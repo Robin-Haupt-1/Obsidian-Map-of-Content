@@ -1,6 +1,32 @@
 import { strict } from 'assert';
 import { readFile } from 'fs';
-import { App, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
+import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
+import { TLI_NAME } from './constants'
+import { LibEntry, LibEntry2 } from 'types';
+
+
+
+const t2 = (file: TFile, app: App): LibEntry2 => {
+	let return_lib: LibEntry
+	return_lib
+
+	let links_to = app.metadataCache.getCache(file.path).links.map((val: LinkCache) => val.link);
+	let b: LibEntry2 = { internal_file: file, links_to: links_to }
+	return b
+}
+
+
+
+const t = (file: TFile, app: App): LibEntry => {
+	let return_lib: LibEntry
+	return_lib
+
+	let links_to = app.metadataCache.getCache(file.path).links.map((val: LinkCache) => val.link);
+	let b: LibEntry = { internal_file: file, links_to: links_to, is_linked_to_TLI: false, distance_from_TLI: null, linked_from: null }
+	return b
+}
+
+
 
 const log = (text: any) => {
 	text = String(text)
@@ -17,10 +43,20 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 }
 
 const readVaultFile = async (file: TFile, app: App) => {
-	let file_cont: string = await app.vault.read(file)
-	let linkcache=app.metadataCache.getCache(file.path).links.map((val:LinkCache)=>val.link);
-	return linkcache.join(", ") 
-	
+	//let file_cont: string = await app.vault.read(file)
+	let linkcache = app.metadataCache.getCache(file.path).links.map((val: LinkCache) => val.link);
+	linkcache.forEach(async (val: string) => {
+		let link_path = getLinkpath(val)
+		new Notice("link path: " + link_path + " from " + val)
+		let linked_file = app.metadataCache.getFirstLinkpathDest(val, "/")
+		new Notice("basename: " + linked_file.basename)
+		//let file_cont: string = await app.vault.read(linked_file)
+		//new Notice(linked_file.basename+": "+file_cont)
+		//new Notice(val)
+	})
+
+	return linkcache.join(", ")
+
 }
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
@@ -42,12 +78,15 @@ export default class MyPlugin extends Plugin {
 			const md_files = v.getMarkdownFiles()
 			log(md_files.length)
 			md_files.forEach((file) => {
-				new Notice(file.name);
-				readVaultFile(file, this.app).then((ret)=>{
+				let obsname = file.path.slice(0, -3) // remove .md
+
+				new Notice(file.name + " obsname: " + obsname);
+
+				readVaultFile(file, this.app).then((ret) => {
 					const cont: string = ret
 					log(cont);
 				})
-				
+
 
 			})
 
