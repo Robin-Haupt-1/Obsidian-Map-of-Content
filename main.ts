@@ -79,6 +79,7 @@ export default class MyPlugin extends Plugin {
 			//let b: lib = new lib("van given string")
 			l.refresh()
 			new Notice("items: "+String(l.count()))
+			new Notice(l.overview())
 
 
 				/*
