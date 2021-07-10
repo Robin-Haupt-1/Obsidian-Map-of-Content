@@ -2,8 +2,7 @@ import { strict } from 'assert';
 import { readFile } from 'fs';
 import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
 import { TLI_NAME } from './constants'
-import { LibEntry, LibEntry2 } from 'types';
-
+import { LibEntry, LibEntry2, note, libkeeper } from 'types';
 
 
 const t2 = (file: TFile, app: App): LibEntry2 => {
@@ -16,7 +15,7 @@ const t2 = (file: TFile, app: App): LibEntry2 => {
 }
 
 
-
+/*
 const t = (file: TFile, app: App): LibEntry => {
 	let return_lib: LibEntry
 	return_lib
@@ -24,8 +23,7 @@ const t = (file: TFile, app: App): LibEntry => {
 	let links_to = app.metadataCache.getCache(file.path).links.map((val: LinkCache) => val.link);
 	let b: LibEntry = { internal_file: file, links_to: links_to, is_linked_to_TLI: false, distance_from_TLI: null, linked_from: null }
 	return b
-}
-
+}*/
 
 
 const log = (text: any) => {
@@ -60,37 +58,37 @@ const readVaultFile = async (file: TFile, app: App) => {
 }
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
+	lib:libkeeper;
 
 	async onload() {
 		console.log('loading plugin');
 
 		await this.loadSettings();
+		this.lib=new libkeeper(this.app)
+		let l=this.lib
+
 		/*
 		this.addRibbonIcon('dice', 'Sample Plugin', () => {
 			new Notice('This is a notice!');
 			log("test");
 
 		});*/
+
 		this.addRibbonIcon('dice', 'Sample Plugin', () => {
 			// new Notice('This is a notice!');
+			//let b: lib = new lib("van given string")
+			l.refresh()
+			new Notice("items: "+String(l.count()))
 
-			const v: Vault = this.app.vault
-			const md_files = v.getMarkdownFiles()
-			log(md_files.length)
-			md_files.forEach((file) => {
-				let obsname = file.path.slice(0, -3) // remove .md
 
-				new Notice(file.name + " obsname: " + obsname);
-
+				/*
 				readVaultFile(file, this.app).then((ret) => {
 					const cont: string = ret
 					log(cont);
-				})
+				})*/
 
 
-			})
 
-			new Notice(String())
 			// log("test");
 			//new SampleModal(this.app).open();
 		});
