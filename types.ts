@@ -1,7 +1,7 @@
 import { LINKED_TO } from "constants";
 import { LINKED_FROM } from "constants";
 import { TLI_NAME } from "constants";
-import { TFile, App, Vault, Notice, LinkCache, getLinkpath, ValueComponent } from "obsidian";
+import { TFile, App, Vault, Notice, LinkCache, getLinkpath, ValueComponent, Modal } from "obsidian";
 import * as path from "path";
 
 export class note {
@@ -42,8 +42,27 @@ interface path {
     all_members: string[]
 
 
-
 }
+
+class PATHModal extends Modal {
+    paths: string
+    constructor(app: App, paths: string) {
+        super(app);
+        this.paths = paths
+    }
+
+    onOpen() {
+        let { contentEl } = this;
+        contentEl.setText(this.paths);
+        contentEl.insr
+    }
+
+    onClose() {
+        let { contentEl } = this;
+        contentEl.empty();
+    }
+}
+
 export class libkeeper {
     libdict: libdict
     l_entries: any[]
@@ -86,12 +105,26 @@ export class libkeeper {
 
             let linkcache = this.app.metadataCache.getCache(note.path).links
             if (!linkcache) return // no links
-            let links_str = linkcache.map((val: LinkCache) => this.app.metadataCache.getFirstLinkpathDest(val.link, "/").path);
-            
-            // let links_str=linkcache.map((val: LinkCache) => val.link); // links without extension or folder
-            this.libdict[note.path].links_to = links_str
+            let this_links_to: string[] = []
+            //let links_str = linkcache.map((val: LinkCache) => this.app.metadataCache.getFirstLinkpathDest(val.link, "/").path);
+            linkcache.forEach((val: LinkCache) => {
+                try { // if the link is not valid it breaks here
+                    let link_path = this.app.metadataCache.getFirstLinkpathDest(val.link, "/").path
+                    this_links_to.push(link_path)
+                }
+                catch {
 
-            links_str.forEach((link: string) => {
+
+
+
+                }
+
+
+            })
+            // let links_str=linkcache.map((val: LinkCache) => val.link); // links without extension or folder
+            this.libdict[note.path].links_to = this_links_to
+
+            this_links_to.forEach((link: string) => {
                 this.libdict[link].linked_from.push(note.path)
             })
 
@@ -109,11 +142,11 @@ export class libkeeper {
         now_paths.push({ depth: 0, items: [[start_note, null]], all_members: [start_note] })
         let explored_paths: path[] = []
         while (now_paths.length > 0) {
-            
-            let new_paths:path[]=[]
-            
+
+            let new_paths: path[] = []
+
             now_paths.forEach((this_path: path) => {
-                let depth=this_path.depth+1
+                let depth = this_path.depth + 1
                 let last_member_name = this_path.items.last()[0]
                 new Notice(last_member_name)
                 this.libdict[last_member_name].links_to.forEach((link: string) => {
@@ -128,10 +161,11 @@ export class libkeeper {
                     }
 
                 })
+
                 explored_paths.push(this_path)
 
             })
-            now_paths=new_paths
+            now_paths = new_paths
         }
 
 
@@ -139,7 +173,14 @@ export class libkeeper {
 
 
         new Notice(String(explored_paths.length))
+        let all_paths = ""
+        explored_paths.forEach((path: path) => {
+            let this_path=this.compilePath(path.items)
+            new Notice(this_path)
+            all_paths=all_paths.concat("                                    "+this_path)
 
+        })
+        new PATHModal(this.app,all_paths).open()
         /*
         linkcache.forEach(async (val: string) => {
             let link_path = getLinkpath(val)
@@ -152,8 +193,13 @@ export class libkeeper {
     })*/
         this.l_entries = Object.entries(this.libdict)
     }
-    compilePath(path:[string,string][]){
 
+    compilePath(path: [string, string][]): string {
+        let str: string = path[0][0] // TLI linkedtoorform is null
+        path.slice(1).forEach((path: string[]) => {
+            str = str.concat(` ${path[1]} ${path[0]}`); // => note  for example
+        })
+        return str
     }
     count() {
         return this.l_entries.length
