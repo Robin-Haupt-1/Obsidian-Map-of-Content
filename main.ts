@@ -90,7 +90,8 @@ export default class MyPlugin extends Plugin {
 		this.addRibbonIcon('dice', 'Sample Plugin', () => {
 			// new Notice('This is a notice!');
 			//let b: lib = new lib("van given string")
-			l.refresh()
+			l.updateLib()
+			l.updatePaths()
 			new Notice("items: "+String(l.count()))
 			new Notice(l.overview())
 

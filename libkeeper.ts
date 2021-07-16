@@ -18,17 +18,23 @@ export class LibKeeper {
         this.vault = app.vault
         this.libdict = {}
         this.l_entries = Object.entries(this.libdict)
+        this.updateLib()
+        this.updatePaths()
     }
 
     findPaths(filename:string):path[]{
-        let filtered_paths=this.all_paths.map((p:path)=>{
-            new Notice(String(p.all_members))
+        let filtered_paths:path[]=[]
+
+        this.all_paths.forEach((p:path)=>{
+            //new Notice(String(p.all_members))
             if( p.all_members.includes(filename)){
                 
-                return p
+                filtered_paths.push(p)
             }
         })
-        return filtered_paths
+        if( filtered_paths.length>0){
+            return filtered_paths}
+        return null
     }
 
     addNote(note: note) {
@@ -37,49 +43,53 @@ export class LibKeeper {
     get_all_notes(): note[] {
         return this.l_entries.map(([key, value]) => value)
     }
-    refresh() {
-        // step 1: read files
-        let l = this.libdict
-        for (let note in l) { { delete l[note]; } }
-
-        let md_files = this.vault.getMarkdownFiles()
-
-        md_files.forEach((file) => {
-            if (!file.path.endsWith(".md")) return // unnecessary because mdfiles() only gives .md files
-            //new Notice("file.path: "+file.path+"\nfile.basename: "+file.basename+"\nfile.extension: "+file.extension+"\nfile.parent: "+file.parent+"\nfile.stat: "+file.stat+"\nfile.vault: "+file.vault)
-            let path = file.path //.slice(0, -3) // remove .md
-            let mynote = new note(file, path, [], [], null, false);
-            this.addNote(mynote);
-        })
-
-        // step 2: analyze links
-        this.get_all_notes().forEach((note: note) => {
-
-            let linkcache = this.app.metadataCache.getCache(note.path).links
-            if (!linkcache) return // no links
-            let this_links_to: string[] = []
-            //let links_str = linkcache.map((val: LinkCache) => this.app.metadataCache.getFirstLinkpathDest(val.link, "/").path);
-            linkcache.forEach((val: LinkCache) => {
-                try { // if the link is not valid it breaks here
-                    let link_path = this.app.metadataCache.getFirstLinkpathDest(val.link, "/").path
-                    this_links_to.push(link_path)
-                }
-                catch {
-
-                }
-
-
-            })
-            // let links_str=linkcache.map((val: LinkCache) => val.link); // links without extension or folder
-            this.libdict[note.path].links_to = this_links_to
-
-            this_links_to.forEach((link: string) => {
-                this.libdict[link].linked_from.push(note.path)
-            })
-
-        })
-
-
+    updateLib(){
+         // step 1: read files
+         let l = this.libdict
+         for (let note in l) { { delete l[note]; } }
+ 
+         let md_files = this.vault.getMarkdownFiles()
+ 
+         md_files.forEach((file) => {
+             if (!file.path.endsWith(".md")) return // unnecessary because mdfiles() only gives .md files
+             //new Notice("file.path: "+file.path+"\nfile.basename: "+file.basename+"\nfile.extension: "+file.extension+"\nfile.parent: "+file.parent+"\nfile.stat: "+file.stat+"\nfile.vault: "+file.vault)
+             let path = file.path //.slice(0, -3) // remove .md
+             let mynote = new note(file, path, [], [], null, false);
+             this.addNote(mynote);
+         })
+ 
+         // step 2: analyze links
+         this.get_all_notes().forEach((note: note) => {
+ 
+             let linkcache = this.app.metadataCache.getCache(note.path).links
+             if (!linkcache) return // no links
+             let this_links_to: string[] = []
+             //let links_str = linkcache.map((val: LinkCache) => this.app.metadataCache.getFirstLinkpathDest(val.link, "/").path);
+             linkcache.forEach((val: LinkCache) => {
+                 try { // if the link is not valid it breaks here
+                     let link_path = this.app.metadataCache.getFirstLinkpathDest(val.link, "/").path
+                     this_links_to.push(link_path)
+                 }
+                 catch {
+ 
+                 }
+ 
+ 
+             })
+             // let links_str=linkcache.map((val: LinkCache) => val.link); // links without extension or folder
+             this.libdict[note.path].links_to = this_links_to
+ 
+             this_links_to.forEach((link: string) => {
+                 this.libdict[link].linked_from.push(note.path)
+             })
+ 
+         })
+ 
+ 
+    }
+    
+    updatePaths() {
+       
 
         // step 3: generate path information
         // Todo: implement as non-recursive function that iterates over a single array of paths again and again until there are no more unexplored connections
