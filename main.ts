@@ -1,8 +1,9 @@
 import { strict } from 'assert';
 import { readFile } from 'fs';
 import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
-import { TLI_NAME } from './constants'
-import { LibEntry, LibEntry2, note, libkeeper } from 'types';
+import { TLI_NAME, TLI_VIEW_TYPE } from './constants'
+import { LibEntry, LibEntry2, note, LibKeeper } from 'types';
+import TLIView from 'view';
 
 
 const t2 = (file: TFile, app: App): LibEntry2 => {
@@ -53,20 +54,34 @@ const readVaultFile = async (file: TFile, app: App) => {
 		//new Notice(val)
 	})
 
+	
 	return linkcache.join(", ")
 
 }
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
-	lib:libkeeper;
-
+	lib:LibKeeper;
+	view:TLIView;
 	async onload() {
-		console.log('loading plugin');
-
-		await this.loadSettings();
-		this.lib=new libkeeper(this.app)
+		//console.log('loading plugin');
+		
+		this.lib=new LibKeeper(this.app)
 		let l=this.lib
+		
+		await this.loadSettings();
+		this.registerView(TLI_VIEW_TYPE, (leaf) => {
+			this.view = new TLIView(leaf, this)
+			return this.view
+		  })
+		if (this.app.workspace.layoutReady) this.initLeaf()
+		else this.registerEvent(this.app.workspace.on("layout-ready", () => this.initLeaf()))
+		this.view.registerEvent (this.app.workspace.on("file-open", (file:TFile) => {
+			new Notice(file.path)
+			this.setText(file.path)
+		}))
 
+		
+		
 		/*
 		this.addRibbonIcon('dice', 'Sample Plugin', () => {
 			new Notice('This is a notice!');
@@ -93,7 +108,9 @@ export default class MyPlugin extends Plugin {
 			// log("test");
 			//new SampleModal(this.app).open();
 		});
-		this.addStatusBarItem().setText('Status Bar Text');
+
+		// maybe implement some status bar text? like no of linked, unlinked, last time refreshed? like kicker ticker
+		//this.addStatusBarItem().setText('Status Bar Text');
 
 		this.addCommand({
 			id: 'open-sample-modal',
@@ -126,8 +143,20 @@ export default class MyPlugin extends Plugin {
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
 
+	initLeaf(): void {
+		if (this.app.workspace.getLeavesOfType(TLI_VIEW_TYPE).length) return
+	
+		this.app.workspace.getRightLeaf(true).setViewState({
+		  type: TLI_VIEW_TYPE,
+		  active: false,
+		})
+	  }
+  
+
 	onunload() {
 		console.log('unloading plugin');
+		this.app.workspace.detachLeavesOfType(TLI_VIEW_TYPE);
+
 	}
 
 	async loadSettings() {

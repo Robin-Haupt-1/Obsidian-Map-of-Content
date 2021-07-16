@@ -45,16 +45,21 @@ interface path {
 }
 
 class PATHModal extends Modal {
-    paths: string
-    constructor(app: App, paths: string) {
+    paths: string;
+    paths_array:string[];
+    constructor(app: App, paths: string,paths_array:string[]) {
         super(app);
         this.paths = paths
+        this.paths_array=paths_array
     }
 
     onOpen() {
         let { contentEl } = this;
         contentEl.setText(this.paths);
-        contentEl.insr
+        this.paths_array.forEach((str)=>{
+            contentEl.createEl('h2', { text: str });
+        })
+        
     }
 
     onClose() {
@@ -63,7 +68,7 @@ class PATHModal extends Modal {
     }
 }
 
-export class libkeeper {
+export class LibKeeper {
     libdict: libdict
     l_entries: any[]
     app: App
@@ -135,7 +140,7 @@ export class libkeeper {
         // step 3: generate path information
         // Todo: implement as non-recursive function that iterates over a single array of paths again and again until there are no more unexplored connections
         // this could result in exponentially growing array (problem?)
-        // implement member und linked to/from als interface
+        // implement member und linked to/from as interface
         let start_note = TLI_NAME
 
         let now_paths: path[] = []
@@ -155,6 +160,7 @@ export class libkeeper {
                     }
 
                 })
+
                 this.libdict[last_member_name].linked_from.forEach((link: string) => {
                     if (!this_path.all_members.includes(link)) {
                         new_paths.push({ depth: depth, items: this_path.items.concat([[link, LINKED_FROM]]), all_members: this_path.all_members.concat([link]) })
@@ -174,13 +180,16 @@ export class libkeeper {
 
         new Notice(String(explored_paths.length))
         let all_paths = ""
+        let all_paths_array:string[]=[]
         explored_paths.forEach((path: path) => {
             let this_path=this.compilePath(path.items)
             new Notice(this_path)
             all_paths=all_paths.concat("                                    "+this_path)
+            all_paths_array.push(this_path)
+
 
         })
-        new PATHModal(this.app,all_paths).open()
+        new PATHModal(this.app,all_paths,all_paths_array).open()
         /*
         linkcache.forEach(async (val: string) => {
             let link_path = getLinkpath(val)
