@@ -4,7 +4,8 @@ import { TLI_VIEW_TYPE } from './constants'
 import { ItemView, Notice, TFile, WorkspaceLeaf } from 'obsidian'
 
 import MyPlugin from './main'
-import { LibKeeper, path } from 'types'
+import { path } from 'types'
+import { LibKeeper } from 'libkeeper'
 
 export default class TLIView extends ItemView {
   lib: LibKeeper
@@ -19,9 +20,13 @@ export default class TLIView extends ItemView {
       this.containerEl.empty();
       let all_paths = lib.findPaths(file.path)
       this.containerEl.createEl('h2', { text: file.path });
-      all_paths.forEach((p: path) => {
-        this.containerEl.createEl('h2', { text: lib.compilePath(p.items) });
+      console.log("displaying paths")
+      if (all_paths){
+        all_paths.forEach((p: path) => {
+        this.containerEl.createEl('h3', { text: lib.compilePath(p.items) });
       })
+      }
+      
       
     }))
   }

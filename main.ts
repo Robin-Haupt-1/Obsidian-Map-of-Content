@@ -80,18 +80,23 @@ export default class MyPlugin extends Plugin {
 
 		
 		
-		/*
 		this.addRibbonIcon('dice', 'Sample Plugin', () => {
 			new Notice('This is a notice!');
+			let link_path = this.app.metadataCache.getFirstLinkpathDest("Unbennant/ieiaie.md", "/")
+			if (link_path){
+				new Notice(link_path.path)
+			}
+			
 			log("test");
 
-		});*/
+		});
 
 		this.addRibbonIcon('dice', 'Sample Plugin', () => {
+
 			// new Notice('This is a notice!');
 			//let b: lib = new lib("van given string")
 			l.updateLib()
-			l.updatePaths()
+			l.updatePathslinearly()
 			new Notice("items: "+String(l.count()))
 			new Notice(l.overview())
 

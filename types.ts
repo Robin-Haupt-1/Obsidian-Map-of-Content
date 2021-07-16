@@ -7,6 +7,7 @@ import * as path from "path";
 export class note {
     file: TFile
     path: string
+    extension:string
     links_to: string[]
     linked_from: string[]
     distance_from_TLI: number
@@ -15,13 +16,16 @@ export class note {
     constructor(
         file: TFile,
         path: string,
+        extension:string,
         links_to: string[],
         linked_from: string[],
         distance_from_TLI: number,
-        is_linked_to_TLI: boolean
+        is_linked_to_TLI: boolean,
+
     ) {
         this.file = file
         this.path = path
+        this.extension=extension
         this.links_to = links_to
         this.linked_from = linked_from
         this.distance_from_TLI = distance_from_TLI
