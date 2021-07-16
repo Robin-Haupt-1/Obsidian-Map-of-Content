@@ -1,24 +1,31 @@
 
 
 import { TLI_VIEW_TYPE } from './constants'
-import {ItemView, Notice, TFile, WorkspaceLeaf} from 'obsidian'
+import { ItemView, Notice, TFile, WorkspaceLeaf } from 'obsidian'
 
 import MyPlugin from './main'
+import { LibKeeper, path } from 'types'
 
 export default class TLIView extends ItemView {
+  lib: LibKeeper
 
-  constructor(leaf: WorkspaceLeaf, private plugin: MyPlugin) {
+  constructor(leaf: WorkspaceLeaf, private plugin: MyPlugin, lib: LibKeeper) {
     super(leaf)
+    this.lib = lib
     this.containerEl.setText("test")
-    this.registerEvent(this.app.workspace.on("file-open", (file:TFile) => {
-			new Notice(file.path)
-        
-      this.containerEl.empty();
 
+    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => {
+      new Notice(file.path)
+      this.containerEl.empty();
+      let all_paths = lib.findPaths(file.path)
       this.containerEl.createEl('h2', { text: file.path });
-		}))
+      all_paths.forEach((p: path) => {
+        this.containerEl.createEl('h2', { text: lib.compilePath(p.items) });
+      })
+      
+    }))
   }
-  setText(str:string){
+  setText(str: string) {
     this.containerEl.setText(str)
   }
   getViewType(): string {
@@ -32,12 +39,12 @@ export default class TLIView extends ItemView {
     return "dice"
   }
 
-  async onload(){
-   
+  async onload() {
+
   }
   async onOpen(): Promise<void> {
-    
+
   }
 
-  
+
 }

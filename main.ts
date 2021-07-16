@@ -2,7 +2,8 @@ import { strict } from 'assert';
 import { readFile } from 'fs';
 import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
 import { TLI_NAME, TLI_VIEW_TYPE } from './constants'
-import { LibEntry, LibEntry2, note, LibKeeper } from 'types';
+import { LibEntry, LibEntry2, note,  } from 'types';
+import { LibKeeper } from 'libkeeper';
 import TLIView from 'view';
 
 
@@ -70,15 +71,12 @@ export default class MyPlugin extends Plugin {
 		
 		await this.loadSettings();
 		this.registerView(TLI_VIEW_TYPE, (leaf) => {
-			this.view = new TLIView(leaf, this)
+			this.view = new TLIView(leaf, this,this.lib)
 			return this.view
 		  })
 		if (this.app.workspace.layoutReady) this.initLeaf()
 		else this.registerEvent(this.app.workspace.on("layout-ready", () => this.initLeaf()))
-		this.view.registerEvent (this.app.workspace.on("file-open", (file:TFile) => {
-			new Notice(file.path)
-			this.setText(file.path)
-		}))
+		
 
 		
 		
