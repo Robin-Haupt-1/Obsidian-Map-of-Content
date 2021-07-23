@@ -91,7 +91,7 @@ export default class MyPlugin extends Plugin {
 			// new Notice('This is a notice!');
 			//let b: lib = new lib("van given string")
 			l.updateLib()
-			l.updatePathsRecursively()
+			l.updatePaths()
 			//l.updatePathslinearly()
 			new Notice("items: "+String(l.count()))
 			new Notice(l.overview())

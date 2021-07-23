@@ -4,6 +4,7 @@ import { TLI_NAME } from "./constants";
 import { TFile, App, Vault, Notice, LinkCache, getLinkpath, ValueComponent, Modal } from "obsidian";
 import { LibEntry, LibEntry2, note, libdict, path, PATHModal } from './types'
 import { strict } from "assert";
+import { pathToFileURL } from "url";
 
 
 export class LibKeeper {
@@ -20,7 +21,7 @@ export class LibKeeper {
         this.libdict = {}
         this.l_entries = Object.entries(this.libdict)
         this.updateLib()
-        this.updatePathsRecursively
+        this.updatePaths()
         //this.updatePathslinearly()
     }
     getNoteByPath(path: string) {
@@ -35,8 +36,10 @@ export class LibKeeper {
         this.all_paths.forEach((p: path) => {
             //new Notice(String(p.all_members))
             if (p.all_members.includes(filename)) {
-
-                filtered_paths.push(p)
+                if (p.all_members.last()==filename){
+                    filtered_paths.push(p)
+                }
+                
             }
         })
         if (filtered_paths.length > 0) {
@@ -59,10 +62,10 @@ export class LibKeeper {
         for (let note in l) { { delete l[note]; } }
 
         let md_files = this.vault.getFiles()
-        console.log("md files in collection: "+String(md_files.length))
+        console.log("md files in collection: " + String(md_files.length))
 
         md_files.forEach((file) => {
-            console.log("creating lib entry for "+file.path)
+            console.log("creating lib entry for " + file.path)
             //if (!file.path.endsWith(".md")) return // unnecessary because mdfiles() only gives .md files
             //new Notice("file.path: "+file.path+"\nfile.basename: "+file.basename+"\nfile.extension: "+file.extension+"\nfile.parent: "+file.parent+"\nfile.stat: "+file.stat+"\nfile.vault: "+file.vault)
             let path = file.path //.slice(0, -3) // remove .md
@@ -72,12 +75,12 @@ export class LibKeeper {
         })
 
         // step 2: analyze links
-        let all_notes=this.get_all_notes()
-        console.log("total number of notes in lib: "+String(all_notes.length))
+        let all_notes = this.get_all_notes()
+        console.log("total number of notes in lib: " + String(all_notes.length))
         all_notes.forEach((note: note) => {
-            console.log("analysiere links für: "+note.path)
+            console.log("analysiere links für: " + note.path)
             if (note.extension != "md") {
-                console.log("überspringe weil nicht .md: "+note.path)
+                console.log("überspringe weil nicht .md: " + note.path)
                 return
             }
 
@@ -185,50 +188,58 @@ export class LibKeeper {
 
         let next_links: String[] = []
         //let note = this.getNoteByPath(notepath)
-        let note=this.libdict[notepath]
+        let note = this.libdict[notepath]
         let depth = path_so_far.depth
         let all_members = path_so_far.all_members
         let items = path_so_far.items
 
         note.paths_from_TLI.push(path_so_far)
+        this.all_paths.push(path_so_far)
         note.is_linked_to_TLI = true
-        note.distance_from_TLI=depth
+        note.distance_from_TLI = depth
         let new_paths_to_follow: path[] = []
 
-        note.links_to.forEach((link:string) => {
-            console.log("links to"+String(link))
-            let new_path: path = { depth: depth + 1, all_members: all_members.concat(link), items: items.concat([link, LINKED_TO]) }
+        note.links_to.forEach((link: string) => {
+            console.log("links to " + String(link))
+            let new_path: path = { depth: depth + 1, all_members: all_members.concat(link), items: items.concat([[link, LINKED_TO]]) }
             new_paths_to_follow.push(new_path)
         })
 
-        note.linked_from.forEach((link:string) => {
-            console.log("linked from"+String(link))
-            let new_path: path = { depth: depth + 1, all_members: all_members.concat(link), items: items.concat([link, LINKED_FROM]) }
+        note.linked_from.forEach((link: string) => {
+            console.log("linked from " + String(link))
+            let new_path: path = { depth: depth + 1, all_members: all_members.concat(link), items: items.concat([[link, LINKED_FROM]]) }
             new_paths_to_follow.push(new_path)
         })
 
-        new_paths_to_follow.forEach((path:path)=>{
-            let all_items_so_far=path.all_members.slice(0,-1)
-            
-            let last_item_path=path.all_members.last()
-            let last_item=this.getNoteByPath(last_item_path)
-            if (!last_item){
+        new_paths_to_follow.forEach((path: path) => {
+            let all_items_so_far = path.all_members.slice(0, -1)
+
+            let last_item_path = path.all_members.last()
+            let last_item = this.getNoteByPath(last_item_path)
+            if (!last_item) {
                 return
             }
 
-            if (last_item_path in all_items_so_far){
-                console.log("uberspringe pfad weil recursive")
+            if (all_items_so_far.includes(last_item_path)) {
+                console.log("uberspringe pfad weil recursive: " + this.compilePath(path.items))
                 return
             }
-            if ((path.depth-last_item.distance_from_TLI)>1){
-                console.log("uberspringe pfad weil zu lang")
-               return
+
+            if (last_item.distance_from_TLI) {
+                if ((path.depth - last_item.distance_from_TLI) > 1) {
+                    console.log("überspringe pfad weil zu lang: " + this.compilePath(path.items))
+                    console.log("last item: " + last_item_path)
+                    console.log("depth: " + path.depth)
+                    console.log("last item tli n: " + last_item.distance_from_TLI)
+                    return
+                }
             }
-            if ((path.depth>10){
+
+            if ((path.depth > 10){
                 console.log("uberspringe pfad weil länger als 10")
                 return
             }
-            console.log("following path "+this.compilePath(path.items))
+            console.log("following path " + this.compilePath(path.items))
             this.followPaths(path)
         })
 
@@ -240,14 +251,17 @@ export class LibKeeper {
 
     updatePathsRecursively() {
         //this.updateLib()
+        this.all_paths = []
         let path_so_far: path = { depth: 0, all_members: [TLI_NAME], items: [[TLI_NAME, LINKED_TLI]] }
-        let tli=this.getNoteByPath(TLI_NAME)
-        console.log("links to len: "+tli.links_to.length)
+        let tli = this.getNoteByPath(TLI_NAME)
+        console.log("links to len: " + tli.links_to.length)
         this.followPaths(path_so_far)
 
     }
 
-
+    updatePaths() {
+        this.updatePathsRecursively()
+    }
     compilePath(path: [string, string][]): string {
         let str: string = path[0][0] // TLI linkedtoorform is null
         path.slice(1).forEach((path: string[]) => {
