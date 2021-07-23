@@ -12,6 +12,7 @@ export class note {
     linked_from: string[]
     distance_from_TLI: number
     is_linked_to_TLI: boolean
+    paths_from_TLI:path[]
 
     constructor(
         file: TFile,
@@ -21,6 +22,7 @@ export class note {
         linked_from: string[],
         distance_from_TLI: number,
         is_linked_to_TLI: boolean,
+        paths_from_TLI:path[]
 
     ) {
         this.file = file
@@ -30,10 +32,15 @@ export class note {
         this.linked_from = linked_from
         this.distance_from_TLI = distance_from_TLI
         this.is_linked_to_TLI = is_linked_to_TLI
+        this.paths_from_TLI=paths_from_TLI
     }
 
     sayName() {
         return this.path
+    }
+    
+    trimPaths(n:number){
+        //Todo: delete all paths longer than n members
     }
 
 }
