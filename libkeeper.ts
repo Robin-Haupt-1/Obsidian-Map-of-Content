@@ -1,4 +1,4 @@
-import { LINKED_TLI, LINKED_TO } from "./constants";
+import { LINKED_BOTH, LINKED_TLI, LINKED_TO } from "./constants";
 import { LINKED_FROM } from "./constants";
 import { TLI_NAME } from "./constants";
 import { TFile, App, Vault, Notice, LinkCache, getLinkpath, ValueComponent, Modal } from "obsidian";
@@ -14,7 +14,7 @@ export class LibKeeper {
     app: App
     vault: Vault
     declare all_paths: path[]
-    get_paths_ran:number
+    get_paths_ran: number
 
     constructor(app: App) {
         this.app = app;
@@ -193,12 +193,12 @@ export class LibKeeper {
         let docontinue = true
         let links = [TLI_NAME]
         let checked_links: string[] = []
-        let times_checked_depth=0
+        let times_checked_depth = 0
         while (docontinue) {
 
             let next_links: string[] = []
             links.forEach((link: string) => {
-                times_checked_depth+=1
+                times_checked_depth += 1
 
                 let note = this.getNoteByPath(link)
                 note.links_to.forEach((link: string) => {
@@ -224,16 +224,16 @@ export class LibKeeper {
             depth += 1
 
         }
-        console.log("checked depth times: "+times_checked_depth)
+        console.log("checked depth times: " + times_checked_depth)
 
     }
 
     followPaths(path_so_far: path) {
-        this.get_paths_ran+=1
-        if (this.get_paths_ran%100==0){
-            console.log("get paths ran "+String(this.get_paths_ran))
+        this.get_paths_ran += 1
+        if (this.get_paths_ran % 100 == 0) {
+            console.log("get paths ran " + String(this.get_paths_ran))
         }
-        
+
         let notepath = path_so_far.all_members.last()
         //console.log(notepath)
 
@@ -249,14 +249,31 @@ export class LibKeeper {
         note.is_linked_to_TLI = true
         note.distance_from_TLI = depth
         let new_paths_to_follow: path[] = []
+        let note_links_to = note.links_to.slice()
+        let note_linked_from = note.linked_from.slice()
 
-        note.links_to.forEach((link: string) => {
+        note_links_to.forEach((link: string) => {
             //console.log("links to " + String(link))
-            let new_path: path = { depth: depth + 1, all_members: all_members.concat(link), items: items.concat([[link, LINKED_TO]]) }
+            // check if a note is both linked from this note and it links to this note
+            let linked_to_or_both_ways = LINKED_TO
+            if (note_linked_from.contains(link)) {
+                let index = note_linked_from.indexOf(link, 0);
+                if (index > -1) {
+                    console.log("lösche aus linked from array: "+link)
+                    console.log("alte lengh: "+String(note_linked_from.length))
+                    note_linked_from.splice(index, 1);
+                    console.log("neue lengh: "+String(note_linked_from.length))
+                    
+                    console.log("array: "+String(note_linked_from))
+                }
+                linked_to_or_both_ways=LINKED_BOTH
+
+            }
+            let new_path: path = { depth: depth + 1, all_members: all_members.concat(link), items: items.concat([[link, linked_to_or_both_ways]]) }
             new_paths_to_follow.push(new_path)
         })
 
-        note.linked_from.forEach((link: string) => {
+        note_linked_from.forEach((link: string) => {
             //console.log("linked from " + String(link))
             let new_path: path = { depth: depth + 1, all_members: all_members.concat(link), items: items.concat([[link, LINKED_FROM]]) }
             new_paths_to_follow.push(new_path)
@@ -311,7 +328,7 @@ export class LibKeeper {
     }
 
     updatePaths() {
-        this.get_paths_ran=0
+        this.get_paths_ran = 0
         this.updateDepthInformation()
         this.updatePathsRecursively()
     }
