@@ -5,6 +5,7 @@ import { TFile, App, Vault, Notice, LinkCache, getLinkpath, ValueComponent, Moda
 import { LibEntry, LibEntry2, note, libdict, path, PATHModal } from './types'
 import { strict } from "assert";
 import { pathToFileURL } from "url";
+import { networkInterfaces } from "os";
 
 
 export class LibKeeper {
@@ -13,6 +14,7 @@ export class LibKeeper {
     app: App
     vault: Vault
     declare all_paths: path[]
+    get_paths_ran:number
 
     constructor(app: App) {
         this.app = app;
@@ -36,10 +38,10 @@ export class LibKeeper {
         this.all_paths.forEach((p: path) => {
             //new Notice(String(p.all_members))
             if (p.all_members.includes(filename)) {
-                if (p.all_members.last()==filename){
+                if (p.all_members.last() == filename) {
                     filtered_paths.push(p)
                 }
-                
+
             }
         })
         if (filtered_paths.length > 0) {
@@ -63,9 +65,9 @@ export class LibKeeper {
 
         let md_files = this.vault.getFiles()
         console.log("md files in collection: " + String(md_files.length))
-
+        console.log("creating lib entries")
         md_files.forEach((file) => {
-            console.log("creating lib entry for " + file.path)
+            //console.log("creating lib entry for " + file.path)
             //if (!file.path.endsWith(".md")) return // unnecessary because mdfiles() only gives .md files
             //new Notice("file.path: "+file.path+"\nfile.basename: "+file.basename+"\nfile.extension: "+file.extension+"\nfile.parent: "+file.parent+"\nfile.stat: "+file.stat+"\nfile.vault: "+file.vault)
             let path = file.path //.slice(0, -3) // remove .md
@@ -77,14 +79,15 @@ export class LibKeeper {
         // step 2: analyze links
         let all_notes = this.get_all_notes()
         console.log("total number of notes in lib: " + String(all_notes.length))
+        console.log("analysiere links")
         all_notes.forEach((note: note) => {
-            console.log("analysiere links für: " + note.path)
+            //console.log("analysiere links für: " + note.path)
             if (note.extension != "md") {
-                console.log("überspringe weil nicht .md: " + note.path)
+                //console.log("überspringe weil nicht .md: " + note.path)
                 return
             }
 
-            console.log("reading links of" + note.path)
+            //console.log("reading links of" + note.path)
             let linkcache = this.app.metadataCache.getCache(note.path).links
             if (!linkcache) return // no links
             let this_links_to: string[] = []
@@ -102,8 +105,10 @@ export class LibKeeper {
             this.libdict[note.path].links_to = this_links_to
 
             this_links_to.forEach((link: string) => {
-                console.log("working on linked from of " + link)
-                this.libdict[link].linked_from.push(note.path)
+                //console.log("working on linked from of " + link)
+                if (!this.libdict[link].linked_from.contains(note.path)) { // is this neccessary ?
+                    this.libdict[link].linked_from.push(note.path)
+                }
             })
 
         })
@@ -182,9 +187,55 @@ export class LibKeeper {
         this.l_entries = Object.entries(this.libdict)
     }
 
+    updateDepthInformation() {
+        console.log("analysiere tiefe")
+        let depth = 0
+        let docontinue = true
+        let links = [TLI_NAME]
+        let checked_links: string[] = []
+        let times_checked_depth=0
+        while (docontinue) {
+
+            let next_links: string[] = []
+            links.forEach((link: string) => {
+                times_checked_depth+=1
+
+                let note = this.getNoteByPath(link)
+                note.links_to.forEach((link: string) => {
+                    if (!checked_links.contains(link) && !next_links.contains(link)) {
+                        next_links.push(link)
+                    }
+                })
+                note.linked_from.forEach((link: string) => {
+                    if (!checked_links.contains(link) && !next_links.contains(link)) {
+                        next_links.push(link)
+                    }
+                })
+                note.is_linked_to_TLI = true
+                if (note.distance_from_TLI == null || note.distance_from_TLI > depth) {
+                    note.distance_from_TLI = depth
+                }
+                checked_links.push(link)
+            })
+            links = next_links.slice()
+            if (links.length == 0) {
+                docontinue = false
+            }
+            depth += 1
+
+        }
+        console.log("checked depth times: "+times_checked_depth)
+
+    }
+
     followPaths(path_so_far: path) {
+        this.get_paths_ran+=1
+        if (this.get_paths_ran%100==0){
+            console.log("get paths ran "+String(this.get_paths_ran))
+        }
+        
         let notepath = path_so_far.all_members.last()
-        console.log(notepath)
+        //console.log(notepath)
 
         let next_links: String[] = []
         //let note = this.getNoteByPath(notepath)
@@ -200,13 +251,13 @@ export class LibKeeper {
         let new_paths_to_follow: path[] = []
 
         note.links_to.forEach((link: string) => {
-            console.log("links to " + String(link))
+            //console.log("links to " + String(link))
             let new_path: path = { depth: depth + 1, all_members: all_members.concat(link), items: items.concat([[link, LINKED_TO]]) }
             new_paths_to_follow.push(new_path)
         })
 
         note.linked_from.forEach((link: string) => {
-            console.log("linked from " + String(link))
+            //console.log("linked from " + String(link))
             let new_path: path = { depth: depth + 1, all_members: all_members.concat(link), items: items.concat([[link, LINKED_FROM]]) }
             new_paths_to_follow.push(new_path)
         })
@@ -221,25 +272,25 @@ export class LibKeeper {
             }
 
             if (all_items_so_far.includes(last_item_path)) {
-                console.log("uberspringe pfad weil recursive: " + this.compilePath(path.items))
+                //console.log("uberspringe pfad weil recursive: " + this.compilePath(path.items))
                 return
             }
 
             if (last_item.distance_from_TLI) {
-                if ((path.depth - last_item.distance_from_TLI) > 1) {
-                    console.log("überspringe pfad weil zu lang: " + this.compilePath(path.items))
-                    console.log("last item: " + last_item_path)
-                    console.log("depth: " + path.depth)
-                    console.log("last item tli n: " + last_item.distance_from_TLI)
+                if ((path.depth - last_item.distance_from_TLI) > 0) {
+                    //console.log("überspringe pfad weil zu lang: " + this.compilePath(path.items))
+                    //console.log("last item: " + last_item_path)
+                    //console.log("depth: " + path.depth)
+                    //console.log("last item tli n: " + last_item.distance_from_TLI)
                     return
                 }
             }
 
             if ((path.depth > 10){
-                console.log("uberspringe pfad weil länger als 10")
-                return
+                //console.log("uberspringe pfad weil länger als 10")
+                //return
             }
-            console.log("following path " + this.compilePath(path.items))
+            //console.log("following path " + this.compilePath(path.items))
             this.followPaths(path)
         })
 
@@ -260,6 +311,8 @@ export class LibKeeper {
     }
 
     updatePaths() {
+        this.get_paths_ran=0
+        this.updateDepthInformation()
         this.updatePathsRecursively()
     }
     compilePath(path: [string, string][]): string {
