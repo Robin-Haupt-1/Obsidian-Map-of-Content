@@ -82,7 +82,8 @@ export default class MyPlugin extends Plugin {
 		
 		this.addRibbonIcon('dice', 'Sample Plugin', () => {
 			new Notice('Updating lib')
-			l.updateLib()
+			//l.updateLib()
+			this.app.workspace.openLinkText("Top Level Index.md","Top Level Index.md")
 
 		});
 
@@ -94,7 +95,7 @@ export default class MyPlugin extends Plugin {
 			l.updatePaths()
 			//l.updatePathslinearly()
 			new Notice("items: "+String(l.count()))
-			new Notice(l.overview())
+			//new Notice(l.overview())
 
 
 				/*

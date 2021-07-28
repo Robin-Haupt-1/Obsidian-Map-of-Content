@@ -1,3 +1,8 @@
+// Todo: index TLI by parent note(s) to allow for live path rebuilding taking into account diverging paths to the note 
+// that are significant because they are very different (another great idea: just compare how many notes are different from the shortest existing path,
+// weighted by closeness to TLI)
+
+
 import { LINKED_BOTH, LINKED_TLI, LINKED_TO } from "./constants";
 import { LINKED_FROM } from "./constants";
 import { TLI_NAME } from "./constants";
@@ -15,6 +20,7 @@ export class LibKeeper {
     vault: Vault
     declare all_paths: path[]
     get_paths_ran: number
+    duplicate_file_status: Map<string, boolean> // Todo: map with the count instead of binary status to count up/down on file rename
 
     constructor(app: App) {
         this.app = app;
@@ -26,6 +32,7 @@ export class LibKeeper {
         this.updatePaths()
         //this.updatePathslinearly()
     }
+
     getNoteByPath(path: string) {
         if (path in this.libdict) {
             return this.libdict[path]
@@ -64,7 +71,52 @@ export class LibKeeper {
         for (let note in l) { { delete l[note]; } }
 
         let md_files = this.vault.getFiles()
+        this.duplicate_file_status = new Map<string, boolean>();
+
         console.log("md files in collection: " + String(md_files.length))
+        console.log("checking for duplicate files")
+        md_files.forEach((file) => {
+
+
+            let file_name = this.fileNameFromPath(file.path)
+
+            console.log(file_name)
+            if (this.duplicate_file_status.has(file_name)) { // If the file name is encountered twice or more, set it's duplicate status to true
+                this.duplicate_file_status.set(file_name, true)
+                //console.log("duplicate: " + file_name)
+            } else {
+                this.duplicate_file_status.set(file_name, false)
+                //console.log("unique so far: " + file_name)
+            }
+
+            //console.log(filename[0])
+            //console.log(file.extension)
+            //let mynote = new note(file,path, path, file.extension, [], [], null, false, []);
+            //this.addNote(mynote);
+
+        })
+        md_files.forEach((file) => {
+            return
+            let path = file.path //.slice(0, -3) // remove .md
+            //console.log(path)
+
+            let filename = path.split("/")
+            let file_name = filename.last()
+            if (this.duplicate_file_status.get(file_name)) {
+                this.duplicate_file_status.set(file_name, true)
+                console.log("duplicate: " + file_name)
+            } else {
+
+                console.log("unique: " + file_name)
+            }
+
+
+            //console.log(filename[0])
+            //console.log(file.extension)
+            //let mynote = new note(file,path, path, file.extension, [], [], null, false, []);
+            //this.addNote(mynote);
+        })
+
         console.log("creating lib entries")
         md_files.forEach((file) => {
             //console.log("creating lib entry for " + file.path)
@@ -72,6 +124,8 @@ export class LibKeeper {
             //new Notice("file.path: "+file.path+"\nfile.basename: "+file.basename+"\nfile.extension: "+file.extension+"\nfile.parent: "+file.parent+"\nfile.stat: "+file.stat+"\nfile.vault: "+file.vault)
             let path = file.path //.slice(0, -3) // remove .md
             //console.log(file.extension)
+
+
             let mynote = new note(file, path, file.extension, [], [], null, false, []);
             this.addNote(mynote);
         })
@@ -259,14 +313,14 @@ export class LibKeeper {
             if (note_linked_from.contains(link)) {
                 let index = note_linked_from.indexOf(link, 0);
                 if (index > -1) {
-                    console.log("lösche aus linked from array: "+link)
-                    console.log("alte lengh: "+String(note_linked_from.length))
+                    console.log("lösche aus linked from array: " + link)
+                    console.log("alte lengh: " + String(note_linked_from.length))
                     note_linked_from.splice(index, 1);
-                    console.log("neue lengh: "+String(note_linked_from.length))
-                    
-                    console.log("array: "+String(note_linked_from))
+                    console.log("neue lengh: " + String(note_linked_from.length))
+
+                    console.log("array: " + String(note_linked_from))
                 }
-                linked_to_or_both_ways=LINKED_BOTH
+                linked_to_or_both_ways = LINKED_BOTH
 
             }
             let new_path: path = { depth: depth + 1, all_members: all_members.concat(link), items: items.concat([[link, linked_to_or_both_ways]]) }
@@ -294,16 +348,26 @@ export class LibKeeper {
             }
 
             if (last_item.distance_from_TLI) {
-                if ((path.depth - last_item.distance_from_TLI) > 0) {
-                    //console.log("überspringe pfad weil zu lang: " + this.compilePath(path.items))
-                    //console.log("last item: " + last_item_path)
-                    //console.log("depth: " + path.depth)
-                    //console.log("last item tli n: " + last_item.distance_from_TLI)
-                    return
+                if (path.all_members.length < 6) {
+                    if ((path.depth - last_item.distance_from_TLI) > 1) {
+                        //console.log("überspringe pfad weil zu lang: " + this.compilePath(path.items))
+                        //console.log("last item: " + last_item_path)
+                        //console.log("depth: " + path.depth)
+                        //console.log("last item tli n: " + last_item.distance_from_TLI)
+                        return
+                    }
+                } else {
+                    if ((path.depth - last_item.distance_from_TLI) > 0) {
+                        //console.log("überspringe pfad weil zu lang: " + this.compilePath(path.items))
+                        //console.log("last item: " + last_item_path)
+                        //console.log("depth: " + path.depth)
+                        //console.log("last item tli n: " + last_item.distance_from_TLI)
+                        return
+                    }
                 }
             }
 
-            if ((path.depth > 10){
+            if (path.depth > 10) {
                 //console.log("uberspringe pfad weil länger als 10")
                 //return
             }
@@ -332,12 +396,56 @@ export class LibKeeper {
         this.updateDepthInformation()
         this.updatePathsRecursively()
     }
-    compilePath(path: [string, string][]): string {
-        let str: string = path[0][0] // TLI linkedtoorform is null
-        path.slice(1).forEach((path: string[]) => {
-            str = str.concat(` ${path[1]} ${path[0]}`); // => note  for example
-        })
-        return str
+
+    cleanExtension(path: string, extension: string = ".md") {
+        if (path.endsWith(extension)) {
+            return path.slice(0, -extension.length)
+        }
+        return path
+    }
+    fileNameFromPath(path: string): string {
+        return path.split("/").last()
+    }
+    getDisplayName(path: string): string {
+        // return the full path if there are two or more notes with the same filename and extension, else only the name of file
+        let file_name = this.fileNameFromPath(path)
+        let display_name = null
+
+        if (this.duplicate_file_status.get(file_name)) {
+            display_name = this.cleanExtension(path)
+        } else {
+            display_name = this.cleanExtension(file_name)
+        }
+        return display_name
+    }
+    compilePath(path: [string, string][], reverse: Boolean = false): string {
+        let str: string = this.getDisplayName(path[0][0]) // TLI linkedtoorform is null
+        if (reverse == true) {
+            path.slice(1).forEach((path: string[]) => {
+                let filename = this.getDisplayName(path[0])
+                str = str.concat(` ${path[1]} ${filename}`); // => note  for example
+            })
+            return str
+        }
+        else {
+
+
+            path.slice(1).forEach((path: string[]) => {
+                let filename = this.getDisplayName(path[0])
+
+                let arrow = path[1]
+                if (arrow == LINKED_FROM) {
+                    arrow = LINKED_TO
+                } else if (arrow == LINKED_TO) {
+                    arrow = LINKED_FROM
+                }
+                // reverse the arrow
+
+                str = `${filename}  ${arrow} `.concat(str); // => note  for example
+            })
+            return str
+        }
+
     }
     count() {
         return this.l_entries.length
