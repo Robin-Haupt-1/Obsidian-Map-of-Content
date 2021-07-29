@@ -8,6 +8,7 @@ import { LINKED_FROM } from "./constants";
 import { TLI_NAME } from "./constants";
 import { TFile, App, Vault, Notice, LinkCache, getLinkpath, ValueComponent, Modal } from "obsidian";
 import { LibEntry, LibEntry2, note, libdict, path, PATHModal } from './types'
+import { cleanExtension,fileNameFromPath, getDisplayName } from "./utils"
 import { strict } from "assert";
 import { pathToFileURL } from "url";
 import { networkInterfaces } from "os";
@@ -78,7 +79,7 @@ export class LibKeeper {
         md_files.forEach((file) => {
 
 
-            let file_name = this.fileNameFromPath(file.path)
+            let file_name = fileNameFromPath(file.path)
 
             console.log(file_name)
             if (this.duplicate_file_status.has(file_name)) { // If the file name is encountered twice or more, set it's duplicate status to true
@@ -168,77 +169,6 @@ export class LibKeeper {
         })
 
 
-    }
-
-    updatePathslinearly() {
-
-
-        // step 3: generate path information
-        // implemented as non-recursive function that iterates over a single array of paths again and again until there are no more unexplored connections
-        // this could result in exponentially growing array (problem?)
-        // implement member und linked to/from as interface
-        let start_note = TLI_NAME
-
-        let now_paths: path[] = []
-        now_paths.push({ depth: 0, items: [[start_note, null]], all_members: [start_note] })
-        let explored_paths: path[] = []
-        let new_paths: path[] = []
-        while (now_paths.length > 0) {
-
-            now_paths.forEach((this_path: path) => {
-
-                let depth = this_path.depth + 1
-                let last_member_name = this_path.items.last()[0]
-                new Notice(last_member_name)
-                this.libdict[last_member_name].links_to.forEach((link: string) => {
-                    if (!this_path.all_members.includes(link)) {
-                        new_paths.push({ depth: depth, items: this_path.items.concat([[link, LINKED_TO]]), all_members: this_path.all_members.concat([link]) })
-                    }
-
-                })
-
-                this.libdict[last_member_name].linked_from.forEach((link: string) => {
-                    if (!this_path.all_members.includes(link)) {
-                        new_paths.push({ depth: depth, items: this_path.items.concat([[link, LINKED_FROM]]), all_members: this_path.all_members.concat([link]) })
-                    }
-
-                })
-
-                explored_paths.push(this_path)
-
-            })
-            now_paths = new_paths.slice()
-            new_paths.length = 0
-        }
-
-
-        //this.all_paths.push()
-
-
-        new Notice(String(explored_paths.length))
-        let all_paths = ""
-        let all_paths_array: string[] = []
-        explored_paths.forEach((path: path) => {
-            let this_path = this.compilePath(path.items)
-            new Notice(this_path)
-            all_paths = all_paths.concat("                                    " + this_path)
-            all_paths_array.push(this_path)
-
-
-        })
-
-        new PATHModal(this.app, all_paths, all_paths_array).open()
-
-        /*
-        linkcache.forEach(async (val: string) => {
-            let link_path = getLinkpath(val)
-
-            new Notice("link path: " + link_path + " from " + val)
-            let linked_file = app.metadataCache.getFirstLinkpathDest(val, "/")
-            new Notice("basename: " + linked_file.basename)
-        })*/
-        this.all_paths = explored_paths
-        this.l_entries = Object.entries(this.libdict)
     }
 
     updateDepthInformation() {
@@ -397,32 +327,11 @@ export class LibKeeper {
         this.updatePathsRecursively()
     }
 
-    cleanExtension(path: string, extension: string = ".md") {
-        if (path.endsWith(extension)) {
-            return path.slice(0, -extension.length)
-        }
-        return path
-    }
-    fileNameFromPath(path: string): string {
-        return path.split("/").last()
-    }
-    getDisplayName(path: string): string {
-        // return the full path if there are two or more notes with the same filename and extension, else only the name of file
-        let file_name = this.fileNameFromPath(path)
-        let display_name = null
-
-        if (this.duplicate_file_status.get(file_name)) {
-            display_name = this.cleanExtension(path)
-        } else {
-            display_name = this.cleanExtension(file_name)
-        }
-        return display_name
-    }
     compilePath(path: [string, string][], reverse: Boolean = false): string {
-        let str: string = this.getDisplayName(path[0][0]) // TLI linkedtoorform is null
+        let str: string = getDisplayName(path[0][0],this) // TLI linkedtoorform is null
         if (reverse == true) {
             path.slice(1).forEach((path: string[]) => {
-                let filename = this.getDisplayName(path[0])
+                let filename = getDisplayName(path[0],this)
                 str = str.concat(` ${path[1]} ${filename}`); // => note  for example
             })
             return str
@@ -431,7 +340,7 @@ export class LibKeeper {
 
 
             path.slice(1).forEach((path: string[]) => {
-                let filename = this.getDisplayName(path[0])
+                let filename = getDisplayName(path[0],this)
 
                 let arrow = path[1]
                 if (arrow == LINKED_FROM) {
