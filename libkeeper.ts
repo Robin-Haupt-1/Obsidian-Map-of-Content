@@ -90,41 +90,12 @@ export class LibKeeper {
                 //console.log("unique so far: " + file_name)
             }
 
-            //console.log(filename[0])
-            //console.log(file.extension)
-            //let mynote = new note(file,path, path, file.extension, [], [], null, false, []);
-            //this.addNote(mynote);
 
-        })
-        md_files.forEach((file) => {
-            return
-            let path = file.path //.slice(0, -3) // remove .md
-            //console.log(path)
-
-            let filename = path.split("/")
-            let file_name = filename.last()
-            if (this.duplicate_file_status.get(file_name)) {
-                this.duplicate_file_status.set(file_name, true)
-                console.log("duplicate: " + file_name)
-            } else {
-
-                console.log("unique: " + file_name)
-            }
-
-
-            //console.log(filename[0])
-            //console.log(file.extension)
-            //let mynote = new note(file,path, path, file.extension, [], [], null, false, []);
-            //this.addNote(mynote);
         })
 
         console.log("creating lib entries")
         md_files.forEach((file) => {
-            //console.log("creating lib entry for " + file.path)
-            //if (!file.path.endsWith(".md")) return // unnecessary because mdfiles() only gives .md files
-            //new Notice("file.path: "+file.path+"\nfile.basename: "+file.basename+"\nfile.extension: "+file.extension+"\nfile.parent: "+file.parent+"\nfile.stat: "+file.stat+"\nfile.vault: "+file.vault)
             let path = file.path //.slice(0, -3) // remove .md
-            //console.log(file.extension)
 
 
             let mynote = new note(file, path, file.extension, [], [], null, false, []);
@@ -136,9 +107,9 @@ export class LibKeeper {
         console.log("total number of notes in lib: " + String(all_notes.length))
         console.log("analysiere links")
         all_notes.forEach((note: note) => {
-            //console.log("analysiere links für: " + note.path)
+            //console.log("analyzing links of: " + note.path)
             if (note.extension != "md") {
-                //console.log("überspringe weil nicht .md: " + note.path)
+                //console.log("skipping because no .md file: " + note.path)
                 return
             }
 
@@ -156,7 +127,6 @@ export class LibKeeper {
 
 
             })
-            // let links_str=linkcache.map((val: LinkCache) => val.link); // links without extension or folder
             this.libdict[note.path].links_to = this_links_to
 
             this_links_to.forEach((link: string) => {
@@ -273,14 +243,14 @@ export class LibKeeper {
             }
 
             if (all_items_so_far.includes(last_item_path)) {
-                //console.log("uberspringe pfad weil recursive: " + this.compilePath(path.items))
+                //console.log("skipping because path recursive: " + this.compilePath(path.items))
                 return
             }
 
             if (last_item.distance_from_TLI) {
                 if (path.all_members.length < 6) {
                     if ((path.depth - last_item.distance_from_TLI) > 1) {
-                        //console.log("überspringe pfad weil zu lang: " + this.compilePath(path.items))
+                        //console.log("skipping because path too long: " + this.compilePath(path.items))
                         //console.log("last item: " + last_item_path)
                         //console.log("depth: " + path.depth)
                         //console.log("last item tli n: " + last_item.distance_from_TLI)
@@ -288,7 +258,7 @@ export class LibKeeper {
                     }
                 } else {
                     if ((path.depth - last_item.distance_from_TLI) > 0) {
-                        //console.log("überspringe pfad weil zu lang: " + this.compilePath(path.items))
+                        //console.log("skipping because path too long: " + this.compilePath(path.items))
                         //console.log("last item: " + last_item_path)
                         //console.log("depth: " + path.depth)
                         //console.log("last item tli n: " + last_item.distance_from_TLI)
@@ -298,7 +268,7 @@ export class LibKeeper {
             }
 
             if (path.depth > 10) {
-                //console.log("uberspringe pfad weil länger als 10")
+                //console.log("skipping because path is longer than 10 members")
                 //return
             }
             //console.log("following path " + this.compilePath(path.items))
