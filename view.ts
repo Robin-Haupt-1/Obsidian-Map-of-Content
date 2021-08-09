@@ -23,7 +23,7 @@ export default class TLIView extends ItemView {
       console.log("displaying paths")
       if (all_paths){
         all_paths.forEach((p: path) => {
-        this.containerEl.createEl('h3', { text: lib.compilePath(p.items) })
+        this.containerEl.createEl('p', { text: lib.compilePath(p.items)})
 
       })
       }
