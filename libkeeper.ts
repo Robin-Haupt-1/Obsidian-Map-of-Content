@@ -1,17 +1,9 @@
-// Todo: index TLI by parent note(s) to allow for live path rebuilding taking into account diverging paths to the note 
-// that are significant because they are very different (another great idea: just compare how many notes are different from the shortest existing path,
-// weighted by closeness to TLI)
-
-
 import { LINKED_BOTH, LINKED_TLI, LINKED_TO } from "./constants";
 import { LINKED_FROM } from "./constants";
-import { TLI_NAME } from "./constants";
+import { TLI_NOTE_PATH } from "./constants";
 import type { TFile, App, Vault, Notice, LinkCache, getLinkpath, ValueComponent, Modal } from "obsidian";
-import { LibEntry, LibEntry2, note, libdict, path, PATHModal } from './types'
-import { cleanExtension, fileNameFromPath, getDisplayName } from "./utils"
-import { strict } from "assert";
-import { pathToFileURL } from "url";
-import { networkInterfaces } from "os";
+import { note, libdict, path, PATHModal } from './types'
+import { fileNameFromPath, getDisplayName } from "./utils"
 
 
 export class LibKeeper {
@@ -31,22 +23,22 @@ export class LibKeeper {
         this.l_entries = Object.entries(this.libdict)
         this.updateLib()
         this.updatePaths()
-        //this.updatePathslinearly()
     }
 
     getNoteByPath(path: string) {
+        // Return the internal note representation for a given path
         if (path in this.libdict) {
             return this.libdict[path]
         }
 
     }
-    findPaths(filename: string): path[] {
-        let filtered_paths: path[] = []
 
+    findPaths(path: string): path[] {
+        // return all paths that end at a certain note
+        let filtered_paths: path[] = []
         this.all_paths.forEach((p: path) => {
-            //new Notice(String(p.all_members))
-            if (p.all_members.includes(filename)) {
-                if (p.all_members.last() == filename) {
+            if (p.all_members.includes(path)) {
+                if (p.all_members.last() == path) {
                     filtered_paths.push(p)
                 }
 
@@ -57,28 +49,22 @@ export class LibKeeper {
         }
     }
 
-    addNote(note: note) {
-        this.libdict[note.path] = note
-        this.l_entries = Object.entries(this.libdict)
-
-    }
     get_all_notes(): note[] {
         return this.l_entries.map(([key, value]) => value)
     }
+
     updateLib() {
-        console.log("updating lib")
-        // step 1: read files
+        // step 1: update the plugins internal representation of all notes in the vault
+        console.log("Updating the library...")
+        // delete old state
         let l = this.libdict
         for (let note in l) { { delete l[note]; } }
-
+        // read all files
         let md_files = this.vault.getFiles()
         this.duplicate_file_status = new Map<string, boolean>();
-
         console.log("md files in collection: " + String(md_files.length))
-        console.log("checking for duplicate files")
+        // check for duplicate files
         md_files.forEach((file) => {
-
-
             let file_name = fileNameFromPath(file.path)
 
             console.log(file_name)
@@ -93,67 +79,60 @@ export class LibKeeper {
 
         })
 
-        console.log("creating lib entries")
+        // create new library entries
         md_files.forEach((file) => {
-            let path = file.path //.slice(0, -3) // remove .md
+            let path = file.path
 
+            let new_note = new note(file, path, file.extension, [], [], null, false, []);
 
-            let mynote = new note(file, path, file.extension, [], [], null, false, []);
-            this.addNote(mynote);
+            // update the libdict and the l_entries representation of it
+            this.libdict[new_note.path] = new_note
+            this.l_entries = Object.entries(this.libdict)
         })
 
         // step 2: analyze links
         let all_notes = this.get_all_notes()
-        console.log("total number of notes in lib: " + String(all_notes.length))
-        console.log("analysiere links")
+        console.log("total number of notes in library: " + String(all_notes.length))
+        console.log("analyzing links")
         all_notes.forEach((note: note) => {
-            //console.log("analyzing links of: " + note.path)
             if (note.extension != "md") {
-                //console.log("skipping because no .md file: " + note.path)
+                // skip if its not an md file. other file types can't link to anything
                 return
             }
 
-            //console.log("reading links of" + note.path)
+            // first: save all the links this note links to
             let linkcache = this.app.metadataCache.getCache(note.path).links
             if (!linkcache) return // no links
             let this_links_to: string[] = []
-            //let links_str = linkcache.map((val: LinkCache) => this.app.metadataCache.getFirstLinkpathDest(val.link, "/").path);
             linkcache.forEach((val: LinkCache) => {
-                let link_path = this.app.metadataCache.getFirstLinkpathDest(val.link, "/") // check if the link is not valid 
-                if (link_path) {
-                    this_links_to.push(link_path.path)
+                // check if the link is valid 
+                let link_dest = this.app.metadataCache.getFirstLinkpathDest(val.link, "/")
+                if (link_dest) {
+                    this_links_to.push(link_dest.path)
 
                 }
-
-
             })
             this.libdict[note.path].links_to = this_links_to
 
+            // second: add a passive reference to the lib entry of all notes that are linked to from this note
             this_links_to.forEach((link: string) => {
-                //console.log("working on linked from of " + link)
-                if (!this.libdict[link].linked_from.contains(note.path)) { // is this neccessary ?
-                    this.libdict[link].linked_from.push(note.path)
-                }
+                this.libdict[link].linked_from.push(note.path)
             })
-
         })
-
-
     }
 
+    /** starting from the TLI, follow all paths and store the information on how long the shortest path to each note is*/
     updateDepthInformation() {
-        console.log("analysiere tiefe")
-        let depth = 0
-        let docontinue = true
-        let links = [TLI_NAME]
-        let checked_links: string[] = []
-        let times_checked_depth = 0
-        while (docontinue) {
-
+        console.log("Analyzing distance from TLI")
+        let depth = 0 // distance from the TLI. starts at zero 
+        let checked_links: string[] = []  // all the notes that have already been visited. dont visit them again to prevent endless loops
+        let do_continue = true
+        // start at the the TLI
+        let links = [TLI_NOTE_PATH]
+        while (do_continue) {
             let next_links: string[] = []
             links.forEach((link: string) => {
-                times_checked_depth += 1
-
+                // extract all active and passive connections (linked to or from) for the next iteration of link-following
                 let note = this.getNoteByPath(link)
                 note.links_to.forEach((link: string) => {
                     if (!checked_links.contains(link) && !next_links.contains(link)) {
@@ -165,7 +144,9 @@ export class LibKeeper {
                         next_links.push(link)
                     }
                 })
+                // save the info that the note can be reached from the TLI
                 note.is_linked_to_TLI = true
+                // update the info on how far the note is removed from TLI
                 if (note.distance_from_TLI == null || note.distance_from_TLI > depth) {
                     note.distance_from_TLI = depth
                 }
@@ -173,27 +154,25 @@ export class LibKeeper {
             })
             links = next_links.slice()
             if (links.length == 0) {
-                docontinue = false
+                do_continue = false
             }
             depth += 1
 
         }
-        console.log("checked depth times: " + times_checked_depth)
 
     }
-
+    /**
+     * Recursive function that follows all possible paths from the TLI that aren't unreasonably long or circular and stores them
+     * @param path_so_far the path to be extended in this iteration
+     */
     followPaths(path_so_far: path) {
+        // logging
         this.get_paths_ran += 1
         if (this.get_paths_ran % 100 == 0) {
             console.log("get paths ran " + String(this.get_paths_ran))
         }
 
-        let notepath = path_so_far.all_members.last()
-        //console.log(notepath)
-
-        let next_links: String[] = []
-        //let note = this.getNoteByPath(notepath)
-        let note = this.libdict[notepath]
+        let note = this.libdict[path_so_far.all_members.last()]
         let depth = path_so_far.depth
         let all_members = path_so_far.all_members
         let items = path_so_far.items
@@ -207,19 +186,12 @@ export class LibKeeper {
         let note_linked_from = note.linked_from.slice()
 
         note_links_to.forEach((link: string) => {
-            //console.log("links to " + String(link))
-            // check if a note is both linked from this note and it links to this note
+            // check whether the linked note also links to the current note
             let linked_to_or_both_ways = LINKED_TO
             if (note_linked_from.contains(link)) {
+                // remove it from the passive links to be followed later
                 let index = note_linked_from.indexOf(link, 0);
-                if (index > -1) {
-                    console.log("lösche aus linked from array: " + link)
-                    console.log("alte lengh: " + String(note_linked_from.length))
-                    note_linked_from.splice(index, 1);
-                    console.log("neue lengh: " + String(note_linked_from.length))
-
-                    console.log("array: " + String(note_linked_from))
-                }
+                note_linked_from.splice(index, 1);
                 linked_to_or_both_ways = LINKED_BOTH
 
             }
@@ -228,50 +200,33 @@ export class LibKeeper {
         })
 
         note_linked_from.forEach((link: string) => {
-            //console.log("linked from " + String(link))
             let new_path: path = { depth: depth + 1, all_members: all_members.concat(link), items: items.concat([[link, LINKED_FROM]]) }
             new_paths_to_follow.push(new_path)
         })
 
+        // function calls itself to explore every new path  
         new_paths_to_follow.forEach((path: path) => {
+            // the path without the next note that is to be explored
             let all_items_so_far = path.all_members.slice(0, -1)
-
             let last_item_path = path.all_members.last()
             let last_item = this.getNoteByPath(last_item_path)
-            if (!last_item) {
-                return
-            }
 
+            // stop if this note is already part of the explored path
             if (all_items_so_far.includes(last_item_path)) {
-                //console.log("skipping because path recursive: " + this.compilePath(path.items))
                 return
             }
-
+            // stop if the path is too long. if it's shorter than 6 members, allow some meandering, otherwise none. 
             if (last_item.distance_from_TLI) {
                 if (path.all_members.length < 6) {
                     if ((path.depth - last_item.distance_from_TLI) > 1) {
-                        //console.log("skipping because path too long: " + this.compilePath(path.items))
-                        //console.log("last item: " + last_item_path)
-                        //console.log("depth: " + path.depth)
-                        //console.log("last item tli n: " + last_item.distance_from_TLI)
                         return
                     }
                 } else {
                     if ((path.depth - last_item.distance_from_TLI) > 0) {
-                        //console.log("skipping because path too long: " + this.compilePath(path.items))
-                        //console.log("last item: " + last_item_path)
-                        //console.log("depth: " + path.depth)
-                        //console.log("last item tli n: " + last_item.distance_from_TLI)
                         return
                     }
                 }
-            }
-
-            if (path.depth > 10) {
-                //console.log("skipping because path is longer than 10 members")
-                //return
-            }
-            //console.log("following path " + this.compilePath(path.items))
+            } 
             this.followPaths(path)
         })
 
@@ -284,9 +239,7 @@ export class LibKeeper {
     updatePathsRecursively() {
         //this.updateLib()
         this.all_paths = []
-        let path_so_far: path = { depth: 0, all_members: [TLI_NAME], items: [[TLI_NAME, LINKED_TLI]] }
-        let tli = this.getNoteByPath(TLI_NAME)
-        console.log("links to len: " + tli.links_to.length)
+        let path_so_far: path = { depth: 0, all_members: [TLI_NOTE_PATH], items: [[TLI_NOTE_PATH, LINKED_TLI]] }
         this.followPaths(path_so_far)
 
     }
@@ -297,6 +250,7 @@ export class LibKeeper {
         this.updatePathsRecursively()
     }
 
+    /**deprecated: compile a path object into a string */
     compilePath(path: [string, string][], reverse: Boolean = false): string {
         let str: string = getDisplayName(path[0][0], this) // TLI linkedtoorform is null
         if (reverse == true) {
@@ -307,10 +261,10 @@ export class LibKeeper {
             })
             return str
         }
-        else { 
+        else {
             // show path ending at Top Level Index  
             path.slice(1).forEach((path: string[]) => {
-                let filename = getDisplayName(path[0], this) 
+                let filename = getDisplayName(path[0], this)
                 let arrow = path[1]
                 if (arrow == LINKED_FROM) {
                     arrow = LINKED_TO
@@ -325,15 +279,18 @@ export class LibKeeper {
         }
 
     }
-    count() {
+    
+    /** 
+     * @returns the amount of entries in the libdict */
+    count_notes() {
         return this.l_entries.length
 
     }
+    /**@returns a string overview of the entire libdict. hardly readable */
     overview(): string {
-        let all_keys = this.l_entries.map(([key, value]) => key + "  " + value.links_to[0] + "  " + value.linked_from[0]).join(", ")
-
-        return all_keys
+        let all_keys = this.l_entries.map(([key, value]) => key + "  " + value.links_to[0] + "  " + value.linked_from[0]).join(", ") 
+        return all_keys+"test"
     }
 
 
-}
+} 

@@ -1,45 +1,41 @@
-import { LINKED_TO } from "./constants";
-import { LINKED_FROM } from "./constants";
-import { TLI_NAME } from "./constants";
-import { TFile, App, Vault, Notice, LinkCache, getLinkpath, ValueComponent, Modal } from "obsidian";
-import * as path from "path";
 
+import { TFile, App, Modal } from "obsidian";
 export class note {
     file: TFile
     path: string
-    extension:string
+    extension: string
     links_to: string[]
     linked_from: string[]
     distance_from_TLI: number
     is_linked_to_TLI: boolean
-    paths_from_TLI:path[]
+    paths_from_TLI: path[]
 
     constructor(
         file: TFile,
         path: string,
-        extension:string,
+        extension: string,
         links_to: string[],
         linked_from: string[],
         distance_from_TLI: number,
         is_linked_to_TLI: boolean,
-        paths_from_TLI:path[]
+        paths_from_TLI: path[]
 
     ) {
         this.file = file
         this.path = path
-        this.extension=extension
+        this.extension = extension
         this.links_to = links_to
         this.linked_from = linked_from
         this.distance_from_TLI = distance_from_TLI
         this.is_linked_to_TLI = is_linked_to_TLI
-        this.paths_from_TLI=paths_from_TLI
+        this.paths_from_TLI = paths_from_TLI
     }
 
     sayName() {
         return this.path
     }
-    
-    trimPaths(n:number){
+
+    trimPaths(n: number) {
         //Todo: delete all paths longer than n members
     }
 
@@ -57,20 +53,20 @@ export interface path {
 
 export class PATHModal extends Modal {
     paths: string;
-    paths_array:string[];
-    constructor(app: App, paths: string,paths_array:string[]) {
+    paths_array: string[];
+    constructor(app: App, paths: string, paths_array: string[]) {
         super(app);
         this.paths = paths
-        this.paths_array=paths_array
+        this.paths_array = paths_array
     }
 
     onOpen() {
         let { contentEl } = this;
         contentEl.setText(this.paths);
-        this.paths_array.forEach((str)=>{
+        this.paths_array.forEach((str) => {
             contentEl.createEl('h2', { text: str });
         })
-        
+
     }
 
     onClose() {

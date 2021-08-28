@@ -3,8 +3,7 @@
 
   import { LINKED_BOTH, LINKED_TLI, LINKED_TO } from "./constants";
   import { LINKED_FROM } from "./constants";
-  import { TLI_NAME } from "./constants";
-  import { cleanExtension, fileNameFromPath, getDisplayName } from "./utils";
+  import { getDisplayName, isCtrlPressed } from "./utils";
   import type { LibKeeper } from "./libkeeper";
 
   export let app: App;
@@ -15,13 +14,16 @@
   export const navigateToFile = async (
     app: App,
     path: string,
-    ev: MouseEvent
+    event: MouseEvent
   ) => {
-    //let file = app.vault.getAbstractFileByPath(path)
+    // Todo: maybe use 	this.app.workspace.openLinkText("Top Level Index.md", "Top Level Index.md")
+
     let file = app.metadataCache.getFirstLinkpathDest(path, "/");
 
     if (!file) return;
-    const leaf = app.workspace.getUnpinnedLeaf();
+    const leaf = isCtrlPressed(event)
+      ? app.workspace.splitActiveLeaf()
+      : app.workspace.getUnpinnedLeaf();
     await leaf.openFile(file);
   };
 </script>
@@ -32,9 +34,9 @@
       <span title={pathitem[0]}> {getDisplayName(pathitem[0], lib)}</span>
     {:else}
       <a
-        href="#"
+        class="link"
         title={pathitem[0]}
-        on:click={(ev) => navigateToFile(app, pathitem[0], ev)}
+        on:click={(event) => navigateToFile(app, pathitem[0], event)}
       >
         {getDisplayName(pathitem[0], lib)}</a
       >
@@ -47,10 +49,14 @@
       {LINKED_BOTH}
     {/if}
   {/each}
-</div><br>
+</div>
+<br />
 
-<style> 
-.path{
-    font-size:20px;
-}
+<style>
+  a.link {
+    cursor: pointer;
+  }
+  .path {
+    font-size: 20px;
+  }
 </style>
