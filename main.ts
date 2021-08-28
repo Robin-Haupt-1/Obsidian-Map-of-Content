@@ -2,9 +2,9 @@ import { strict } from 'assert';
 import { readFile } from 'fs';
 import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
 import { TLI_NAME, TLI_VIEW_TYPE } from './constants'
-import { LibEntry, LibEntry2, note,  } from 'types';
-import { LibKeeper } from 'libkeeper';
-import TLIView from 'view';
+import type { LibEntry, LibEntry2, note,  } from './types';
+import { LibKeeper } from './libkeeper';
+import  {  TLIView} from './view';
 
 
 const t2 = (file: TFile, app: App): LibEntry2 => {
@@ -63,17 +63,21 @@ export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
 	lib:LibKeeper;
 	view:TLIView;
+	testing_view:MyView;
 	async onload() {
 		//console.log('loading plugin');
-		
+		 
 		this.lib=new LibKeeper(this.app)
 		let l=this.lib
 		
 		await this.loadSettings();
+
 		this.registerView(TLI_VIEW_TYPE, (leaf) => {
 			this.view = new TLIView(leaf, this,this.lib)
 			return this.view
 		  })
+
+		
 		if (this.app.workspace.layoutReady) this.initLeaf()
 		else this.registerEvent(this.app.workspace.on("layout-ready", () => this.initLeaf()))
 		

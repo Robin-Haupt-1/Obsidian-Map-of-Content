@@ -1,4 +1,4 @@
-import { LibKeeper } from "libkeeper"
+import type { LibKeeper } from "./libkeeper"
 
 export const cleanExtension = (path: string, extension: string = ".md") => {
     if (path.endsWith(extension)) {
@@ -11,7 +11,7 @@ export const fileNameFromPath = (path: string): string => {
 }
 
 
-export const getDisplayName=(path: string,lib:LibKeeper): string =>{
+export const getDisplayName = (path: string, lib: LibKeeper): string => {
     // return the full path if there are two or more notes with the same filename and extension, else only the name of file
     let file_name = fileNameFromPath(path)
     let display_name = null

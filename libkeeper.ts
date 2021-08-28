@@ -6,9 +6,9 @@
 import { LINKED_BOTH, LINKED_TLI, LINKED_TO } from "./constants";
 import { LINKED_FROM } from "./constants";
 import { TLI_NAME } from "./constants";
-import { TFile, App, Vault, Notice, LinkCache, getLinkpath, ValueComponent, Modal } from "obsidian";
+import type { TFile, App, Vault, Notice, LinkCache, getLinkpath, ValueComponent, Modal } from "obsidian";
 import { LibEntry, LibEntry2, note, libdict, path, PATHModal } from './types'
-import { cleanExtension,fileNameFromPath, getDisplayName } from "./utils"
+import { cleanExtension, fileNameFromPath, getDisplayName } from "./utils"
 import { strict } from "assert";
 import { pathToFileURL } from "url";
 import { networkInterfaces } from "os";
@@ -298,20 +298,19 @@ export class LibKeeper {
     }
 
     compilePath(path: [string, string][], reverse: Boolean = false): string {
-        let str: string = getDisplayName(path[0][0],this) // TLI linkedtoorform is null
+        let str: string = getDisplayName(path[0][0], this) // TLI linkedtoorform is null
         if (reverse == true) {
+            // show path starting from Top Level Index
             path.slice(1).forEach((path: string[]) => {
-                let filename = getDisplayName(path[0],this)
+                let filename = getDisplayName(path[0], this)
                 str = str.concat(` ${path[1]} ${filename}`); // => note  for example
             })
             return str
         }
-        else {
-
-
+        else { 
+            // show path ending at Top Level Index  
             path.slice(1).forEach((path: string[]) => {
-                let filename = getDisplayName(path[0],this)
-
+                let filename = getDisplayName(path[0], this) 
                 let arrow = path[1]
                 if (arrow == LINKED_FROM) {
                     arrow = LINKED_TO
