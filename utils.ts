@@ -1,4 +1,5 @@
 import type { LibKeeper } from "./libkeeper"
+import type { App } from "obsidian";
 
 /**  remove the given extension (by default ".md") from path  */
 export const cleanExtension = (path: string, extension: string = ".md") => {
@@ -34,4 +35,19 @@ export const getDisplayName = (path: string, lib: LibKeeper): string => {
     return display_name
 }
 
- 
+
+export const navigateToFile = async (
+    app: App,
+    path: string,
+    event: MouseEvent
+  ) => {
+    // Todo: maybe use 	this.app.workspace.openLinkText("Top Level Index.md", "Top Level Index.md")
+
+    let file = app.metadataCache.getFirstLinkpathDest(path, "/");
+
+    if (!file) return;
+    const leaf = isCtrlPressed(event)
+      ? app.workspace.splitActiveLeaf()
+      : app.workspace.getUnpinnedLeaf();
+    await leaf.openFile(file);
+  }; 
