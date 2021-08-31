@@ -13,6 +13,7 @@ export class LibKeeper {
     vault: Vault
     declare all_paths: path[]
     get_paths_ran: number
+    get_paths_stats: {}
     duplicate_file_status: Map<string, boolean> // Todo: map with the count instead of binary status to count up/down on file rename
 
     constructor(app: App) {
@@ -24,17 +25,16 @@ export class LibKeeper {
         this.updateLib()
         this.updatePaths()
     }
-
+    /**Return the internal note representation object for a given path */
     getNoteByPath(path: string) {
-        // Return the internal note representation for a given path
         if (path in this.libdict) {
             return this.libdict[path]
         }
 
     }
 
+    /** return all paths that end at a certain note*/
     findPaths(path: string): path[] {
-        // return all paths that end at a certain note
         let filtered_paths: path[] = []
         this.all_paths.forEach((p: path) => {
             if (p.all_members.includes(path)) {
@@ -47,6 +47,7 @@ export class LibKeeper {
         if (filtered_paths.length > 0) {
             return filtered_paths
         }
+        console.log("no paths found for " + path)
     }
 
     get_all_notes(): note[] {
@@ -107,7 +108,7 @@ export class LibKeeper {
             linkcache.forEach((val: LinkCache) => {
                 // check if the link is valid 
                 let link_dest = this.app.metadataCache.getFirstLinkpathDest(val.link, "/")
-                if (link_dest) {
+                if (link_dest && !this_links_to.includes(link_dest.path)) {
                     this_links_to.push(link_dest.path)
 
                 }
@@ -116,7 +117,9 @@ export class LibKeeper {
 
             // second: add a passive reference to the lib entry of all notes that are linked to from this note
             this_links_to.forEach((link: string) => {
-                this.libdict[link].linked_from.push(note.path)
+                if (!this.libdict[link].linked_from.includes(note.path)) {
+                    this.libdict[link].linked_from.push(note.path)
+                }
             })
         })
     }
@@ -170,6 +173,7 @@ export class LibKeeper {
         this.get_paths_ran += 1
         if (this.get_paths_ran % 100 == 0) {
             console.log("get paths ran " + String(this.get_paths_ran))
+            console.log(path_so_far.all_members.join(" "))
         }
 
         let note = this.libdict[path_so_far.all_members.last()]
@@ -177,10 +181,10 @@ export class LibKeeper {
         let all_members = path_so_far.all_members
         let items = path_so_far.items
 
-        note.paths_from_TLI.push(path_so_far)
+        //note.paths_from_TLI.push(path_so_far)
         this.all_paths.push(path_so_far)
-        note.is_linked_to_TLI = true
-        note.distance_from_TLI = depth
+        //note.is_linked_to_TLI = true
+        //note.distance_from_TLI = depth
         let new_paths_to_follow: path[] = []
         let note_links_to = note.links_to.slice()
         let note_linked_from = note.linked_from.slice()
@@ -215,6 +219,9 @@ export class LibKeeper {
             if (all_items_so_far.includes(last_item_path)) {
                 return
             }
+
+
+
             // stop if the path is too long. if it's shorter than 6 members, allow some meandering, otherwise none. 
             if (last_item.distance_from_TLI) {
                 if (path.all_members.length < 6) {
@@ -226,7 +233,7 @@ export class LibKeeper {
                         return
                     }
                 }
-            } 
+            }
             this.followPaths(path)
         })
 
@@ -246,6 +253,7 @@ export class LibKeeper {
 
     updatePaths() {
         this.get_paths_ran = 0
+        this.get_paths_stats = { "ran": 0, "skipped": 0 }
         this.updateDepthInformation()
         this.updatePathsRecursively()
     }
@@ -279,7 +287,7 @@ export class LibKeeper {
         }
 
     }
-    
+
     /** 
      * @returns the amount of entries in the libdict */
     count_notes() {
@@ -288,9 +296,9 @@ export class LibKeeper {
     }
     /**@returns a string overview of the entire libdict. hardly readable */
     overview(): string {
-        let all_keys = this.l_entries.map(([key, value]) => key + "  " + value.links_to[0] + "  " + value.linked_from[0]).join(", ") 
-        return all_keys+"test"
+        let all_keys = this.l_entries.map(([key, value]) => key + " links to: " + value.links_to.join(" - ") + " linked from:  " + value.linked_from.join(" - ")).join(", ")
+        return all_keys + "test"
     }
 
 
-} 
+}

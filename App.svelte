@@ -21,7 +21,6 @@
     height: initial;
     position: initial;
     overflow-y: initial;
-    overflow-wrap: initial;
-    font-size: 15px;
+    overflow-wrap: initial; 
   }
 </style>

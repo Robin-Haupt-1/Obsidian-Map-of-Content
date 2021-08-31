@@ -56,7 +56,6 @@
   a.link {
     cursor: pointer;
   }
-  .path {
-    font-size: 20px;
+  .path { 
   }
 </style>
