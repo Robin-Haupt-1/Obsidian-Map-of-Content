@@ -1,53 +1,69 @@
 import 'svelte'
 
 import { TLI_VIEW_TYPE } from './constants'
-import { ItemView, Notice, TFile, WorkspaceLeaf } from 'obsidian' 
+import { ItemView, Notice, TFile, WorkspaceLeaf } from 'obsidian'
 
 
-import type MyPlugin from './main'
+import type TLIPlugin from './main'
 import type { path } from './types'
 import type { LibKeeper } from './libkeeper'
-import App from './App.svelte'
+import PathView from './PathView.svelte'
 
 
 export default class TLIView extends ItemView {
   lib: LibKeeper
-  private _app: App
+  _app: PathView
+  plugin: TLIPlugin
+  open_file_path: string
 
 
-  constructor(leaf: WorkspaceLeaf, private plugin: MyPlugin, lib: LibKeeper) {
+  constructor(leaf: WorkspaceLeaf, plugin: TLIPlugin, lib: LibKeeper) {
     super(leaf)
     this.lib = lib
-    this.app = plugin.app 
+    this.app = plugin.app
+    this.plugin = plugin
 
     // update the path view every time a file is opened
-    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => { 
-      let all_paths = lib.findPaths(file.path)
-
-      if (all_paths) {  
-        let props = all_paths.map((p: path) =>
-          p.items.slice()
-        )
-        let str = JSON.stringify(props);
-        console.log(str)
-        this._app.$set({ pathes: props, app: this.app })
-
-
-      }
-
-    }))
+    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.fileChanged(file)))
 
 
   }
 
   async onOpen(): Promise<void> {
-    this._app = new App({
+    this._app = new PathView({
       target: (this as any).contentEl,
-      props: { pathes: [], app: this.app, lib: this.lib },
+      props: { pathes: [], app: this.app, lib: this.lib, plugin: this.plugin,tli_path:this.plugin.getTliPath() },
+
     })
 
   }
- 
+
+  fileChanged(file: TFile) {
+    this.open_file_path = file.path
+    this.rerender()
+  }
+  rerender(): void {
+    console.log("rerender called")
+    let all_paths = this.lib.findPaths(this.open_file_path)
+    if (all_paths.length>0) {
+      let paths = all_paths.map((p: path) =>
+        p.items.slice()
+
+      )
+      let str = JSON.stringify(paths);
+      console.log(str)
+      this._app.$set({ pathes: paths, app: this.app ,tli_path:this.plugin.getTliPath()})
+    } else {
+      console.log("no paths")
+      this._app.$set({ pathes: [], app: this.app,tli_path:this.plugin.getTliPath() })
+    }
+
+
+
+
+
+  }
+
   getViewType(): string {
     return TLI_VIEW_TYPE
   }

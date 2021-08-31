@@ -1,23 +1,26 @@
 import { LINKED_BOTH, LINKED_TLI, LINKED_TO } from "./constants";
 import { LINKED_FROM } from "./constants";
-import { TLI_NOTE_PATH } from "./constants";
+import { TLI_NOTE_PATH_DEFAULT } from "./constants";
 import type { TFile, App, Vault, Notice, LinkCache, getLinkpath, ValueComponent, Modal } from "obsidian";
 import { note, libdict, path, PATHModal } from './types'
 import { fileNameFromPath, getDisplayName } from "./utils"
+import type TLIPlugin from "./main"
 
 
 export class LibKeeper {
     libdict: libdict
     l_entries: any[]
     app: App
+    plugin: TLIPlugin
     vault: Vault
     declare all_paths: path[]
     get_paths_ran: number
     get_paths_stats: {}
     duplicate_file_status: Map<string, boolean> // Todo: map with the count instead of binary status to count up/down on file rename
 
-    constructor(app: App) {
+    constructor(app: App, plugin: TLIPlugin) {
         this.app = app;
+        this.plugin = plugin
         this.all_paths = []
         this.vault = app.vault
         this.libdict = {}
@@ -44,10 +47,9 @@ export class LibKeeper {
 
             }
         })
-        if (filtered_paths.length > 0) {
-            return filtered_paths
-        }
-        console.log("no paths found for " + path)
+ 
+        return filtered_paths 
+        
     }
 
     get_all_notes(): note[] {
@@ -64,11 +66,16 @@ export class LibKeeper {
         let md_files = this.vault.getFiles()
         this.duplicate_file_status = new Map<string, boolean>();
         console.log("md files in collection: " + String(md_files.length))
+
         // check for duplicate files
+        let checked_files = 0
         md_files.forEach((file) => {
             let file_name = fileNameFromPath(file.path)
-
-            console.log(file_name)
+            // logging
+            checked_files += 1
+            if (checked_files % 100 == 0) {
+                console.log("checked for duplicates " + String(checked_files))
+            }
             if (this.duplicate_file_status.has(file_name)) { // If the file name is encountered twice or more, set it's duplicate status to true
                 this.duplicate_file_status.set(file_name, true)
                 //console.log("duplicate: " + file_name)
@@ -81,7 +88,13 @@ export class LibKeeper {
         })
 
         // create new library entries
+        checked_files = 0
         md_files.forEach((file) => {
+            // logging
+            checked_files += 1
+            if (checked_files % 100 == 0) {
+                console.log("created new lib entries " + String(checked_files))
+            }
             let path = file.path
 
             let new_note = new note(file, path, file.extension, [], [], null, false, []);
@@ -126,12 +139,12 @@ export class LibKeeper {
 
     /** starting from the TLI, follow all paths and store the information on how long the shortest path to each note is*/
     updateDepthInformation() {
-        console.log("Analyzing distance from TLI")
+        console.log("Analyzing distance from TLI. Tli path: "+this.plugin.getTliPath())
         let depth = 0 // distance from the TLI. starts at zero 
         let checked_links: string[] = []  // all the notes that have already been visited. dont visit them again to prevent endless loops
         let do_continue = true
         // start at the the TLI
-        let links = [TLI_NOTE_PATH]
+        let links = [this.plugin.getTliPath()]
         while (do_continue) {
             let next_links: string[] = []
             links.forEach((link: string) => {
@@ -246,7 +259,7 @@ export class LibKeeper {
     updatePathsRecursively() {
         //this.updateLib()
         this.all_paths = []
-        let path_so_far: path = { depth: 0, all_members: [TLI_NOTE_PATH], items: [[TLI_NOTE_PATH, LINKED_TLI]] }
+        let path_so_far: path = { depth: 0, all_members: [this.plugin.getTliPath()], items: [[this.plugin.getTliPath(), LINKED_TLI]] }
         this.followPaths(path_so_far)
 
     }
