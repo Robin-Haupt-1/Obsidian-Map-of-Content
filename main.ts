@@ -5,44 +5,30 @@ import type { LibEntry, LibEntry2, note, } from './types';
 import { LibKeeper } from './libkeeper';
 import TLIView from './view';
 import Settings from './Settings.svelte';
-import { TLISettings,DEFAULT_SETTINGS } from './settings';
+import { TLISettings, DEFAULT_SETTINGS } from './settings';
 
 
-const t2 = (file: TFile, app: App): LibEntry2 => {
-	let return_lib: LibEntry
-	return_lib
-
-	let links_to = app.metadataCache.getCache(file.path).links.map((val: LinkCache) => val.link);
-	let b: LibEntry2 = { internal_file: file, links_to: links_to }
-	return b
-}
- 
-
-const readVaultFile = async (file: TFile, app: App) => {
-	let linkcache = app.metadataCache.getCache(file.path).links.map((val: LinkCache) => val.link);
-	linkcache.forEach(async (val: string) => {
-		let link_path = getLinkpath(val)
-		new Notice("link path: " + link_path + " from " + val)
-		let linked_file = app.metadataCache.getFirstLinkpathDest(val, "/")
-		new Notice("basename: " + linked_file.basename)
-
-	})
-
-
-	return linkcache.join(", ")
-
-}
 export default class TLIPlugin extends Plugin {
 	settings: TLISettings;
 	lib: LibKeeper;
 	view: TLIView;
 	statusbartext: HTMLElement
 	async onload() {
-		await this.loadSettings() 
+		if (this.app.workspace.layoutReady) this.initializePlugin() 
+		else this.registerEvent(this.app.workspace.on("layout-ready", () => this.initializePlugin()))
+
+
+
+
+
+
+	}
+	async initializePlugin() {
+		await this.loadSettings()
 		console.log(this.app.vault.getName())
-		this.lib = new LibKeeper(this.app,this)
+		this.lib = new LibKeeper(this.app, this)
 		let l = this.lib
-		this.addSettingTab(new TLISettingTab(this.app, this,this.lib));
+		this.addSettingTab(new TLISettingTab(this.app, this, this.lib));
 
 		this.registerView(TLI_VIEW_TYPE, (leaf) => {
 			this.view = new TLIView(leaf, this, this.lib)
@@ -51,67 +37,32 @@ export default class TLIPlugin extends Plugin {
 
 
 		if (this.app.workspace.layoutReady) this.initLeaf()
-		else this.registerEvent(this.app.workspace.on("layout-ready", () => this.initLeaf()))
 
 
-
-
-
-		this.addRibbonIcon('dice', 'Update paths', () => {
-			new Notice('Updating paths...');
-			l.updateLib()
-			l.updatePaths()
-			new Notice("Total number of notes: " + String(l.count_notes()))
-			new Notice(l.overview())
+		this.addRibbonIcon('dice', 'Update paths', async () => {
+			new Notice('Updating paths... your program might freeze');
+			await l.updateLib()
+			await l.updatePaths()
+			new Notice("Paths updated")
 			// Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? like kicker ticker
+			//this.statusbartext = this.addStatusBarItem()
 			//this.statusbartext.setText("Total number of notes: " + String(l.count()));
 		});
 
-		this.statusbartext = this.addStatusBarItem()
-		this.statusbartext.setText("");
-
-
-		this.addCommand({
-			id: 'open-sample-modal',
-			name: 'Open Sample Modal',
-			// callback: () => {
-			// 	console.log('Simple Callback');
-			// },
-			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf) {
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-					return true;
-				}
-				return false;
-			}
-		});
-
-		
 
 		this.registerCodeMirror((cm: CodeMirror.Editor) => {
 			console.log('codemirror', cm);
 		});
 
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-		
-
 	}
-
 	initLeaf(): void {
-		if (this.app.workspace.getLeavesOfType(TLI_VIEW_TYPE).length) return 
+		if (this.app.workspace.getLeavesOfType(TLI_VIEW_TYPE).length) return
 		this.app.workspace.getRightLeaf(true).setViewState({
 			type: TLI_VIEW_TYPE,
 			active: false,
 		})
 	}
-	rerender(){
+	rerender() {
 		this.view.rerender()
 	}
 
@@ -128,7 +79,7 @@ export default class TLIPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
-	 
+
 	async updateSettings(updates: Partial<TLISettings>) {
 		Object.assign(this.settings, updates)
 		await this.saveData(this.settings)
@@ -139,26 +90,32 @@ export default class TLIPlugin extends Plugin {
 		return this.settings[setting]
 	}
 
-	getTliPath(){ 
-		let tli_settings_vault_names=this.settings.TLI_path_per_vault.map((val:[string,string] )=>val[0])
-		if (tli_settings_vault_names.contains(this.app.vault.getName())){
+	getTliPath() {
+		console.log(this.settings.TLI_path_per_vault)
+
+		let tli_settings_vault_names = this.settings.TLI_path_per_vault.map((val: [string, string]) => val[0])
+
+		if (tli_settings_vault_names.contains(this.app.vault.getName())) {
+
 			return this.settings.TLI_path_per_vault[tli_settings_vault_names.indexOf(this.app.vault.getName())][1]
+
 		}
-		
+
 		return TLI_NOTE_PATH_DEFAULT
 	}
-	
-	setTliPath(path:string){
 
-		let tli_settings_vault_names=this.settings.TLI_path_per_vault.map((val:[string,string] )=>val[0])
-		let new_settings=this.settings.TLI_path_per_vault.slice()
+	setTliPath(path: string) {
 
-		if (tli_settings_vault_names.contains(this.app.vault.getName())){
-			new_settings.splice(tli_settings_vault_names.indexOf(this.app.vault.getName()),1)
-			 
+		let tli_settings_vault_names = this.settings.TLI_path_per_vault.map((val: [string, string]) => val[0])
+		let new_settings = this.settings.TLI_path_per_vault.slice()
+
+		if (tli_settings_vault_names.contains(this.app.vault.getName())) {
+			new_settings.splice(tli_settings_vault_names.indexOf(this.app.vault.getName()), 1)
+
 		}
-		new_settings.push([this.app.vault.getName(),path]) 
-		this.settings.TLI_path_per_vault=new_settings
+		new_settings.push([this.app.vault.getName(), path])
+		this.settings.TLI_path_per_vault = new_settings
+		this.saveSettings()
 	}
 }
 
@@ -181,20 +138,26 @@ class SampleModal extends Modal {
 class TLISettingTab extends PluginSettingTab {
 	plugin: TLIPlugin;
 	_app: Settings;
-	lib:LibKeeper
+	lib: LibKeeper
 
-	constructor(app: App, plugin: TLIPlugin, lib:LibKeeper) {
+	constructor(app: App, plugin: TLIPlugin, lib: LibKeeper) {
 		super(app, plugin);
 		this.plugin = plugin;
-		this.lib=lib
-	}
-
-	display(): void {
-		//let { containerEl } = this;
+		this.lib = lib
 		this._app = new Settings({
 			target: (this as any).containerEl,
-			props: { app: this.app,lib:this.lib ,plugin:this.plugin},
+			props: { app: this.app, lib: this.lib, plugin: this.plugin },
 		})
+	}
+
+	display(): void { 
+		this._app.$destroy()
+		this._app = new Settings({
+			target: (this as any).containerEl,
+			props: { app: this.app, lib: this.lib, plugin: this.plugin },
+		})
+	}
+		
 		/*
 				containerEl.empty();
 		

@@ -34,8 +34,7 @@
   console.log(chosen_tli_path);
   let input_value = "";
 
-  const updateTliPath = () => {
-    console.log(input_value);
+  const updateTliPath = () => { 
     plugin.setTliPath(input_value)
     lib.updatePaths()
     plugin.rerender()
@@ -43,12 +42,11 @@
 </script>
 
 <div class="path">
-  <label for="myBrowser">Choose a browser from this list:</label>
+  <label for="myBrowser">Choose the top level index note from this list:</label>
   <input
     bind:value={input_value}
     list="browsers"
-    id="TLI_select"
-    name="myBrowser"
+    id="TLI_select" 
   />
   <datalist id="browsers">
     {#each all_files as filepath}

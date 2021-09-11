@@ -32,7 +32,7 @@ export default class TLIView extends ItemView {
   async onOpen(): Promise<void> {
     this._app = new PathView({
       target: (this as any).contentEl,
-      props: { pathes: [], app: this.app, lib: this.lib, plugin: this.plugin,tli_path:this.plugin.getTliPath() },
+      props: { paths: [], app: this.app, lib: this.lib, plugin: this.plugin,tli_path:this.plugin.getTliPath(),open_note_path:this.plugin.getTliPath()},
 
     })
 
@@ -50,12 +50,19 @@ export default class TLIView extends ItemView {
         p.items.slice()
 
       )
-      let str = JSON.stringify(paths);
+      let str = JSON.stringify(paths); 
       console.log(str)
-      this._app.$set({ pathes: paths, app: this.app ,tli_path:this.plugin.getTliPath()})
+      
+      this._app.$set({ paths: paths, app: this.app ,tli_path:this.plugin.getTliPath(),open_note_path:this.open_file_path })
+      this._app.$destroy()
+      this._app = new PathView({
+        target: (this as any).contentEl,
+        props: { paths: paths, app: this.app,lib:this.lib ,tli_path:this.plugin.getTliPath(),open_note_path:this.open_file_path },
+  
+      })
     } else {
       console.log("no paths")
-      this._app.$set({ pathes: [], app: this.app,tli_path:this.plugin.getTliPath() })
+      this._app.$set({ paths: [], app: this.app,tli_path:this.plugin.getTliPath(),open_note_path:this.open_file_path })
     }
 
 
