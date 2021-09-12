@@ -20,6 +20,7 @@ export default class TLIPlugin extends Plugin {
  
 
 	}
+
 	async initializePlugin() {
 		await this.loadSettings()
 		log(this.app.vault.getName())
@@ -37,10 +38,7 @@ export default class TLIPlugin extends Plugin {
 
 
 		this.addRibbonIcon('sync', 'Update paths', async () => {
-			new Notice('Updating paths... your program might freeze');
-			await l.updateLib()
-			await l.updatePaths()
-			new Notice("Paths updated")
+			l.updateEverything()
 			// Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? like kicker ticker
 			//this.statusbartext = this.addStatusBarItem()
 			//this.statusbartext.setText("Total number of notes: " + String(l.count()));

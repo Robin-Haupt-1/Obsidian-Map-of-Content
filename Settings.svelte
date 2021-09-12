@@ -25,8 +25,7 @@
     document.getElementById("tli_path").textContent = input_value;
     
     // recreate path information
-    lib.updatePaths();
-    plugin.rerender();
+    lib.updateEverything()
 
     // clear selection dropdown list
     document.getElementById("TLI_select").value = "";

@@ -5,6 +5,7 @@ import {Notice} from 'obsidian'
 import { note, libdict, path } from './types'
 import { fileNameFromPath, getDisplayName } from "./utils"
 import type TLIPlugin from "./main"
+import { log } from "./utils";
 
 
 /**
@@ -19,8 +20,7 @@ export class LibKeeper {
     plugin: TLIPlugin
     vault: Vault
     all_paths: path[]
-    get_paths_ran: number
-    get_paths_stats: {}
+    get_paths_ran: number 
     descendants: Map<string, string[]>
     duplicate_file_status: Map<string, boolean> // Todo: map with the count instead of binary status to count up/down on file rename
 
@@ -31,8 +31,11 @@ export class LibKeeper {
         this.vault = app.vault
         this.libdict = {}
         this.l_entries = Object.entries(this.libdict)
+        this.updateEverything()
+    }
+    updateEverything(update_lib:boolean=true){
         new Notice('Updating paths... your program might freeze'); 
-        this.updateLib()
+        if (update_lib) this.updateLib()
         this.updatePaths()
         this.updateDescendants() 
         new Notice("Paths updated")
@@ -56,8 +59,7 @@ export class LibKeeper {
 
                 } else {
                     let index = p.all_members.indexOf(path) + 1
-                    let chopped_of_path = p.items.slice(0, index)
-                    //console.log("old path: " + JSON.stringify(p.items) + " new path: " + JSON.stringify(chopped_of_path))
+                    let chopped_of_path = p.items.slice(0, index)  
                     if (!filtered_paths_json.includes(JSON.stringify(chopped_of_path))) {
                         // return a path element containing only the parts of the path information up to the note in question
                         // Todo: make sure depth:index-1 is correct
@@ -80,30 +82,28 @@ export class LibKeeper {
 
     async updateLib() {
         // step 1: update the plugins internal representation of all notes in the vault
-        console.log("Updating the library...")
+         log("Updating the library...")
         // delete old state
         let l = this.libdict
         for (let note in l) { delete l[note]; }
         // read all files
-        let md_files = this.vault.getFiles()
+        let vault_files = this.vault.getFiles()
         this.duplicate_file_status = new Map<string, boolean>();
-        console.log("md files in collection: " + String(md_files.length))
+        log("total files in collection: " + String(vault_files.length),true)
 
         // check for duplicate files
         let checked_files = 0
-        md_files.forEach((file) => {
+        vault_files.forEach((file) => {
             let file_name = fileNameFromPath(file.path)
             // logging
             checked_files += 1
             if (checked_files % 1000 == 0) {
-                console.log("checked for duplicates " + String(checked_files))
+                log("checked for duplicates " + String(checked_files),true)
             }
             if (this.duplicate_file_status.has(file_name)) { // If the file name is encountered twice or more, set it's duplicate status to true
-                this.duplicate_file_status.set(file_name, true)
-                //console.log("duplicate: " + file_name)
+                this.duplicate_file_status.set(file_name, true) 
             } else {
-                this.duplicate_file_status.set(file_name, false)
-                //console.log("unique so far: " + file_name)
+                this.duplicate_file_status.set(file_name, false) 
             }
 
 
@@ -111,11 +111,11 @@ export class LibKeeper {
 
         // create new library entries
         checked_files = 0
-        md_files.forEach((file) => {
+        vault_files.forEach((file) => {
             // logging
             checked_files += 1
             if (checked_files % 1000 == 0) {
-                console.log("created new lib entries " + String(checked_files))
+                 log("created new lib entries " + String(checked_files),true)
             }
             let path = file.path
             let new_note = new note(file, path, file.extension, [], [], null, false, []);
@@ -127,8 +127,8 @@ export class LibKeeper {
 
         // step 2: analyze links
         let all_notes = this.get_all_notes()
-        console.log("total number of notes in library: " + String(all_notes.length))
-        console.log("analyzing links")
+         log("total number of notes in library: " + String(all_notes.length),true)
+         log("analyzing links",true)
         all_notes.forEach((note: note) => {
             if (note.extension != "md") {
                 // skip if its not an md file. other file types can't link to anything
@@ -160,7 +160,7 @@ export class LibKeeper {
 
     /** starting from the TLI, follow all paths and store the information on how long the shortest path to each note is*/
     async updateDepthInformation() {
-        console.log("Analyzing distance from TLI. Tli path: " + this.plugin.getTliPath())
+        log("Analyzing distance from TLI. Tli path: " + this.plugin.getTliPath(),true)
         let depth = 0 // distance from the TLI. starts at zero 
         let checked_links: string[] = []  // all the notes that have already been visited. dont visit them again to prevent endless loops
         let do_continue = true
@@ -206,8 +206,8 @@ export class LibKeeper {
         // logging
         this.get_paths_ran += 1
         if (this.get_paths_ran % 1000 == 0) {
-            console.log("get paths ran " + String(this.get_paths_ran))
-            console.log(path_so_far.all_members.join(" "))
+             log("get paths ran " + String(this.get_paths_ran),true)
+             log(path_so_far.all_members.join(" "),true)
         }
 
         let note = this.libdict[path_so_far.all_members.last()]
@@ -305,25 +305,23 @@ export class LibKeeper {
                     // logging
                     descendants_run += 1
                     if (descendants_run % 1000 == 0) {
-                        console.log("descendants ran " + String(descendants_run))
+                         log("descendants ran " + String(descendants_run),true)
                     }
                     let next_path_member = p.all_members[index + 1]
                     // add note as descendant if it isn't already stored in array
                     if (!this.descendants.get(note_path).includes(next_path_member)) {
                         this.descendants.set(note_path, this.descendants.get(note_path).concat(next_path_member))
-                    }
-                    //console.log("doing descendant analysis")
+                    } 
                 }
 
             }
 
             )
         })
-        console.log("all descendants: " + JSON.stringify(this.descendants.get("Top Level Index.md")))
+        
     }
     async updatePaths() {
-        this.get_paths_ran = 0
-        this.get_paths_stats = { "ran": 0, "skipped": 0 }
+        this.get_paths_ran = 0 
         await this.updateDepthInformation()
         await this.updatePathsRecursively()
         await this.updateDescendants()
@@ -337,7 +335,7 @@ export class LibKeeper {
      * @todo figure out how to correctly specify the types of the arrays
      */
     getDescendants(starting_path: string, levels: number = 3) {
-        console.log("descendants runing: " + starting_path)
+        log("descendants runing: " + starting_path,true)
         let return_array: any[] = [starting_path, []]
         if (this.descendants.has(starting_path)) {
             let descendants = this.descendants.get(starting_path)
