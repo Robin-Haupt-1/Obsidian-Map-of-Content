@@ -1,6 +1,14 @@
 import type { LibKeeper } from "./libkeeper"
 import type { App } from "obsidian";
 
+
+/** log to the console */
+export const log = (message: string,dev:boolean=false) => {
+    let log_dev=true // weether to print development log messages
+    if (!dev || log_dev) console.log("[Automatic MOC] "+message)
+    
+}
+
 /**  remove the given extension (by default ".md") from path  */
 export const cleanExtension = (path: string, extension: string = ".md") => {
     if (path.endsWith(extension)) {
@@ -40,14 +48,14 @@ export const navigateToFile = async (
     app: App,
     path: string,
     event: MouseEvent
-  ) => {
+) => {
     // Todo: maybe use 	this.app.workspace.openLinkText("Top Level Index.md", "Top Level Index.md")
 
     let file = app.metadataCache.getFirstLinkpathDest(path, "/");
 
     if (!file) return;
     const leaf = isCtrlPressed(event)
-      ? app.workspace.splitActiveLeaf()
-      : app.workspace.getUnpinnedLeaf();
+        ? app.workspace.splitActiveLeaf()
+        : app.workspace.getUnpinnedLeaf();
     await leaf.openFile(file);
-  }; 
+};

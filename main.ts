@@ -6,6 +6,7 @@ import { LibKeeper } from './libkeeper';
 import TLIView from './view';
 import Settings from './Settings.svelte';
 import { TLISettings, DEFAULT_SETTINGS } from './settings';
+import { log } from './utils';
 
 
 export default class TLIPlugin extends Plugin {
@@ -16,16 +17,12 @@ export default class TLIPlugin extends Plugin {
 	async onload() {
 		if (this.app.workspace.layoutReady) this.initializePlugin() 
 		else this.registerEvent(this.app.workspace.on("layout-ready", () => this.initializePlugin()))
-
-
-
-
-
+ 
 
 	}
 	async initializePlugin() {
 		await this.loadSettings()
-		console.log(this.app.vault.getName())
+		log(this.app.vault.getName())
 		this.lib = new LibKeeper(this.app, this)
 		let l = this.lib
 		this.addSettingTab(new TLISettingTab(this.app, this, this.lib));
@@ -39,7 +36,7 @@ export default class TLIPlugin extends Plugin {
 		if (this.app.workspace.layoutReady) this.initLeaf()
 
 
-		this.addRibbonIcon('dice', 'Update paths', async () => {
+		this.addRibbonIcon('sync', 'Update paths', async () => {
 			new Notice('Updating paths... your program might freeze');
 			await l.updateLib()
 			await l.updatePaths()
@@ -49,10 +46,7 @@ export default class TLIPlugin extends Plugin {
 			//this.statusbartext.setText("Total number of notes: " + String(l.count()));
 		});
 
-
-		this.registerCodeMirror((cm: CodeMirror.Editor) => {
-			console.log('codemirror', cm);
-		});
+ 
 
 	}
 	initLeaf(): void {
@@ -67,7 +61,7 @@ export default class TLIPlugin extends Plugin {
 	}
 
 	onunload() {
-		console.log('unloading plugin');
+		log('Unloading plugin');
 		this.app.workspace.detachLeavesOfType(TLI_VIEW_TYPE);
 
 	}
@@ -91,7 +85,7 @@ export default class TLIPlugin extends Plugin {
 	}
 
 	getTliPath() {
-		console.log(this.settings.TLI_path_per_vault)
+		log("TLI path per vault"+this.settings.TLI_path_per_vault,true)
 
 		let tli_settings_vault_names = this.settings.TLI_path_per_vault.map((val: [string, string]) => val[0])
 
@@ -175,4 +169,4 @@ class TLISettingTab extends PluginSettingTab {
 							await this.plugin.saveSettings();
 						}));*/
 	}
-}
+

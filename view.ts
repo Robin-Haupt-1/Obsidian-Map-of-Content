@@ -3,6 +3,7 @@ import 'svelte'
 import { TLI_VIEW_TYPE } from './constants'
 import { ItemView, Notice, TFile, WorkspaceLeaf } from 'obsidian'
 
+import { log } from './utils';
 
 import type TLIPlugin from './main'
 import type { path } from './types'
@@ -32,7 +33,7 @@ export default class TLIView extends ItemView {
   async onOpen(): Promise<void> {
     this._app = new PathView({
       target: (this as any).contentEl,
-      props: { paths: [], app: this.app, lib: this.lib, plugin: this.plugin,tli_path:this.plugin.getTliPath(),open_note_path:this.plugin.getTliPath()},
+      props: { paths: [], app: this.app, lib: this.lib, tli_path:this.plugin.getTliPath(),open_note_path:this.plugin.getTliPath()},
 
     })
 
@@ -43,7 +44,7 @@ export default class TLIView extends ItemView {
     this.rerender()
   }
   rerender(): void {
-    console.log("rerender called")
+     
     let all_paths = this.lib.findPaths(this.open_file_path)
     if (all_paths.length>0) {
       let paths = all_paths.map((p: path) =>
@@ -51,7 +52,7 @@ export default class TLIView extends ItemView {
 
       )
       let str = JSON.stringify(paths); 
-      console.log(str)
+      log("Paths to note: "+str,true)
       
       this._app.$set({ paths: paths, app: this.app ,tli_path:this.plugin.getTliPath(),open_note_path:this.open_file_path })
       this._app.$destroy()
@@ -61,7 +62,7 @@ export default class TLIView extends ItemView {
   
       })
     } else {
-      console.log("no paths")
+      log("No paths to this note",true)
       this._app.$set({ paths: [], app: this.app,tli_path:this.plugin.getTliPath(),open_note_path:this.open_file_path })
     }
 

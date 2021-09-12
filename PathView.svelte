@@ -20,13 +20,11 @@
   //export let plugin: TLIPlugin;
   export let tli_path: string;
   export let rerender_key: number;
-  export let open_note_path:string;
-  console.log("Pathview called");
+  export let open_note_path:string; 
  
   $: {
     app = app;
-    paths = paths;
-    console.log("Pathview called2");
+    paths = paths; 
     open_note_path=open_note_path
      
   }

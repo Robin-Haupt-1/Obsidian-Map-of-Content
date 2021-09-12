@@ -8,47 +8,35 @@
   import type TLIPlugin from "./main";
   export let app: App;
 
+  import { log } from "./utils";
+  import { domain } from "process";
   export let lib: LibKeeper;
   export let plugin: TLIPlugin;
 
-  export const navigateToFile = async (
-    app: App,
-    path: string,
-    event: MouseEvent
-  ) => {
-    // Todo: maybe use 	this.app.workspace.openLinkText("Top Level Index.md", "Top Level Index.md")
-
-    let file = app.metadataCache.getFirstLinkpathDest(path, "/");
-
-    if (!file) return;
-    const leaf = isCtrlPressed(event)
-      ? app.workspace.splitActiveLeaf()
-      : app.workspace.getUnpinnedLeaf();
-    await leaf.openFile(file);
-  };
-
   // get list of all files for dropdown menu
   let all_files = app.vault.getFiles().map((file: TFile) => file.path);
-
-  let chosen_tli_path = plugin.getSettingValue("TLI_path");
-  console.log(chosen_tli_path);
+  log("Central note path: " + plugin.getTliPath(), true);
   let input_value = "";
+  let current_tli = plugin.getTliPath();
+  const updateTliPath = () => {
+    // change TLI path
+    plugin.setTliPath(input_value);
+    log("New central note path: " + input_value, true); 
+    document.getElementById("tli_path").textContent = input_value;
+    
+    // recreate path information
+    lib.updatePaths();
+    plugin.rerender();
 
-  const updateTliPath = () => { 
-    plugin.setTliPath(input_value)
-    lib.updatePaths()
-    plugin.rerender()
+    // clear selection dropdown list
+    document.getElementById("TLI_select").value = "";
   };
 </script>
 
 <div class="path">
-  <label for="myBrowser">Choose the top level index note from this list:</label>
-  <input
-    bind:value={input_value}
-    list="browsers"
-    id="TLI_select" 
-  />
-  <datalist id="browsers">
+  <label for="myBrowser">Choose the central note from this list:</label>
+  <input bind:value={input_value} list="notes" id="TLI_select" />
+  <datalist id="notes">
     {#each all_files as filepath}
       <option value={filepath} />{/each}
   </datalist>
@@ -58,10 +46,12 @@
     type="button"
     on:click={() => {
       updateTliPath();
-    }}>Save Settings & rebuild path information</button
+    }}>Save settings & rebuild path information</button
   >
 </div>
+
 <br />
+Current central note: <span id="tli_path">{current_tli}</span>
 
 <style>
   a.link {
