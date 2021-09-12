@@ -29,44 +29,56 @@
     children = lib.descendants.get(note_path).slice();
   }
 </script>
-{#if indentation == 0 && children.length == 0}
 
+{#if indentation == 0 && children.length == 0}
   No descendants
-  {:else}
-<li class="container">
-  <p>
-    {#if indentation == 0}
-      
-      
+{:else}
+  <li class="container">
+    <p>
+      {#if indentation == 0}
         {getDisplayName(note_path, lib)}
-      
-    {:else}
-      <a
-        class="link"
-        title={note_path}
-        on:click={(event) => {
-          navigateToFile(app, note_path, event);
-        }}
-      >
-        {getDisplayName(note_path, lib)}</a
-      >
-      <!--<span class:expanded on:click={toggle}>expand</span>-->
-    {/if}
-  </p>
-  <ul>
-    {#if expanded && children.length > 0 && indentation < 3}
-      {#each children as child}
-        <svelte:self
-          {lib}
-          {app}
-          note_path={child}
-          indentation={indentation + 1}
-        />
-      {/each}
-    {/if}
-  </ul>
-</li>
+      {:else}
+        <a
+          class="link"
+          title={note_path}
+          on:click={(event) => {
+            navigateToFile(app, note_path, event);
+          }}
+        >
+          {getDisplayName(note_path, lib)}</a
+        >
+        <!--<span class:expanded on:click={toggle}>expand</span>-->
+      {/if}
+    </p>
+    <ul>
+      {#if expanded && children.length > 0}
+        {#if indentation < 3}
+          {#each children as child}
+            <svelte:self
+              {lib}
+              {app}
+              note_path={child}
+              indentation={indentation + 1}
+            />
+          {/each}
+        {:else}
+          <li>
+            <a
+              class="link"
+              title={note_path}
+              on:click={(event) => {
+                navigateToFile(app, note_path, event);
+              }}
+            >
+              ...</a
+            >
+          </li>
+        {/if}
+      {/if}
+    </ul>
+  </li>
 {/if}
+
 <style>
   .pathview {
     padding: initial;
@@ -117,3 +129,4 @@
     margin-left: -17px;
   }
 </style>
+

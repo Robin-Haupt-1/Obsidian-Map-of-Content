@@ -23,9 +23,7 @@ export default class TLIPlugin extends Plugin {
 
 	async initializePlugin() {
 		await this.loadSettings()
-		log(this.app.vault.getName())
-		this.lib = new LibKeeper(this.app, this)
-		let l = this.lib
+		this.lib = new LibKeeper(this.app, this) 
 		this.addSettingTab(new TLISettingTab(this.app, this, this.lib));
 
 		this.registerView(TLI_VIEW_TYPE, (leaf) => {
@@ -38,8 +36,8 @@ export default class TLIPlugin extends Plugin {
 
 
 		this.addRibbonIcon('sync', 'Update paths', async () => {
-			l.updateEverything()
-			// Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? like kicker ticker
+			this.lib.updateEverything()
+			// Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? 
 			//this.statusbartext = this.addStatusBarItem()
 			//this.statusbartext.setText("Total number of notes: " + String(l.count()));
 		});
@@ -111,22 +109,6 @@ export default class TLIPlugin extends Plugin {
 	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		let { contentEl } = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		let { contentEl } = this;
-		contentEl.empty();
-	}
-}
-
 class TLISettingTab extends PluginSettingTab {
 	plugin: TLIPlugin;
 	_app: Settings;
@@ -150,21 +132,5 @@ class TLISettingTab extends PluginSettingTab {
 		})
 	}
 		
-		/*
-				containerEl.empty();
-		
-				containerEl.createEl('h2', { text: 'Settings for my awesome plugin.' });
-		
-				new Setting(containerEl)
-					.setName('Setting #1')
-					.setDesc('It\'s a secret')
-					.addText(text => text
-						.setPlaceholder('Enter your secret')
-						.setValue('')
-						.onChange(async (value) => {
-							console.log('Secret: ' + value);
-							this.plugin.settings.mySetting = value;
-							await this.plugin.saveSettings();
-						}));*/
 	}
 
