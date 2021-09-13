@@ -7,63 +7,66 @@ import TLIView from './view';
 import Settings from './Settings.svelte';
 import { TLISettings, DEFAULT_SETTINGS } from './settings';
 import { log } from './utils';
+import { Console } from 'console';
 
 
 export default class TLIPlugin extends Plugin {
 	settings: TLISettings;
 	lib: LibKeeper;
 	view: TLIView;
-	statusbartext: HTMLElement
+	//statusbartext: HTMLElement
 	async onload() {
-		if (this.app.workspace.layoutReady) this.initializePlugin() 
+		this.registerView(TLI_VIEW_TYPE, (leaf) => (this.view = new TLIView(leaf)))
+		if (this.app.workspace.layoutReady) this.initializePlugin()
 		else this.registerEvent(this.app.workspace.on("layout-ready", () => this.initializePlugin()))
- 
+
 
 	}
 
 	async initializePlugin() {
 		await this.loadSettings()
-		this.lib = new LibKeeper(this.app, this) 
+		this.lib = new LibKeeper(this.app, this)
 		this.addSettingTab(new TLISettingTab(this.app, this, this.lib));
-
-		this.registerView(TLI_VIEW_TYPE, (leaf) => {
-			this.view = new TLIView(leaf, this, this.lib)
-			return this.view
-		})
-
-
-		if (this.app.workspace.layoutReady) this.initLeaf()
-
+		
+		this.initLeaf()
+		this.view._init( this, this.lib)
 
 		this.addRibbonIcon('sync', 'Update paths', async () => {
 			this.lib.updateEverything()
-			// Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? 
-			//this.statusbartext = this.addStatusBarItem()
-			//this.statusbartext.setText("Total number of notes: " + String(l.count()));
+
 		});
 
- 
+		// Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? 
+		//this.statusbartext = this.addStatusBarItem()
+		//this.statusbartext.setText("Total number of notes: " + String(l.count()));
 
 	}
 	initLeaf(): void {
-		if (this.app.workspace.getLeavesOfType(TLI_VIEW_TYPE).length) return
+		
+		
+		if (this.app.workspace.getLeavesOfType(TLI_VIEW_TYPE).length) {
+			log("already leaves attached",true)
+			return
+		}
+
 		this.app.workspace.getRightLeaf(true).setViewState({
-			type: TLI_VIEW_TYPE,
-			active: false,
+			type: TLI_VIEW_TYPE
 		})
 	}
 	rerender() {
 		this.view.rerender()
 	}
 
-	onunload() {
+	onunload(): void {
 		log('Unloading plugin');
-		this.app.workspace.detachLeavesOfType(TLI_VIEW_TYPE);
+		this.view.onClose()
+		this.app.workspace.getLeavesOfType(TLI_VIEW_TYPE).forEach((leaf) => leaf.detach());
 
 	}
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		log("TLI path per vault" + this.settings.TLI_path_per_vault, true)
 	}
 
 	async saveSettings() {
@@ -81,7 +84,7 @@ export default class TLIPlugin extends Plugin {
 	}
 
 	getTliPath() {
-		log("TLI path per vault"+this.settings.TLI_path_per_vault,true)
+	 
 
 		let tli_settings_vault_names = this.settings.TLI_path_per_vault.map((val: [string, string]) => val[0])
 
@@ -124,13 +127,13 @@ class TLISettingTab extends PluginSettingTab {
 		})
 	}
 
-	display(): void { 
+	display(): void {
 		this._app.$destroy()
 		this._app = new Settings({
 			target: (this as any).containerEl,
 			props: { app: this.app, lib: this.lib, plugin: this.plugin },
 		})
 	}
-		
-	}
+
+}
 

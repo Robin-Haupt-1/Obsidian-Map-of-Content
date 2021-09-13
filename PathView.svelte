@@ -19,7 +19,7 @@
   export let lib: LibKeeper;
   //export let plugin: TLIPlugin;
   export let tli_path: string;
-  export let rerender_key: number;
+  
   export let open_note_path:string; 
  
   $: {
@@ -28,7 +28,7 @@
     open_note_path=open_note_path
      
   }
-  rerender_key += 1;
+  
     
 </script>
 

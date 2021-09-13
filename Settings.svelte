@@ -1,4 +1,4 @@
-<script lang="ts">
+  <script lang="ts">
   import type { App, TFile } from "obsidian";
 
   import { LINKED_BOTH, LINKED_TLI, LINKED_TO } from "./constants";
@@ -26,6 +26,7 @@
     
     // recreate path information
     lib.updateEverything()
+    plugin.view.rerender()
 
     // clear selection dropdown list
     document.getElementById("TLI_select").value = "";
