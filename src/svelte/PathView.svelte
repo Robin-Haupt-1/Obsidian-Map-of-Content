@@ -1,35 +1,24 @@
 <script lang="ts">
   // Todo: check if note is not in lib (new note), show notice
   import type { App } from "obsidian";
-  import type { LibKeeper } from "./libkeeper";
-  import { LINKED_BOTH, LINKED_TLI, LINKED_TO, LINKED_FROM } from "./constants";
-
-  import {
-    getDisplayName,
-    isCtrlPressed,
-    navigateToFile,
-    
-  } from "./utils";
-
-  import type TLIPlugin from "./main";
+  import type { LibKeeper } from "../libkeeper";
+  import { LINKED_BOTH, LINKED_TO, LINKED_FROM } from "../constants"; 
+  import { getDisplayName, isCtrlPressed, navigateToFile } from "../utils";
+ 
   import Descendants from "./Descendants.svelte";
-  
+
   export let paths: [string, string][][];
   export let app: App;
-  export let lib: LibKeeper;
-  //export let plugin: TLIPlugin;
+  export let lib: LibKeeper; 
   export let tli_path: string;
-  
-  export let open_note_path:string; 
- 
+
+  export let open_note_path: string;
+
   $: {
     app = app;
-    paths = paths; 
-    open_note_path=open_note_path
-     
+    paths = paths;
+    open_note_path = open_note_path;
   }
-  
-    
 </script>
 
 <div class="pathview">
@@ -68,13 +57,12 @@
     <br />
   {/each}
 </div>
-<br>
+<br />
 <ul>
-<Descendants lib={lib} {app} note_path={open_note_path} indentation={0}/>
+  <Descendants {lib} {app} note_path={open_note_path} indentation={0} />
 </ul>
-<style>
 
-  
+<style>
   .pathview {
     padding: initial;
     width: initial;
@@ -86,9 +74,7 @@
   a.link {
     cursor: pointer;
   }
-  ul{ 
-    padding:0px
-
+  ul {
+    padding: 0px;
   }
-  
 </style>

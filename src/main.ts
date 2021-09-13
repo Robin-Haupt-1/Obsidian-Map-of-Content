@@ -1,14 +1,12 @@
 
 import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
-import { TLI_NOTE_PATH_DEFAULT, TLI_VIEW_TYPE } from './constants'
-import type { LibEntry, LibEntry2, note, } from './types';
+import { TLI_NOTE_PATH_DEFAULT, TLI_VIEW_TYPE } from './constants' 
 import { LibKeeper } from './libkeeper';
 import TLIView from './view';
-import Settings from './Settings.svelte';
+import Settings from './svelte/Settings.svelte';
 import { TLISettings, DEFAULT_SETTINGS } from './settings';
-import { log } from './utils';
-import { Console } from 'console';
-
+import { log } from './utils';    
+ 
 
 export default class TLIPlugin extends Plugin {
 	settings: TLISettings;
@@ -33,7 +31,6 @@ export default class TLIPlugin extends Plugin {
 
 		this.addRibbonIcon('sync', 'Update paths', async () => {
 			this.lib.updateEverything()
-
 		});
 
 		// Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? 

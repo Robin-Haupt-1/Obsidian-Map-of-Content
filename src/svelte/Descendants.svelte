@@ -1,10 +1,8 @@
 <script lang="ts">
   //Todo: store expanded or not for every note between instances of this view
   import type { App } from "obsidian";
-  import type { LibKeeper } from "./libkeeper";
-  import { LINKED_BOTH, LINKED_TLI, LINKED_TO, LINKED_FROM } from "./constants";
-  import { getDisplayName, isCtrlPressed, navigateToFile } from "./utils";
-  import type TLIPlugin from "./main";
+  import type { LibKeeper } from "../libkeeper"; 
+  import { getDisplayName, isCtrlPressed, navigateToFile } from "../utils"; 
 
   export let note_path: string;
   export let lib: LibKeeper;

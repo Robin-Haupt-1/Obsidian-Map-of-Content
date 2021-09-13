@@ -1,14 +1,14 @@
   <script lang="ts">
   import type { App, TFile } from "obsidian";
 
-  import { LINKED_BOTH, LINKED_TLI, LINKED_TO } from "./constants";
-  import { LINKED_FROM } from "./constants";
-  import { getDisplayName, isCtrlPressed } from "./utils";
-  import type { LibKeeper } from "./libkeeper";
-  import type TLIPlugin from "./main";
+  import { LINKED_BOTH, LINKED_TLI, LINKED_TO } from "../constants";
+  import { LINKED_FROM } from "../constants";
+  import { getDisplayName, isCtrlPressed } from "../utils";
+  import type { LibKeeper } from "../libkeeper";
+  import type TLIPlugin from "../main";
   export let app: App;
 
-  import { log } from "./utils";
+  import { log } from "../utils";
   import { domain } from "process";
   export let lib: LibKeeper;
   export let plugin: TLIPlugin;

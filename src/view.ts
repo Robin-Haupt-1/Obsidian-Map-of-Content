@@ -8,7 +8,7 @@ import { log } from './utils';
 import type TLIPlugin from './main'
 import type { path } from './types'
 import type { LibKeeper } from './libkeeper'
-import PathView from './PathView.svelte'
+import PathView from './svelte/PathView.svelte'
 
 
 export default class TLIView extends ItemView {
@@ -16,7 +16,7 @@ export default class TLIView extends ItemView {
   _app: PathView
   plugin: TLIPlugin
   open_file_path: string
-
+ 
 
   constructor(leaf: WorkspaceLeaf) {
     super(leaf)
