@@ -42,6 +42,7 @@ export class LibKeeper {
         new Notice("Paths updated")
         log("Update complete")
     }
+    
     /**Return the internal note representation object for a given path */
     getNoteByPath(path: string) {
         if (path in this.libdict) {
@@ -328,57 +329,6 @@ export class LibKeeper {
         await this.updatePathsRecursively()
         await this.updateDescendants()
 
-
-    }
-    /**
-     * @returns a [string, string[]][] of all descendants and their descendants. recursive function
-     * @param starting_path note to start with
-     * @param levels how many levels to go down
-     * @todo figure out how to correctly specify the types of the arrays
-     */
-    getDescendants(starting_path: string, levels: number = 3) {
-        log("descendants runing: " + starting_path, true)
-        let return_array: any[] = [starting_path, []]
-        if (this.descendants.has(starting_path)) {
-            let descendants = this.descendants.get(starting_path)
-            if (levels > 0) {
-                descendants.forEach((note_path: string) => {
-                    let second_descendants = this.getDescendants(note_path, levels = levels - 1)
-                    return_array[1].push([starting_path, return_array])
-
-                })
-            }
-        }
-        return return_array
-
-    }
-    /**deprecated: compile a path object into a string Todo: delete*/
-    compilePath(path: [string, string][], reverse: Boolean = false): string {
-        let str: string = getDisplayName(path[0][0], this) // TLI linkedtoorform is null
-        if (reverse == true) {
-            // show path starting from Top Level Index
-            path.slice(1).forEach((path: string[]) => {
-                let filename = getDisplayName(path[0], this)
-                str = str.concat(` ${path[1]} ${filename}`); // => note  for example
-            })
-            return str
-        }
-        else {
-            // show path ending at Top Level Index  
-            path.slice(1).forEach((path: string[]) => {
-                let filename = getDisplayName(path[0], this)
-                let arrow = path[1]
-                if (arrow == LINKED_FROM) {
-                    arrow = LINKED_TO
-                } else if (arrow == LINKED_TO) {
-                    arrow = LINKED_FROM
-                }
-                // reverse the arrow
-
-                str = `${filename}  ${arrow} `.concat(str); // => note  for example
-            })
-            return str
-        }
 
     }
 
