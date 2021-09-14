@@ -125,9 +125,9 @@ export class LibKeeper {
 
             // update the libdict and the l_entries representation of it
             this.libdict[new_note.path] = new_note
-            this.l_entries = Object.entries(this.libdict)
+            
         })
-
+        this.l_entries = Object.entries(this.libdict)
         // step 2: analyze links
         let all_notes = this.get_all_notes()
         log("total number of notes in library: " + String(all_notes.length), true)
