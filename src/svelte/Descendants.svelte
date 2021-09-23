@@ -1,8 +1,8 @@
 <script lang="ts">
   //Todo: store expanded or not for every note between instances of this view
   import type { App } from "obsidian";
-  import type { LibKeeper } from "../libkeeper"; 
-  import { getDisplayName, isCtrlPressed, navigateToFile } from "../utils"; 
+  import type { LibKeeper } from "../libkeeper";
+  import { getDisplayName, isCtrlPressed, navigateToFile } from "../utils";
 
   export let note_path: string;
   export let lib: LibKeeper;
@@ -90,7 +90,11 @@
     cursor: pointer;
   }
 
-  ul,
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
   li {
     list-style: none;
     margin: 0;
@@ -127,4 +131,3 @@
     margin-left: -17px;
   }
 </style>
-

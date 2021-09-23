@@ -2,14 +2,14 @@
   // Todo: check if note is not in lib (new note), show notice
   import type { App } from "obsidian";
   import type { LibKeeper } from "../libkeeper";
-  import { LINKED_BOTH, LINKED_TO, LINKED_FROM } from "../constants"; 
+  import { LINKED_BOTH, LINKED_TO, LINKED_FROM } from "../constants";
   import { getDisplayName, isCtrlPressed, navigateToFile } from "../utils";
- 
+
   import Descendants from "./Descendants.svelte";
 
   export let paths: [string, string][][];
   export let app: App;
-  export let lib: LibKeeper; 
+  export let lib: LibKeeper;
   export let tli_path: string;
 
   export let open_note_path: string;
@@ -75,44 +75,6 @@
     cursor: pointer;
   }
   ul {
-    padding: 0px;
-  }
-
-  
-  ul,
-  li {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  ul {
-    padding-left: 1em;
-  }
-  li {
-    padding-left: 1em;
-    border: 5px dotted black;
-    border-width: 0 0 1px 1px;
-  }
-  li.container {
-    border-bottom: 0px;
-  }
-  li.empty {
-    font-style: italic;
-    color: silver;
-    border-color: silver;
-  }
-  li p {
-    margin: 0;
-    position: relative;
-    top: 0em;
-  }
-  li ul {
-    border-top: 1px dotted black;
-    margin-left: -1em;
-    padding-left: 2em;
-  }
-  ul li:last-child ul {
-    border-left: none;
-    margin-left: -17px;
-  }
+    padding-left: 0;
+  } 
 </style>
