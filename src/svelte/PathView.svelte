@@ -77,4 +77,42 @@
   ul {
     padding: 0px;
   }
+
+  
+  ul,
+  li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  ul {
+    padding-left: 1em;
+  }
+  li {
+    padding-left: 1em;
+    border: 5px dotted black;
+    border-width: 0 0 1px 1px;
+  }
+  li.container {
+    border-bottom: 0px;
+  }
+  li.empty {
+    font-style: italic;
+    color: silver;
+    border-color: silver;
+  }
+  li p {
+    margin: 0;
+    position: relative;
+    top: 0em;
+  }
+  li ul {
+    border-top: 1px dotted black;
+    margin-left: -1em;
+    padding-left: 2em;
+  }
+  ul li:last-child ul {
+    border-left: none;
+    margin-left: -17px;
+  }
 </style>

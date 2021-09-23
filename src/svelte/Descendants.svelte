@@ -8,7 +8,7 @@
   export let lib: LibKeeper;
   export let indentation: number;
   export let app: App;
-  export let expanded = true;
+  export let expanded = true; // not used yet
 
   function toggle() {
     expanded = !expanded;
