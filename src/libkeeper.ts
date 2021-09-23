@@ -34,6 +34,7 @@ export class LibKeeper {
         this.updateEverything()
     }
     updateEverything(update_lib: boolean = true) {
+        let start_tmsp = Date.now()
         new Notice('Updating paths...');
         log("Updating paths")
         if (update_lib) this.updateLib()
@@ -41,6 +42,9 @@ export class LibKeeper {
         this.updateDescendants()
         new Notice("Paths updated")
         log("Update complete")
+        let end_tmsp = Date.now()
+        log("Took " + String((end_tmsp - start_tmsp) / 1000))
+        
     }
     
     /**Return the internal note representation object for a given path */
