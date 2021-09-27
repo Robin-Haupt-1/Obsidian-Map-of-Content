@@ -1,26 +1,12 @@
 <script lang="ts">
-  //Todo: store expanded or not for every note between instances of this view
   import type { App } from "obsidian";
-  import type { LibKeeper } from "../libkeeper";
-  import { getDisplayName, isCtrlPressed, navigateToFile } from "../utils";
+  import type { DBManager } from "../db";
+  import  { GetDisplayName, NavigateToFile } from "../utils";
 
   export let note_path: string;
-  export let lib: LibKeeper;
+  export let lib: DBManager;
   export let indentation: number;
   export let app: App;
-  export let expanded = true; // not used yet
-
-  function toggle() {
-    expanded = !expanded;
-  }
-
-  $: {
-    note_path = note_path;
-    let children = [];
-    if (lib.descendants.has(note_path)) {
-      children = lib.descendants.get(note_path).slice();
-    }
-  }
 
   let children = [];
   if (lib.descendants.has(note_path)) {
@@ -29,27 +15,26 @@
 </script>
 
 {#if indentation == 0 && children.length == 0}
-  No descendants
+  This note has no descendants
 {:else}
   <li class="container">
     <p>
       {#if indentation == 0}
-        {getDisplayName(note_path, lib)}
+        {GetDisplayName(note_path, lib)}
       {:else}
         <a
-          class="link"
+          class="link" 
           title={note_path}
           on:click={(event) => {
-            navigateToFile(app, note_path, event);
+            NavigateToFile(app, note_path, event);
           }}
         >
-          {getDisplayName(note_path, lib)}</a
+          {GetDisplayName(note_path, lib)}</a
         >
-        <!--<span class:expanded on:click={toggle}>expand</span>-->
       {/if}
     </p>
     <ul>
-      {#if expanded && children.length > 0}
+      {#if children.length > 0}
         {#if indentation < 3}
           {#each children as child}
             <svelte:self
@@ -62,10 +47,11 @@
         {:else}
           <li>
             <a
+            href="/"
               class="link"
               title={note_path}
               on:click={(event) => {
-                navigateToFile(app, note_path, event);
+                NavigateToFile(app, note_path, event);
               }}
             >
               ...</a
@@ -78,17 +64,10 @@
 {/if}
 
 <style>
-  .pathview {
-    padding: initial;
-    width: initial;
-    height: initial;
-    position: initial;
-    overflow-y: initial;
-    overflow-wrap: initial;
-  }
+  
   a.link {
     cursor: pointer;
-  }
+  } 
 
   ul {
     list-style: none;
@@ -110,12 +89,8 @@
   }
   li.container {
     border-bottom: 0px;
-  }
-  li.empty {
-    font-style: italic;
-    color: silver;
-    border-color: silver;
-  }
+  } 
+
   li p {
     margin: 0;
     position: relative;

@@ -10,7 +10,7 @@ export interface TLISettings {
 }
 
 export const DEFAULT_SETTINGS: TLISettings = {
-    TLI_path: "Top Level Index.md",
+    TLI_path: "Central Note.md",
     TLI_path_per_vault:[],
     all_paths:null
 }

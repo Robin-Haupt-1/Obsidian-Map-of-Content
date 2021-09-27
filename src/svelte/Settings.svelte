@@ -1,31 +1,32 @@
   <script lang="ts">
   import type { App, TFile } from "obsidian";
-
-  import { LINKED_BOTH, LINKED_TLI, LINKED_TO } from "../constants";
-  import { LINKED_FROM } from "../constants";
-  import { getDisplayName, isCtrlPressed } from "../utils";
-  import type { LibKeeper } from "../libkeeper";
+  import type { DBManager } from "../db";
   import type TLIPlugin from "../main";
-  export let app: App;
+  import { Log } from "../utils";
 
-  import { log } from "../utils";
-  import { domain } from "process";
-  export let lib: LibKeeper;
+  export let app: App;
+  export let lib: DBManager;
   export let plugin: TLIPlugin;
+
+
+  // Todo: choose whether to reverse paths to note
+  // Show paths and descendants in different views
+  // 
 
   // get list of all files for dropdown menu
   let all_files = app.vault.getFiles().map((file: TFile) => file.path);
-  log("Central note path: " + plugin.getTliPath(), true);
+  Log("Central note path: " + plugin.getTliPath(), true);
   let input_value = "";
   let current_tli = plugin.getTliPath();
+
   const updateTliPath = () => {
     // change TLI path
     plugin.setTliPath(input_value);
-    log("New central note path: " + input_value, true); 
+    Log("New central note path: " + input_value, true); 
     document.getElementById("tli_path").textContent = input_value;
     
     // recreate path information
-    lib.updateEverything()
+    lib.update()
     plugin.view.rerender()
 
     // clear selection dropdown list
@@ -54,16 +55,12 @@
 Current central note: <span id="tli_path">{current_tli}</span>
 
 <style>
-  a.link {
-    cursor: pointer;
-  }
-  .path {
-  }
+
+
   #TLI_select {
     width: 200px;
   }
   #update_TLI_path_button {
-    center: right;
     margin-left: auto;
     margin-right: auto;
   }

@@ -1,24 +1,18 @@
 <script lang="ts">
-  // Todo: check if note is not in lib (new note), show notice
-  import type { App } from "obsidian";
-  import type { LibKeeper } from "../libkeeper";
+  import type { App } from 'obsidian'
+  import type { DBManager } from "../db";
   import { LINKED_BOTH, LINKED_TO, LINKED_FROM } from "../constants";
-  import { getDisplayName, isCtrlPressed, navigateToFile } from "../utils";
+  import { GetDisplayName, IsCtrlPressed, NavigateToFile } from "../utils";
 
   import Descendants from "./Descendants.svelte";
 
   export let paths: [string, string][][];
   export let app: App;
-  export let lib: LibKeeper;
+  export let lib: DBManager;
   export let tli_path: string;
 
   export let open_note_path: string;
-
-  $: {
-    app = app;
-    paths = paths;
-    open_note_path = open_note_path;
-  }
+ 
 </script>
 
 <div class="pathview">
@@ -26,23 +20,23 @@
     ❌ This note has no connections to <a
       class="link"
       title={tli_path}
-      on:click={(event) => navigateToFile(app, tli_path, event)}
+      on:click={(event) => NavigateToFile(app, tli_path, event)}
     >
-      {getDisplayName(tli_path, lib)}</a
+      {GetDisplayName(tli_path, lib)}</a
     >
   {/if}
   {#each paths as path}
     <div class="path">
       {#each path.reverse() as pathitem, i}
         {#if i == 0}
-          <span title={pathitem[0]}> {getDisplayName(pathitem[0], lib)}</span>
+          <span title={pathitem[0]}> {GetDisplayName(pathitem[0], lib)}</span>
         {:else}
           <a
             class="link"
             title={pathitem[0]}
-            on:click={(event) => navigateToFile(app, pathitem[0], event)}
+            on:click={(event) => NavigateToFile(app, pathitem[0], event)}
           >
-            {getDisplayName(pathitem[0], lib)}</a
+            {GetDisplayName(pathitem[0], lib)}</a
           >
         {/if}
         {#if pathitem[1] == LINKED_FROM}

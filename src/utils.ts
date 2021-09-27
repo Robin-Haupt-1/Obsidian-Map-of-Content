@@ -1,16 +1,16 @@
-import type { LibKeeper } from "./libkeeper"
+import type { DBManager } from "./db"
 import type { App } from "obsidian";
 
 
 /** log to the console */
-export const log = (message: string,dev:boolean=false) => {
-    let log_dev=false // weether to print development log messages
+export const Log = (message: string,dev:boolean=false) => {
+    let log_dev=true // weether to print development log messages
     if (!dev || log_dev) console.log("[Automatic MOC] "+message)
     
 }
 
 /**  remove the given extension (by default ".md") from path  */
-export const cleanExtension = (path: string, extension: string = ".md") => {
+export const CleanExtension = (path: string, extension: string = ".md") => {
     if (path.endsWith(extension)) {
         return path.slice(0, -extension.length)
     }
@@ -18,44 +18,45 @@ export const cleanExtension = (path: string, extension: string = ".md") => {
 }
 
 /**@returns True if CTRL / Meta is pressed */
-export const isCtrlPressed = (e: MouseEvent): boolean => {
+export const IsCtrlPressed = (e: MouseEvent): boolean => {
     console.log(window.navigator.userAgent)
     return window.navigator.userAgent.includes("Macintosh") ? e.metaKey : e.ctrlKey
 }
 
 /**  Returns only the name of the actual file  */
-export const fileNameFromPath = (path: string): string => {
+export const FileNameFromPath = (path: string): string => {
     return path.split("/").last()
 }
 
 /**  return the full path if there are two or more notes with the same filename and extension, else only the filename  
  * @todo only return as many segments (folders) of the path as are neccessary to uniquely differentiate the note
 */
-export const getDisplayName = (path: string, lib: LibKeeper): string => {
-    let file_name = fileNameFromPath(path)
+export const GetDisplayName = (path: string, lib: DBManager): string => {
+    let file_name = FileNameFromPath(path)
     let display_name = null
 
     if (lib.duplicate_file_status.get(file_name)) {
-        display_name = cleanExtension(path)
+        display_name = CleanExtension(path)
     } else {
-        display_name = cleanExtension(file_name)
+        display_name = CleanExtension(file_name)
     }
     return display_name
 }
 
 
-export const navigateToFile = async (
+export const NavigateToFile = async (
     app: App,
     path: string,
     event: MouseEvent
 ) => {
-    // Todo: maybe use 	this.app.workspace.openLinkText("Top Level Index.md", "Top Level Index.md")
+     
 
     let file = app.metadataCache.getFirstLinkpathDest(path, "/");
 
     if (!file) return;
-    const leaf = isCtrlPressed(event)
+    const leaf = IsCtrlPressed(event)
         ? app.workspace.splitActiveLeaf()
         : app.workspace.getUnpinnedLeaf();
-    await leaf.openFile(file);
+    app.workspace.openLinkText(path,"/")
+    //await leaf.openFile(file);
 };

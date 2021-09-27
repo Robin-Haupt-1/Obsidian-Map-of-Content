@@ -1,36 +1,41 @@
 
 import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
 import { TLI_NOTE_PATH_DEFAULT, TLI_VIEW_TYPE } from './constants' 
-import { LibKeeper } from './libkeeper';
+import { DBManager } from './db'
 import TLIView from './view';
 import Settings from './svelte/Settings.svelte';
 import { TLISettings, DEFAULT_SETTINGS } from './settings';
-import { log } from './utils';    
+import { Log } from './utils';    
  
 
 export default class TLIPlugin extends Plugin {
 	settings: TLISettings;
-	lib: LibKeeper;
+	lib: DBManager;
 	view: TLIView;
 	//statusbartext: HTMLElement
 	async onload() {
-		this.registerView(TLI_VIEW_TYPE, (leaf) => (this.view = new TLIView(leaf)))
-		if (this.app.workspace.layoutReady) this.initializePlugin()
-		else this.registerEvent(this.app.workspace.on("layout-ready", () => this.initializePlugin()))
-
-
+		this.registerView(TLI_VIEW_TYPE, (leaf) => (this.view = new TLIView(leaf))) 
+		this.app.workspace.onLayoutReady(() => this.initializePlugin()) 
 	}
 
 	async initializePlugin() {
 		await this.loadSettings()
-		this.lib = new LibKeeper(this.app, this)
+		this.lib = new DBManager(this.app, this)
 		this.addSettingTab(new TLISettingTab(this.app, this, this.lib));
 		
 		this.initLeaf()
-		this.view._init( this, this.lib)
+		this.view.init( this, this.lib)
 
 		this.addRibbonIcon('sync', 'Update paths', async () => {
-			this.lib.updateEverything()
+			this.lib.update()
+		});
+
+		this.addCommand({
+			id: 'rebuild-map-of-content',
+			name: 'Rebuild Map of Content',
+			 callback: () => {this.lib.update()
+			 
+			}
 		});
 
 		// Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? 
@@ -38,11 +43,10 @@ export default class TLIPlugin extends Plugin {
 		//this.statusbartext.setText("Total number of notes: " + String(l.count()));
 
 	}
+
 	initLeaf(): void {
-		
-		
 		if (this.app.workspace.getLeavesOfType(TLI_VIEW_TYPE).length) {
-			log("already leaves attached",true)
+			Log("already leaves attached",true)
 			return
 		}
 
@@ -55,7 +59,7 @@ export default class TLIPlugin extends Plugin {
 	}
 
 	onunload(): void {
-		log('Unloading plugin');
+		Log('Unloading plugin');
 		this.view.onClose()
 		this.app.workspace.getLeavesOfType(TLI_VIEW_TYPE).forEach((leaf) => leaf.detach());
 
@@ -63,7 +67,7 @@ export default class TLIPlugin extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-		log("TLI path per vault" + this.settings.TLI_path_per_vault, true)
+		Log("TLI path per vault" + this.settings.TLI_path_per_vault, true)
 	}
 
 	async saveSettings() {
@@ -107,14 +111,20 @@ export default class TLIPlugin extends Plugin {
 		this.settings.TLI_path_per_vault = new_settings
 		this.saveSettings()
 	}
+	/**check whether the central note exists */
+	TLIexists():boolean{
+		return !(this.app.vault.getAbstractFileByPath(this.getTliPath())==null) 
+	}
+
+	
 }
 
 class TLISettingTab extends PluginSettingTab {
 	plugin: TLIPlugin;
 	_app: Settings;
-	lib: LibKeeper
+	lib: DBManager
 
-	constructor(app: App, plugin: TLIPlugin, lib: LibKeeper) {
+	constructor(app: App, plugin: TLIPlugin, lib: DBManager) {
 		super(app, plugin);
 		this.plugin = plugin;
 		this.lib = lib
