@@ -1,10 +1,10 @@
 {
-	"id": "automatic-moc",
-	"name": "Automatic MOC",
-	"version": "1.0.1",
-	"minAppVersion": "0.9.12",
-	"description": " ",
+	"id": "map-of-content",
+	"name": "Map of Content",
+	"version": "0.1.0",
+	"minAppVersion": "0.12.15",
+	"description": "Automatically generate a Map of Content for your vault",
 	"author": "Robin Haupt",
-	"authorUrl": "https://github.com/Robin-Haupt-1/obsidian_top_level_index_plugin",
-	"isDesktopOnly": false
+	"authorUrl": "https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content",
+	"isDesktopOnly": true
 }

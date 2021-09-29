@@ -4,8 +4,8 @@ import type { App } from "obsidian";
 
 /** log to the console */
 export const Log = (message: string,dev:boolean=false) => {
-    let log_dev=true // weether to print development log messages
-    if (!dev || log_dev) console.log("[Automatic MOC] "+message)
+    let log_dev=false // whether to print development log messages
+    if (!dev || log_dev) console.log("[Map of Content] "+message)
     
 }
 

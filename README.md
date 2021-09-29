@@ -1,7 +1,15 @@
-## Top Level Indexer (Obsidian Plugin)
+## Map Of Content for Obsidian
 
-I'm working on creating a plugin for Obsidian.md to analyze and display each note's relationship within a semantic context, all centering around one "Top Level Index" note.
+This plugin helps you connect your notes in a decentralized manner, where every note is connected to a central note through different other notes, just like files in folders that are in other folders except through links. 
 
-The goal is to create a tool to sort all the user's notes in a way that is both hierachical and flexible. It's a modern implementation of the classic Zettelkasten prefix system used by Niklas Luhmann.
+When your vault is set up in this way, the plugin will find the shortest path from the central note to each note and display it. It will also display the notes that can best be reached through the current note (it's descendants) and their descendants up to three levels.
 
-In my implementation, each note can be a parent, child, category and/or tag at the same time, and changes to the semantic connections of one note are automatically propagated to the path information of all notes that are related to it in some way.
+If you have the notes "Central Note", "Animals", "Mammals", "Cats", "Dogs" and "Kittens", and you open "Mammals", it will look like this:
+
+
+
+You can choose which note should be at the center of your vault in the settings tab.
+
+
+When you make changes to your notes, you need to rebuild the map of content by clicking on the icon in the sidebar or executing the command from the command palette. This shouldn't take more than a second even if you have thousands of notes.
+

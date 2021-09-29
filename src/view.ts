@@ -56,11 +56,11 @@ export default class TLIView extends ItemView {
 
     // make sure the database is usable
     if (!this.lib.database_complete){
-      errors.push("Your vault could not be analyzed. Try updating the paths again")
+      errors.push("Your vault could not be analyzed. Try updating the Map of Content again")
     }
     else if (this.lib.getNoteFromPath(this.open_file_path) ==undefined){
       // make sure file is in library   
-      errors.push("This note has not been indexed yet. Update the paths")
+      errors.push("This note has not been indexed yet. Update the Map of Content")
     }
 
     // Show error message if necessary
@@ -96,7 +96,7 @@ export default class TLIView extends ItemView {
   }
   
   getDisplayText(): string {
-    return "Automatic MOC"
+    return "Map of Content"
   }
 
   getIcon(): string {

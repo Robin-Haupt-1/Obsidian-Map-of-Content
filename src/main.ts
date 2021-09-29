@@ -15,6 +15,7 @@ export default class TLIPlugin extends Plugin {
 	//statusbartext: HTMLElement
 	async onload() {
 		this.registerView(TLI_VIEW_TYPE, (leaf) => (this.view = new TLIView(leaf))) 
+		
 		this.app.workspace.onLayoutReady(() => this.initializePlugin()) 
 	}
 
@@ -26,7 +27,7 @@ export default class TLIPlugin extends Plugin {
 		this.initLeaf()
 		this.view.init( this, this.lib)
 
-		this.addRibbonIcon('sync', 'Update paths', async () => {
+		this.addRibbonIcon('sync', 'Rebuild Map of Content', async () => {
 			this.lib.update()
 		});
 
@@ -67,7 +68,7 @@ export default class TLIPlugin extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-		Log("TLI path per vault" + this.settings.TLI_path_per_vault, true)
+		Log("Central note path per vault" + this.settings.TLI_path_per_vault, true)
 	}
 
 	async saveSettings() {
