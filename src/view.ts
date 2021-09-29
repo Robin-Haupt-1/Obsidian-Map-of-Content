@@ -32,7 +32,7 @@ export default class MOCView extends ItemView {
     // update the path view every time a file is opened
     this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.rerender()))
     
-    Log("open path: " + this.app.workspace.getActiveFile().path, true)
+    Log("Ppen path: " + this.app.workspace.getActiveFile().path, true)
 
     this.rerender()
   }
@@ -46,8 +46,15 @@ export default class MOCView extends ItemView {
     Log("Rerender called on view", true) 
 
     // destroy old pathview/errorview instance
-    if (this._app) this._app.$destroy()
-    if (this.errorview) this.errorview.$destroy()
+    // set symbol to undefined to avoid "This component has already been destroyed" message
+    if (this._app) {
+      this._app.$destroy()
+      this._app=undefined
+    }
+    if (this.errorview) {
+      this.errorview.$destroy()
+      this.errorview=undefined
+    }
 
     // get path of open note
     this.open_file_path = this.app.workspace.getActiveFile().path

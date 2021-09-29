@@ -104,7 +104,7 @@ export class DBManager {
         return this.db_entries.map(([key, value]) => value)
     }
 
-    async updateDB() {
+    updateDB() {
         // step 1: update the plugins internal representation of all notes in the vault
         Log("Updating the library...", true)
         // delete old state 
@@ -185,7 +185,7 @@ export class DBManager {
     }
 
     /** starting from the CN, follow all paths and store the information on how long the shortest path to each note is*/
-    async updateDepthInformation() {
+    updateDepthInformation() {
         Log("Analyzing distance from Central Note. CN path: " + this.plugin.getCNPath(), true)
         let depth = 0 // distance from the CN. starts at zero 
         let checked_links: string[] = []  // all the notes that have already been visited. dont visit them again to prevent endless loops
@@ -290,7 +290,7 @@ export class DBManager {
     } 
 
     /** for every note, store all notes that come right after it in any path. this is for generating the Map Of Content later on */
-    async updateDescendants() {
+    updateDescendants() {
 
         // delete old Information
         this.descendants = new Map()
