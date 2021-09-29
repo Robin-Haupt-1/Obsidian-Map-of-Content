@@ -1,20 +1,20 @@
 
 import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
-import { TLI_NOTE_PATH_DEFAULT, TLI_VIEW_TYPE } from './constants' 
+import { CENTRAL_NOTE_PATH_DEFAULT, MOC_VIEW_TYPE } from './constants' 
 import { DBManager } from './db'
-import TLIView from './view';
+import MOCView from './view';
 import Settings from './svelte/Settings.svelte';
-import { TLISettings, DEFAULT_SETTINGS } from './settings';
-import { Log } from './utils';    
+import { MOCSettings, DEFAULT_SETTINGS } from './settings';
+import { Log } from './utils' ;     
  
-
-export default class TLIPlugin extends Plugin {
-	settings: TLISettings;
+   
+export default class MOCPlugin extends Plugin {
+	settings: MOCSettings;
 	lib: DBManager;
-	view: TLIView;
+	view: MOCView;
 	//statusbartext: HTMLElement
 	async onload() {
-		this.registerView(TLI_VIEW_TYPE, (leaf) => (this.view = new TLIView(leaf))) 
+		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view = new MOCView(leaf))) 
 		
 		this.app.workspace.onLayoutReady(() => this.initializePlugin()) 
 	}
@@ -22,7 +22,7 @@ export default class TLIPlugin extends Plugin {
 	async initializePlugin() {
 		await this.loadSettings()
 		this.lib = new DBManager(this.app, this)
-		this.addSettingTab(new TLISettingTab(this.app, this, this.lib));
+		this.addSettingTab(new MOCSettingTab(this.app, this, this.lib));
 		
 		this.initLeaf()
 		this.view.init( this, this.lib)
@@ -46,13 +46,13 @@ export default class TLIPlugin extends Plugin {
 	}
 
 	initLeaf(): void {
-		if (this.app.workspace.getLeavesOfType(TLI_VIEW_TYPE).length) {
-			Log("already leaves attached",true)
+		if (this.app.workspace.getLeavesOfType(MOC_VIEW_TYPE).length) {
+			Log("View already attached",true)
 			return
 		}
 
 		this.app.workspace.getRightLeaf(true).setViewState({
-			type: TLI_VIEW_TYPE
+			type: MOC_VIEW_TYPE
 		})
 	}
 	rerender() {
@@ -62,70 +62,71 @@ export default class TLIPlugin extends Plugin {
 	onunload(): void {
 		Log('Unloading plugin');
 		this.view.onClose()
-		this.app.workspace.getLeavesOfType(TLI_VIEW_TYPE).forEach((leaf) => leaf.detach());
+		this.app.workspace.getLeavesOfType(MOC_VIEW_TYPE).forEach((leaf) => leaf.detach());
 
 	}
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-		Log("Central note path per vault" + this.settings.TLI_path_per_vault, true)
+		Log("Central note path per vault" + this.settings.CN_path_per_vault, true)
 	}
 
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
 
-	async updateSettings(updates: Partial<TLISettings>) {
+	async updateSettings(updates: Partial<MOCSettings>) {
 		Object.assign(this.settings, updates)
 		await this.saveData(this.settings)
 		this.view.rerender()
 	}
 
-	getSettingValue<K extends keyof TLISettings>(setting: K): TLISettings[K] {
+	getSettingValue<K extends keyof MOCSettings>(setting: K): MOCSettings[K] {
 		return this.settings[setting]
 	}
-
-	getTliPath() {
+	/**get the path of the central note for the open vault */
+	getCNPath() {
 	 
 
-		let tli_settings_vault_names = this.settings.TLI_path_per_vault.map((val: [string, string]) => val[0])
+		let cn_settings_vault_names = this.settings.CN_path_per_vault.map((val: [string, string]) => val[0])
 
-		if (tli_settings_vault_names.contains(this.app.vault.getName())) {
+		if (cn_settings_vault_names.contains(this.app.vault.getName())) {
 
-			return this.settings.TLI_path_per_vault[tli_settings_vault_names.indexOf(this.app.vault.getName())][1]
+			return this.settings.CN_path_per_vault[cn_settings_vault_names.indexOf(this.app.vault.getName())][1]
 
 		}
 
-		return TLI_NOTE_PATH_DEFAULT
+		return CENTRAL_NOTE_PATH_DEFAULT
 	}
+	/**set the path of the central note for the open vault */
+	setCNPath(path: string) {
 
-	setTliPath(path: string) {
+		let cn_settings_vault_names = this.settings.CN_path_per_vault.map((val: [string, string]) => val[0])
+		let new_settings = this.settings.CN_path_per_vault.slice()
 
-		let tli_settings_vault_names = this.settings.TLI_path_per_vault.map((val: [string, string]) => val[0])
-		let new_settings = this.settings.TLI_path_per_vault.slice()
-
-		if (tli_settings_vault_names.contains(this.app.vault.getName())) {
-			new_settings.splice(tli_settings_vault_names.indexOf(this.app.vault.getName()), 1)
+		if (cn_settings_vault_names.contains(this.app.vault.getName())) {
+			new_settings.splice(cn_settings_vault_names.indexOf(this.app.vault.getName()), 1)
 
 		}
 		new_settings.push([this.app.vault.getName(), path])
-		this.settings.TLI_path_per_vault = new_settings
+		this.settings.CN_path_per_vault = new_settings
 		this.saveSettings()
 	}
+
 	/**check whether the central note exists */
-	TLIexists():boolean{
-		return !(this.app.vault.getAbstractFileByPath(this.getTliPath())==null) 
+	CNexists():boolean{
+		return !(this.app.vault.getAbstractFileByPath(this.getCNPath())==null) 
 	}
 
 	
 }
 
-class TLISettingTab extends PluginSettingTab {
-	plugin: TLIPlugin;
+class MOCSettingTab extends PluginSettingTab {
+	plugin: MOCPlugin;
 	_app: Settings;
 	lib: DBManager
 
-	constructor(app: App, plugin: TLIPlugin, lib: DBManager) {
+	constructor(app: App, plugin: MOCPlugin, lib: DBManager) {
 		super(app, plugin);
 		this.plugin = plugin;
 		this.lib = lib

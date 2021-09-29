@@ -8,8 +8,8 @@
 
   export let paths: [string, string][][];
   export let app: App;
-  export let lib: DBManager;
-  export let tli_path: string;
+  export let db: DBManager;
+  export let cn_path: string;
 
   export let open_note_path: string;
  
@@ -19,24 +19,24 @@
   {#if paths.length == 0}
     ❌ This note has no connections to <a
       class="link"
-      title={tli_path}
-      on:click={(event) => NavigateToFile(app, tli_path, event)}
+      title={cn_path}
+      on:click={(event) => NavigateToFile(app, cn_path, event)}
     >
-      {GetDisplayName(tli_path, lib)}</a
+      {GetDisplayName(cn_path, db)}</a
     >
   {/if}
   {#each paths as path}
     <div class="path">
       {#each path.reverse() as pathitem, i}
         {#if i == 0}
-          <span title={pathitem[0]}> {GetDisplayName(pathitem[0], lib)}</span>
+          <span title={pathitem[0]}> {GetDisplayName(pathitem[0], db)}</span>
         {:else}
           <a
             class="link"
             title={pathitem[0]}
             on:click={(event) => NavigateToFile(app, pathitem[0], event)}
           >
-            {GetDisplayName(pathitem[0], lib)}</a
+            {GetDisplayName(pathitem[0], db)}</a
           >
         {/if}
         {#if pathitem[1] == LINKED_FROM}
@@ -53,7 +53,7 @@
 </div>
 <br />
 <ul>
-  <Descendants {lib} {app} note_path={open_note_path} indentation={0} />
+  <Descendants {db} {app} note_path={open_note_path} indentation={0} />
 </ul>
 
 <style>

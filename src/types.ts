@@ -4,21 +4,21 @@ export class Note {
     extension: string
     links_to: string[]
     linked_from: string[]
-    distance_from_TLI: number
+    distance_from_CN: number
 
     constructor(
         path: string,
         extension: string,
         links_to: string[],
         linked_from: string[],
-        distance_from_TLI: number
+        distance_from_CN: number
 
     ) {
         this.path = path
         this.extension = extension
         this.links_to = links_to
         this.linked_from = linked_from
-        this.distance_from_TLI = distance_from_TLI
+        this.distance_from_CN = distance_from_CN
     }
   
 }

@@ -4,13 +4,13 @@
   import  { GetDisplayName, NavigateToFile } from "../utils";
 
   export let note_path: string;
-  export let lib: DBManager;
+  export let db: DBManager;
   export let indentation: number;
   export let app: App;
 
   let children = [];
-  if (lib.descendants.has(note_path)) {
-    children = lib.descendants.get(note_path).slice();
+  if (db.descendants.has(note_path)) {
+    children = db.descendants.get(note_path).slice();
   }
 </script>
 
@@ -20,7 +20,7 @@
   <li class="container">
     <p>
       {#if indentation == 0}
-        {GetDisplayName(note_path, lib)}
+        {GetDisplayName(note_path, db)}
       {:else}
         <a
           class="link" 
@@ -29,7 +29,7 @@
             NavigateToFile(app, note_path, event);
           }}
         >
-          {GetDisplayName(note_path, lib)}</a
+          {GetDisplayName(note_path, db)}</a
         >
       {/if}
     </p>
@@ -38,7 +38,7 @@
         {#if indentation < 3}
           {#each children as child}
             <svelte:self
-              {lib}
+              db={db}
               {app}
               note_path={child}
               indentation={indentation + 1}

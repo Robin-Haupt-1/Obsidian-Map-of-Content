@@ -31,11 +31,11 @@ export const FileNameFromPath = (path: string): string => {
 /**  return the full path if there are two or more notes with the same filename and extension, else only the filename  
  * @todo only return as many segments (folders) of the path as are neccessary to uniquely differentiate the note
 */
-export const GetDisplayName = (path: string, lib: DBManager): string => {
+export const GetDisplayName = (path: string, db: DBManager): string => {
     let file_name = FileNameFromPath(path)
     let display_name = null
 
-    if (lib.duplicate_file_status.get(file_name)) {
+    if (db.duplicate_file_status.get(file_name)) {
         display_name = CleanExtension(path)
     } else {
         display_name = CleanExtension(file_name)

@@ -1,7 +1,5 @@
 <script lang="ts">
-   export let message:String
-
-  
+   export let message:String 
 </script>
 
 <div class="errors">

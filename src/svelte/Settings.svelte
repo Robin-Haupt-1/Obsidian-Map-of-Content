@@ -1,27 +1,26 @@
   <script lang="ts">
   import type { App, TFile } from "obsidian";
   import type { DBManager } from "../db";
-  import type TLIPlugin from "../main";
+  import type MOCPlugin from "../main";
   import { Log } from "../utils";
 
   export let app: App;
   export let lib: DBManager;
-  export let plugin: TLIPlugin;
+  export let plugin: MOCPlugin;
 
 
   // Todo: choose whether to reverse paths to note
-  // Show paths and descendants in different views
-  // 
+  // Show paths and descendants in different views 
 
   // get list of all files for dropdown menu
   let all_files = app.vault.getFiles().map((file: TFile) => file.path);
-  Log("Central note path: " + plugin.getTliPath(), true);
+  Log("Central note path: " + plugin.getCNPath(), true);
   let input_value = "";
-  let current_tli = plugin.getTliPath();
+  let current_tli = plugin.getCNPath();
 
-  const updateTliPath = () => {
+  const updateCNPath = () => {
     // change TLI path
-    plugin.setTliPath(input_value);
+    plugin.setCNPath(input_value);
     Log("New central note path: " + input_value, true); 
     document.getElementById("tli_path").textContent = input_value;
     
@@ -30,13 +29,13 @@
     plugin.view.rerender()
 
     // clear selection dropdown list
-    document.getElementById("TLI_select").value = "";
+    document.getElementById("CN_select").value = "";
   };
 </script>
 
 <div class="path">
   <label for="myBrowser">Choose the central note from this list:</label>
-  <input bind:value={input_value} list="notes" id="TLI_select" />
+  <input bind:value={input_value} list="notes" id="CN_select" />
   <datalist id="notes">
     {#each all_files as filepath}
       <option value={filepath} />{/each}
@@ -46,8 +45,8 @@
     id="update_TLI_path_button"
     type="button"
     on:click={() => {
-      updateTliPath();
-    }}>Save settings & rebuild path information</button
+      updateCNPath();
+    }}>Save settings & rebuild Map of Content</button
   >
 </div>
 
@@ -57,7 +56,7 @@ Current central note: <span id="tli_path">{current_tli}</span>
 <style>
 
 
-  #TLI_select {
+  #CN_select {
     width: 200px;
   }
   #update_TLI_path_button {

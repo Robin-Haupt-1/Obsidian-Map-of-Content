@@ -1,9 +1,9 @@
-import { LINKED_BOTH, LINKED_TLI, LINKED_TO , LINKED_FROM} from "./constants"; 
+import { LINKED_BOTH, LINKED_CN as LINKED_CN, LINKED_TO , LINKED_FROM} from "./constants"; 
 import type {  App, Vault, LinkCache } from "obsidian";
 import { Notice } from 'obsidian'
 import { Note, DB, Path } from './types'
 import { FileNameFromPath } from "./utils"
-import type TLIPlugin from "./main"
+import type MOCPlugin from "./main"
 import { Log } from "./utils";
 
 
@@ -11,7 +11,7 @@ export class DBManager {
     db: DB
     db_entries: any[]
     app: App
-    plugin: TLIPlugin
+    plugin: MOCPlugin
     vault: Vault
     all_paths: Path[]
     get_paths_ran: number
@@ -19,7 +19,7 @@ export class DBManager {
     duplicate_file_status: Map<string, boolean>
     database_complete:boolean // whether the db etc. are in a good state and can be used
 
-    constructor(app: App, plugin: TLIPlugin) {
+    constructor(app: App, plugin: MOCPlugin) {
         this.app = app;
         this.plugin = plugin
         this.all_paths = []
@@ -32,16 +32,16 @@ export class DBManager {
         this.database_complete=false
 
         // make sure the Central note exists
-        if(!this.plugin.TLIexists()){
-            new Notice("Central note '"+this.plugin.getTliPath()+"' does not exist")
+        if(!this.plugin.CNexists()){
+            new Notice("Central note '"+this.plugin.getCNPath()+"' does not exist")
             return
         }
 
         // save timestamp for tracking duration of rebuilding
         let start_tmsp = Date.now()
 
-        new Notice('Updating paths...');
-        Log("Updating paths")
+        new Notice('Rebuilding Map of Content...');
+        Log("Rebuilding Map of Content...")
 
         // update db
         this.updateDB()
@@ -50,14 +50,14 @@ export class DBManager {
 
         // delete old path information
         this.all_paths.length = 0
-        let path_so_far: Path = { all_members: [this.plugin.getTliPath()], items: [[this.plugin.getTliPath(), LINKED_TLI]] }
+        let path_so_far: Path = { all_members: [this.plugin.getCNPath()], items: [[this.plugin.getCNPath(), LINKED_CN]] }
         this.followPaths(path_so_far) 
         this.updateDescendants()
 
         // mark database as complete
         this.database_complete=true
-        new Notice("Paths updated")
-        Log("Update complete")
+        new Notice("Rebuilding complete")
+        Log("Rebuilding complete")
 
 
         let end_tmsp = Date.now()
@@ -87,7 +87,6 @@ export class DBManager {
                     let chopped_of_path = p.items.slice(0, index)
                     if (!filtered_paths_json.includes(JSON.stringify(chopped_of_path))) {
                         // return a path element containing only the parts of the path information up to the note in question
-                        // Todo: make sure depth:index-1 is correct
                         filtered_paths.push({ all_members: p.all_members.slice(0, index), items: p.items.slice(0, index) })
                         filtered_paths_json = JSON.stringify(filtered_paths)
                     }
@@ -113,7 +112,7 @@ export class DBManager {
         // read all files
         let vault_files = this.app.vault.getFiles()
         this.duplicate_file_status = new Map<string, boolean>();
-        Log("total files in collection: " + String(vault_files.length), true)
+        Log("Total number of files in vault: " + String(vault_files.length), true)
 
         // check for duplicate files
         let checked_files = 0
@@ -122,7 +121,7 @@ export class DBManager {
             // logging
             checked_files += 1
             if (checked_files % 1000 == 0) {
-                Log("checked for duplicates " + String(checked_files), true)
+                Log("checked for duplicates: " + String(checked_files), true)
             }
             if (this.duplicate_file_status.has(file_name)) { // If the file name is encountered twice or more, set it's duplicate status to true
                 this.duplicate_file_status.set(file_name, true)
@@ -139,22 +138,23 @@ export class DBManager {
             // logging
             checked_files += 1
             if (checked_files % 1000 == 0) {
-                Log("created new lib entries " + String(checked_files), true)
+                Log("Created new db entries: " + String(checked_files), true)
             }
             let path = file.path
             let new_note = new Note(path, file.extension, [], [], null);
 
-            // update the db and the db_entries representation of it
+            // update the db
             this.db[new_note.path] = new_note
 
         })
+        // update the db_entries representation of the db
         this.db_entries = Object.entries(this.db)
 
         // step 2: analyze links 
         Log("analyzing links", true)
         this.all_notes().forEach((note: Note) => {
             if (note.extension != "md") {
-                // skip if its not an md file. other file types can't link to anything
+                // skip if its not an md file. Other file types can't link to anything
                 return
             }
 
@@ -175,7 +175,7 @@ export class DBManager {
             // save links_to information to db
             this.db[note.path].links_to = this_links_to
 
-            // second: add a "linked_from" reference to the lib entry of all notes that are linked to from this note
+            // second: add a "linked_from" reference to the db entry of all notes that are linked to from this note
             this_links_to.forEach((link: string) => {
                 if (!this.db[link].linked_from.includes(note.path)) {
                     this.db[link].linked_from.push(note.path)
@@ -184,14 +184,14 @@ export class DBManager {
         })
     }
 
-    /** starting from the TLI, follow all paths and store the information on how long the shortest path to each note is*/
+    /** starting from the CN, follow all paths and store the information on how long the shortest path to each note is*/
     async updateDepthInformation() {
-        Log("Analyzing distance from TLI. Tli path: " + this.plugin.getTliPath(), true)
-        let depth = 0 // distance from the TLI. starts at zero 
+        Log("Analyzing distance from Central Note. CN path: " + this.plugin.getCNPath(), true)
+        let depth = 0 // distance from the CN. starts at zero 
         let checked_links: string[] = []  // all the notes that have already been visited. dont visit them again to prevent endless loops
         let do_continue = true
-        // start at the the TLI
-        let links = [this.plugin.getTliPath()]
+        // start at the the CN
+        let links = [this.plugin.getCNPath()]
         while (do_continue) {
             let next_links: string[] = []
             links.forEach((link: string) => {
@@ -207,9 +207,9 @@ export class DBManager {
                         next_links.push(link)
                     }
                 })
-                // update the info on how far the note is removed from TLI
-                if (note.distance_from_TLI == null || note.distance_from_TLI > depth) {
-                    note.distance_from_TLI = depth
+                // update the info on how far the note is removed from CN
+                if (note.distance_from_CN == null || note.distance_from_CN > depth) {
+                    note.distance_from_CN = depth
                 }
                 checked_links.push(link)
             })
@@ -224,7 +224,7 @@ export class DBManager {
     }
 
     /**
-     * Recursive function that follows all possible paths from the TLI that aren't unreasonably long or circular and stores them
+     * Recursive function that follows all possible paths from the CN that aren't unreasonably long or circular and stores them
      * @param path_so_far the path to be extended in this iteration
      */
     followPaths(path_so_far: Path) {
@@ -275,7 +275,7 @@ export class DBManager {
             }
 
             // stop if the path meanders too much 
-            if ((path.all_members.length - last_item.distance_from_TLI) > 1) {
+            if ((path.all_members.length - last_item.distance_from_CN) > 1) {
                 return
             }
  
