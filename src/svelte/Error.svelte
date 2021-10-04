@@ -8,7 +8,7 @@
 
 <style>
   .errors {
-    padding: initial;
+    padding: 10px;
     width: initial;
     height: initial;
     position: initial;
