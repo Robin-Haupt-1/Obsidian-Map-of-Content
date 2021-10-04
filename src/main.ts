@@ -15,7 +15,6 @@ export default class MOCPlugin extends Plugin {
 	//statusbartext: HTMLElement
 	async onload() {
 		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view = new MOCView(leaf)))
-
 		this.app.workspace.onLayoutReady(() => this.initializePlugin())
 	}
 
@@ -63,7 +62,7 @@ export default class MOCPlugin extends Plugin {
 	onunload(): void {
 		Log('Unloading plugin');
 		this.view.onClose()
-		this.app.workspace.getLeavesOfType(MOC_VIEW_TYPE).forEach((leaf) => leaf.detach());
+		this.app.workspace.detachLeavesOfType(MOC_VIEW_TYPE)
 
 	}
 
