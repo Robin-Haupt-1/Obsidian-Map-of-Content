@@ -1,14 +1,14 @@
 <script lang="ts">
   import type { App } from "obsidian";
   import type { DBManager } from "../db";
-  import  { GetDisplayName, NavigateToFile } from "../utils";
+  import { GetDisplayName, NavigateToFile } from "../utils";
 
   export let note_path: string;
   export let db: DBManager;
   export let indentation: number;
   export let app: App;
 
-  let expanded=true?indentation < 3:false;
+  let expanded = true ? indentation < 3 : false;
 
   let children = [];
   if (db.descendants.has(note_path)) {
@@ -24,45 +24,50 @@
       {#if indentation == 0}
         {GetDisplayName(note_path, db)}
       {:else}{#if children.length > 0}
-      <span class="expand-arrow" on:click={()=>{expanded=!expanded}}>{#if expanded}⮝{:else}⮟{/if}</span>&nbsp;{/if}
+          <span
+            class="expand-arrow"
+            on:click={() => {
+              expanded = !expanded;
+            }}
+            >{#if expanded}⮝{:else}⮟{/if}</span
+          >&nbsp;{/if}
         <a
-          class="link" 
+          class="link"
           title={note_path}
           on:click={(event) => {
             NavigateToFile(app, note_path, event);
           }}
         >
           {GetDisplayName(note_path, db)}</a
-        > 
+        >
       {/if}
     </p>
     <ul>
-      {#if children.length > 0 && expanded} 
-          {#each children as child}
-            <svelte:self
-              db={db}
-              {app}
-              note_path={child}
-              indentation={indentation + 1}
-            />
-          {/each}
+      {#if children.length > 0 && expanded}
+        {#each children as child}
+          <svelte:self
+            {db}
+            {app}
+            note_path={child}
+            indentation={indentation + 1}
+          />
+        {/each}
       {/if}
     </ul>
   </li>
 {/if}
 
 <style>
-  
   a.link {
     cursor: pointer;
-  } 
+  }
 
   ul {
     list-style: none;
     margin: 0;
     padding: 0;
   }
-  
+
   li {
     list-style: none;
     margin: 0;
@@ -80,7 +85,7 @@
   }
   li.container {
     border-bottom: 0px;
-  } 
+  }
 
   li p {
     margin: 0;
@@ -99,11 +104,11 @@
     margin-left: -17px;
   }
 
-  .expand-arrow{
-    color:darkgrey
+  .expand-arrow {
+    color: darkgrey;
   }
 
-  .expand-arrow:hover{
-    color:gray
+  .expand-arrow:hover {
+    color: gray;
   }
 </style>

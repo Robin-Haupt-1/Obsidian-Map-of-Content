@@ -1,5 +1,5 @@
-import { LINKED_BOTH, LINKED_CN as LINKED_CN, LINKED_TO , LINKED_FROM} from "./constants"; 
-import type {  App, Vault, LinkCache } from "obsidian";
+import { LINKED_BOTH, LINKED_CN as LINKED_CN, LINKED_TO, LINKED_FROM } from "./constants";
+import type { App, Vault, LinkCache } from "obsidian";
 import { Notice } from 'obsidian'
 import { Note, DB, Path } from './types'
 import { FileNameFromPath } from "./utils"
@@ -17,7 +17,7 @@ export class DBManager {
     get_paths_ran: number
     descendants: Map<string, string[]>
     duplicate_file_status: Map<string, boolean>
-    database_complete:boolean // whether the db etc. are in a good state and can be used
+    database_complete: boolean // whether the db etc. are in a good state and can be used
 
     constructor(app: App, plugin: MOCPlugin) {
         this.app = app;
@@ -29,11 +29,12 @@ export class DBManager {
     }
 
     update() {
-        this.database_complete=false
+        this.database_complete = false
 
         // make sure the Central note exists
-        if(!this.plugin.CNexists()){
-            new Notice("Central note '"+this.plugin.getCNPath()+"' does not exist")
+        if (!this.plugin.CNexists()) {
+            new Notice("Central note '" + this.plugin.getCNPath() + "' does not exist")
+            new Notice("You can adjust the path of your Central Note in the settings tab")
             return
         }
 
@@ -46,16 +47,16 @@ export class DBManager {
         // update db
         this.updateDB()
         this.get_paths_ran = 0
-        this.updateDepthInformation() 
+        this.updateDepthInformation()
 
         // delete old path information
         this.all_paths.length = 0
         let path_so_far: Path = { all_members: [this.plugin.getCNPath()], items: [[this.plugin.getCNPath(), LINKED_CN]] }
-        this.followPaths(path_so_far) 
+        this.followPaths(path_so_far)
         this.updateDescendants()
 
         // mark database as complete
-        this.database_complete=true
+        this.database_complete = true
         new Notice("Rebuilding complete")
         Log("Rebuilding complete")
 
@@ -229,9 +230,9 @@ export class DBManager {
      */
     followPaths(path_so_far: Path) {
         // logging
-        this.get_paths_ran += 1 
+        this.get_paths_ran += 1
         if (this.get_paths_ran % 10000 == 0) {
-            Log("get paths ran " + String(this.get_paths_ran), true) 
+            Log("get paths ran " + String(this.get_paths_ran), true)
         }
 
         let note = this.db[path_so_far.all_members.last()]
@@ -278,7 +279,7 @@ export class DBManager {
             if ((path.all_members.length - last_item.distance_from_CN) > 1) {
                 return
             }
- 
+
             this.followPaths(path)
             called_itself = true
         })
@@ -287,7 +288,7 @@ export class DBManager {
             this.all_paths.push(path_so_far)
         }
 
-    } 
+    }
 
     /** for every note, store all notes that come right after it in any path. this is for generating the Map Of Content later on */
     updateDescendants() {
@@ -305,12 +306,12 @@ export class DBManager {
                     // create entry in descendants if it doesn't exist
                     if (!this.descendants.has(note_path)) {
                         this.descendants.set(note_path, [])
-                    } 
+                    }
                     // logging
                     descendants_ran += 1
                     if (descendants_ran % 1000 == 0) {
                         Log("descendants ran " + String(descendants_ran), true)
-                     }
+                    }
                     let next_path_member = p.all_members[index + 1]
                     // add note as descendant if it isn't already stored in array
                     if (!this.descendants.get(note_path).includes(next_path_member)) {
@@ -323,9 +324,9 @@ export class DBManager {
             )
         })
 
-    } 
+    }
 
-   
+
 
 
 }

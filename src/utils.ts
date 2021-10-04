@@ -3,10 +3,10 @@ import type { App } from "obsidian";
 
 
 /** log to the console */
-export const Log = (message: string,dev:boolean=false) => {
-    let log_dev=false // whether to print development log messages
-    if (!dev || log_dev) console.log("[Map of Content] "+message)
-    
+export const Log = (message: string, dev: boolean = false) => {
+    let log_dev = false // whether to print development log messages
+    if (!dev || log_dev) console.log("[Map of Content] " + message)
+
 }
 
 /**  remove the given extension (by default ".md") from path  */
@@ -19,8 +19,8 @@ export const CleanExtension = (path: string, extension: string = ".md") => {
 
 /**@returns True if CTRL / Meta is pressed */
 export const IsCtrlPressed = (e: MouseEvent): boolean => {
-    console.log(window.navigator.userAgent)
     return window.navigator.userAgent.includes("Macintosh") ? e.metaKey : e.ctrlKey
+
 }
 
 /**  Returns only the name of the actual file  */
@@ -49,7 +49,7 @@ export const NavigateToFile = async (
     path: string,
     event: MouseEvent
 ) => {
-     
+
 
     let file = app.metadataCache.getFirstLinkpathDest(path, "/");
 
@@ -57,6 +57,6 @@ export const NavigateToFile = async (
     const leaf = IsCtrlPressed(event)
         ? app.workspace.splitActiveLeaf()
         : app.workspace.getUnpinnedLeaf();
-    app.workspace.openLinkText(path,"/")
+    app.workspace.openLinkText(path, "/")
     //await leaf.openFile(file);
 };

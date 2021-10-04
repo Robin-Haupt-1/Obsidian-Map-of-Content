@@ -1,4 +1,4 @@
-  <script lang="ts">
+<script lang="ts">
   import type { App, TFile } from "obsidian";
   import type { DBManager } from "../db";
   import type MOCPlugin from "../main";
@@ -8,9 +8,8 @@
   export let lib: DBManager;
   export let plugin: MOCPlugin;
 
-
   // Todo: choose whether to reverse paths to note
-  // Show paths and descendants in different views 
+  // Show paths and descendants in different views
 
   // get list of all files for dropdown menu
   let all_files = app.vault.getFiles().map((file: TFile) => file.path);
@@ -21,12 +20,12 @@
   const updateCNPath = () => {
     // change TLI path
     plugin.setCNPath(input_value);
-    Log("New central note path: " + input_value, true); 
+    Log("New central note path: " + input_value, true);
     document.getElementById("tli_path").textContent = input_value;
-    
+
     // recreate path information
-    lib.update()
-    plugin.view.rerender()
+    lib.update();
+    plugin.view.rerender();
 
     // clear selection dropdown list
     document.getElementById("CN_select").value = "";
@@ -54,8 +53,6 @@
 Current central note: <span id="tli_path">{current_tli}</span>
 
 <style>
-
-
   #CN_select {
     width: 200px;
   }

@@ -20,7 +20,7 @@ export class Note {
         this.linked_from = linked_from
         this.distance_from_CN = distance_from_CN
     }
-  
+
 }
 export interface DB {
     [index: string]: Note
@@ -31,4 +31,3 @@ export interface Path {
 
 
 }
- 

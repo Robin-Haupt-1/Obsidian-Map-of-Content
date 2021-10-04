@@ -1,31 +1,31 @@
 
 import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
-import { CENTRAL_NOTE_PATH_DEFAULT, MOC_VIEW_TYPE } from './constants' 
+import { CENTRAL_NOTE_PATH_DEFAULT, MOC_VIEW_TYPE } from './constants'
 import { DBManager } from './db'
 import MOCView from './view';
 import Settings from './svelte/Settings.svelte';
 import { MOCSettings, DEFAULT_SETTINGS } from './settings';
-import { Log } from './utils' ;     
- 
-   
+import { Log } from './utils';
+
+
 export default class MOCPlugin extends Plugin {
 	settings: MOCSettings;
 	lib: DBManager;
 	view: MOCView;
 	//statusbartext: HTMLElement
 	async onload() {
-		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view = new MOCView(leaf))) 
-		
-		this.app.workspace.onLayoutReady(() => this.initializePlugin()) 
+		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view = new MOCView(leaf)))
+
+		this.app.workspace.onLayoutReady(() => this.initializePlugin())
 	}
 
 	async initializePlugin() {
 		await this.loadSettings()
 		this.lib = new DBManager(this.app, this)
 		this.addSettingTab(new MOCSettingTab(this.app, this, this.lib));
-		
+
 		this.initLeaf()
-		this.view.init( this, this.lib)
+		this.view.init(this, this.lib)
 
 		this.addRibbonIcon('sync', 'Rebuild Map of Content', async () => {
 			this.lib.update()
@@ -34,8 +34,9 @@ export default class MOCPlugin extends Plugin {
 		this.addCommand({
 			id: 'rebuild-map-of-content',
 			name: 'Rebuild Map of Content',
-			 callback: () => {this.lib.update()
-			 
+			callback: () => {
+				this.lib.update()
+
 			}
 		});
 
@@ -47,7 +48,7 @@ export default class MOCPlugin extends Plugin {
 
 	initLeaf(): void {
 		if (this.app.workspace.getLeavesOfType(MOC_VIEW_TYPE).length) {
-			Log("View already attached",true)
+			Log("View already attached", true)
 			return
 		}
 
@@ -86,7 +87,7 @@ export default class MOCPlugin extends Plugin {
 	}
 	/**get the path of the central note for the open vault */
 	getCNPath() {
-	 
+
 
 		let cn_settings_vault_names = this.settings.CN_path_per_vault.map((val: [string, string]) => val[0])
 
@@ -114,11 +115,11 @@ export default class MOCPlugin extends Plugin {
 	}
 
 	/**check whether the central note exists */
-	CNexists():boolean{
-		return !(this.app.vault.getAbstractFileByPath(this.getCNPath())==null) 
+	CNexists(): boolean {
+		return !(this.app.vault.getAbstractFileByPath(this.getCNPath()) == null)
 	}
 
-	
+
 }
 
 class MOCSettingTab extends PluginSettingTab {

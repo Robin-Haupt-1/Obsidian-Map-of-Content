@@ -1,10 +1,10 @@
 <script lang="ts">
-   export let message:String 
+  export let message: String;
 </script>
 
 <div class="errors">
   {message}
-</div> 
+</div>
 
 <style>
   .errors {
@@ -15,5 +15,4 @@
     overflow-y: initial;
     overflow-wrap: initial;
   }
- 
 </style>
