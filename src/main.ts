@@ -1,20 +1,19 @@
 
 import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
-import { CENTRAL_NOTE_PATH_DEFAULT, MOC_VIEW_TYPE } from './constants'
+import { CENTRAL_NOTE_PATH_DEFAULT, MOC_VIEW_TYPE, ViewCallback } from './constants'
 import { DBManager } from './db'
 import MOCView from './view';
 import Settings from './svelte/Settings.svelte';
 import { MOCSettings, DEFAULT_SETTINGS } from './settings';
 import { Log } from './utils';
 
-
 export default class MOCPlugin extends Plugin {
 	settings: MOCSettings;
 	lib: DBManager;
-	view: MOCView;
-	//statusbartext: HTMLElement
+	view_ref: MOCView
+	// statusbartext: HTMLElement
 	async onload() {
-		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view = new MOCView(leaf)))
+		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view_ref = new MOCView(leaf)))
 		this.app.workspace.onLayoutReady(() => this.initializePlugin())
 	}
 
@@ -24,10 +23,11 @@ export default class MOCPlugin extends Plugin {
 		this.addSettingTab(new MOCSettingTab(this.app, this, this.lib));
 
 		this.initLeaf()
-		this.view.init(this, this.lib)
+		this.view_ref.init(this, this.lib)
+		//this.view((view) => { view.init(this, this.lib) })
 
 		this.addRibbonIcon('sync', 'Rebuild Map of Content', async () => {
-			this.lib.update()
+			await this.lib.update()
 		});
 
 		this.addCommand({
@@ -48,20 +48,22 @@ export default class MOCPlugin extends Plugin {
 	initLeaf(): void {
 		if (this.app.workspace.getLeavesOfType(MOC_VIEW_TYPE).length) {
 			Log("View already attached", true)
-			return
+		} else {
+			this.app.workspace.getRightLeaf(true).setViewState({
+				type: MOC_VIEW_TYPE,
+				active: true
+			})
 		}
-
-		this.app.workspace.getRightLeaf(true).setViewState({
-			type: MOC_VIEW_TYPE
-		})
 	}
+
 	rerender() {
-		this.view.rerender()
+		Log("rerender on main plugin called", true)
+		this.view((view) => { view.rerender() })
 	}
 
 	onunload(): void {
 		Log('Unloading plugin');
-		this.view.onClose()
+		this.view((view) => { view.onClose() })
 		this.app.workspace.detachLeavesOfType(MOC_VIEW_TYPE)
 
 	}
@@ -78,12 +80,13 @@ export default class MOCPlugin extends Plugin {
 	async updateSettings(updates: Partial<MOCSettings>) {
 		Object.assign(this.settings, updates)
 		await this.saveData(this.settings)
-		this.view.rerender()
+		this.view((view) => { view.rerender() })
 	}
 
 	getSettingValue<K extends keyof MOCSettings>(setting: K): MOCSettings[K] {
 		return this.settings[setting]
 	}
+
 	/**get the path of the central note for the open vault */
 	getCNPath() {
 
@@ -116,6 +119,21 @@ export default class MOCPlugin extends Plugin {
 	/**check whether the central note exists */
 	CNexists(): boolean {
 		return !(this.app.vault.getAbstractFileByPath(this.getCNPath()) == null)
+	}
+
+	/** get any open views and perform callback function on them */
+	view(callback: ViewCallback) {
+		let leaves = this.app.workspace.getLeavesOfType(MOC_VIEW_TYPE)
+		if (leaves.length) {
+
+			leaves.forEach((leaf) => {
+				let view = leaf.view as MOCView
+				callback(view)
+			})
+		}
+		else {
+			Log("No view attached",true)
+		}
 	}
 
 

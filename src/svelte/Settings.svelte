@@ -25,7 +25,7 @@
 
     // recreate path information
     lib.update();
-    plugin.view.rerender();
+    plugin.rerender();
 
     // clear selection dropdown list
     document.getElementById("CN_select").value = "";
