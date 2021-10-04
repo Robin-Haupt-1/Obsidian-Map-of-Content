@@ -28,7 +28,7 @@ export class DBManager {
         this.update()
     }
 
-    update() {
+    async update(){
         this.database_complete = false
 
         // make sure the Central note exists
@@ -44,17 +44,24 @@ export class DBManager {
         new Notice('Rebuilding Map of Content...');
         Log("Rebuilding Map of Content...")
 
+        await new Promise(r=>setTimeout(r, 0))
         // update db
         this.updateDB()
+        await new Promise(r=>setTimeout(r, 0))
+
         this.get_paths_ran = 0
         this.updateDepthInformation()
 
         // delete old path information
         this.all_paths.length = 0
         let path_so_far: Path = { all_members: [this.plugin.getCNPath()], items: [[this.plugin.getCNPath(), LINKED_CN]] }
-        this.followPaths(path_so_far)
-        this.updateDescendants()
+        await new Promise(r=>setTimeout(r, 0))
 
+        this.followPaths(path_so_far)
+        await new Promise(r=>setTimeout(r, 0))
+
+        this.updateDescendants()
+        
         // mark database as complete
         this.database_complete = true
         new Notice("Rebuilding complete")
@@ -63,6 +70,7 @@ export class DBManager {
 
         let end_tmsp = Date.now()
         Log("Took " + String((end_tmsp - start_tmsp) / 1000))
+        this.plugin.rerender()
 
     }
 
@@ -279,7 +287,7 @@ export class DBManager {
             if ((path.all_members.length - last_item.distance_from_CN) > 1) {
                 return
             }
-
+ 
             this.followPaths(path)
             called_itself = true
         })
