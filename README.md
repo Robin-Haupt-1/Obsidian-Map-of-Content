@@ -14,4 +14,3 @@ If you have the notes "Central Note", "Animals", "Mammals", "Cats", "Dogs" and "
 You can choose which note should be at the center of your vault in the settings tab.
 
 When you make changes to your notes, you need to rebuild the map of content by clicking on the icon in the sidebar or executing the command from the command palette. This shouldn't take more than a second, even if you have thousands of notes.
-
