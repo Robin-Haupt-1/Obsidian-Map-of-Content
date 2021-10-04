@@ -20,18 +20,19 @@ export default class MOCView extends ItemView {
   open_file_path: string
 
 
-  constructor(leaf: WorkspaceLeaf) {
+  constructor(leaf: WorkspaceLeaf,plugin: MOCPlugin) {
     super(leaf)
+    this.plugin = plugin
+    this.db = plugin.db
+    this.app = plugin.app
+    // update the path view every time a file is opened
+      this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.rerender()))
+
   }
 
-  init(plugin: MOCPlugin, db: DBManager) {
-    this.db = db
-    this.app = plugin.app
-    this.plugin = plugin
-
-    // update the path view every time a file is opened
-    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.rerender()))
-
+  initt():void {
+    Log("init called on view",true)
+    
     Log("Open path: " + this.app.workspace.getActiveFile().path, true)
 
     this.rerender()

@@ -5,7 +5,7 @@
   import { Log } from "../utils";
 
   export let app: App;
-  export let lib: DBManager;
+  export let db: DBManager;
   export let plugin: MOCPlugin;
 
   // Todo: choose whether to reverse paths to note
@@ -24,7 +24,7 @@
     document.getElementById("tli_path").textContent = input_value;
 
     // recreate path information
-    lib.update();
+    db.update();
     plugin.rerender();
 
     // clear selection dropdown list

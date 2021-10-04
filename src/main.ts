@@ -9,32 +9,31 @@ import { Log } from './utils';
 
 export default class MOCPlugin extends Plugin {
 	settings: MOCSettings;
-	lib: DBManager;
-	view_ref: MOCView
-	// statusbartext: HTMLElement
+	db: DBManager;
+ 	// statusbartext: HTMLElement	
 	async onload() {
-		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view_ref = new MOCView(leaf)))
+		this.registerView(MOC_VIEW_TYPE, (leaf) => (new MOCView(leaf, this)))
 		this.app.workspace.onLayoutReady(() => this.initializePlugin())
 	}
 
 	async initializePlugin() {
 		await this.loadSettings()
-		this.lib = new DBManager(this.app, this)
-		this.addSettingTab(new MOCSettingTab(this.app, this, this.lib));
+		this.db = new DBManager(this.app, this)
+		this.addSettingTab(new MOCSettingTab(this.app, this, this.db));
 
 		this.initLeaf()
-		this.view_ref.init(this, this.lib)
-		//this.view((view) => { view.init(this, this.lib) })
+		this.view((view) => { view.initt() })
+		//this.view_ref.init(this, this.db)
 
 		this.addRibbonIcon('sync', 'Rebuild Map of Content', async () => {
-			await this.lib.update()
+			await this.db.update()
 		});
 
 		this.addCommand({
 			id: 'rebuild-map-of-content',
 			name: 'Rebuild Map of Content',
 			callback: () => {
-				this.lib.update()
+				this.db.update()
 
 			}
 		});
@@ -125,14 +124,14 @@ export default class MOCPlugin extends Plugin {
 	view(callback: ViewCallback) {
 		let leaves = this.app.workspace.getLeavesOfType(MOC_VIEW_TYPE)
 		if (leaves.length) {
-
+			Log(`Found ${leaves.length} leaves`, true)
 			leaves.forEach((leaf) => {
 				let view = leaf.view as MOCView
 				callback(view)
 			})
 		}
 		else {
-			Log("No view attached",true)
+			Log("No view attached", true)
 		}
 	}
 
@@ -142,15 +141,15 @@ export default class MOCPlugin extends Plugin {
 class MOCSettingTab extends PluginSettingTab {
 	plugin: MOCPlugin;
 	_app: Settings;
-	lib: DBManager
+	db: DBManager
 
-	constructor(app: App, plugin: MOCPlugin, lib: DBManager) {
+	constructor(app: App, plugin: MOCPlugin, db: DBManager) {
 		super(app, plugin);
 		this.plugin = plugin;
-		this.lib = lib
+		this.db = db
 		this._app = new Settings({
 			target: (this as any).containerEl,
-			props: { app: this.app, lib: this.lib, plugin: this.plugin },
+			props: { app: this.app, db: this.db, plugin: this.plugin },
 		})
 	}
 
@@ -158,7 +157,7 @@ class MOCSettingTab extends PluginSettingTab {
 		this._app.$destroy()
 		this._app = new Settings({
 			target: (this as any).containerEl,
-			props: { app: this.app, lib: this.lib, plugin: this.plugin },
+			props: { app: this.app, db: this.db, plugin: this.plugin },
 		})
 	}
 
