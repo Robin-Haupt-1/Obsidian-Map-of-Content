@@ -29,15 +29,7 @@ export default class MOCView extends ItemView {
       this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.rerender()))
 
   }
-
-  initt():void {
-    Log("init called on view",true)
-    
-    Log("Open path: " + this.app.workspace.getActiveFile().path, true)
-
-    this.rerender()
-  }
-
+ 
   async onOpen(): Promise<void> {
 
   }

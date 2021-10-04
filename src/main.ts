@@ -10,7 +10,7 @@ import { Log } from './utils';
 export default class MOCPlugin extends Plugin {
 	settings: MOCSettings;
 	db: DBManager;
- 	// statusbartext: HTMLElement	
+	// statusbartext: HTMLElement	
 	async onload() {
 		this.registerView(MOC_VIEW_TYPE, (leaf) => (new MOCView(leaf, this)))
 		this.app.workspace.onLayoutReady(() => this.initializePlugin())
@@ -22,8 +22,6 @@ export default class MOCPlugin extends Plugin {
 		this.addSettingTab(new MOCSettingTab(this.app, this, this.db));
 
 		this.initLeaf()
-		this.view((view) => { view.initt() })
-		//this.view_ref.init(this, this.db)
 
 		this.addRibbonIcon('sync', 'Rebuild Map of Content', async () => {
 			await this.db.update()
@@ -53,6 +51,8 @@ export default class MOCPlugin extends Plugin {
 				active: true
 			})
 		}
+
+
 	}
 
 	rerender() {
