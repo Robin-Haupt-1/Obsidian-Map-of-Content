@@ -32,7 +32,7 @@ export default class MOCView extends ItemView {
     // update the path view every time a file is opened
     this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.rerender()))
 
-    Log("Ppen path: " + this.app.workspace.getActiveFile().path, true)
+    Log("Open path: " + this.app.workspace.getActiveFile().path, true)
 
     this.rerender()
   }
@@ -57,11 +57,9 @@ export default class MOCView extends ItemView {
       this.errorview = undefined
     }
 
-    // get path of open note
-
 
     let errors = []
-    console.log(this.open_file_path)
+    //console.log(this.open_file_path)
 
     // make sure the database is usable
     if (!this.db.database_complete) {
@@ -72,6 +70,7 @@ export default class MOCView extends ItemView {
     if (open_file == null) {
       errors.push("No note has been opened")
     }
+    // get path of open note 
     else {
       this.open_file_path = open_file.path
       if (this.db.getNoteFromPath(this.open_file_path) == undefined) {
@@ -122,9 +121,18 @@ export default class MOCView extends ItemView {
 
 
   onClose(): Promise<void> {
+    // destroy old pathview/errorview instance
+    // set symbol to undefined to avoid "This component has already been destroyed" message
     if (this._app) {
-      this._app.$destroy();
+      this._app.$destroy()
+      this._app = undefined
     }
+
+    if (this.errorview) {
+      this.errorview.$destroy()
+      this.errorview = undefined
+    }
+
     return Promise.resolve();
   }
 
