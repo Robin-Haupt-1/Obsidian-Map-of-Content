@@ -8,6 +8,8 @@
   export let indentation: number;
   export let app: App;
 
+  let expanded=true?indentation < 3:false;
+
   let children = [];
   if (db.descendants.has(note_path)) {
     children = db.descendants.get(note_path).slice();
@@ -21,7 +23,8 @@
     <p>
       {#if indentation == 0}
         {GetDisplayName(note_path, db)}
-      {:else}
+      {:else}{#if children.length > 0}
+      <span class="expand-arrow" on:click={()=>{expanded=!expanded}}>{#if expanded}⮝{:else}⮟{/if}</span>&nbsp;{/if}
         <a
           class="link" 
           title={note_path}
@@ -30,12 +33,11 @@
           }}
         >
           {GetDisplayName(note_path, db)}</a
-        >
+        > 
       {/if}
     </p>
     <ul>
-      {#if children.length > 0}
-        {#if indentation < 3}
+      {#if children.length > 0 && expanded} 
           {#each children as child}
             <svelte:self
               db={db}
@@ -44,20 +46,6 @@
               indentation={indentation + 1}
             />
           {/each}
-        {:else}
-          <li>
-            <a
-            href="/"
-              class="link"
-              title={note_path}
-              on:click={(event) => {
-                NavigateToFile(app, note_path, event);
-              }}
-            >
-              ...</a
-            >
-          </li>
-        {/if}
       {/if}
     </ul>
   </li>
@@ -74,14 +62,17 @@
     margin: 0;
     padding: 0;
   }
+  
   li {
     list-style: none;
     margin: 0;
     padding: 0;
   }
+
   ul {
     padding-left: 1em;
   }
+
   li {
     padding-left: 1em;
     border: 5px dotted black;
@@ -96,13 +87,23 @@
     position: relative;
     top: 0em;
   }
+
   li ul {
     border-top: 1px dotted black;
     margin-left: -1em;
     padding-left: 2em;
   }
+
   ul li:last-child ul {
     border-left: none;
     margin-left: -17px;
+  }
+
+  .expand-arrow{
+    color:darkgrey
+  }
+
+  .expand-arrow:hover{
+    color:gray
   }
 </style>
