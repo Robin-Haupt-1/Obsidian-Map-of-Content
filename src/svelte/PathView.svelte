@@ -83,8 +83,18 @@
   <ul>
     <Descendants {db} {app} note_path={open_note_path} indentation={0} />
   </ul>
-  <div bind:this={scroll_up_div} id="scroll_up" title="Scroll to top">
-    <span on:click={() => scroll_to_top()}>⬆</span>
+  <div
+    bind:this={scroll_up_div}
+    id="scroll_up"
+    title="Scroll to top"
+    on:click={() => scroll_to_top()}
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"><path d="M24 12l-12-9v5h-12v8h12v5l12-9z" /></svg
+    >
   </div>
 </div>
 
@@ -110,13 +120,18 @@
     right: 5px;
     top: 4px;
   }
-  div#scroll_up span {
+  div#scroll_up {
     cursor: pointer;
     font-size: 25px;
     color: darkgrey;
   }
-  div#scroll_up:hover span {
-    color: gray;
+
+  div#scroll_up svg {
+    transform: rotate(-90deg);
+    fill: lightgray;
+  }
+  div#scroll_up:hover svg {
+    fill: gray;
   }
 
   a.link {
