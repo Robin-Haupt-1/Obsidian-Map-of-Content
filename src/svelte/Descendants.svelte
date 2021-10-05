@@ -16,6 +16,16 @@
   }
 </script>
 
+<!-- define expand svg-->
+<svg display="none">
+  <symbol
+    id="expand-arrow-svg"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    ><path d="M22 12l-20 12 5-12-5-12z" />
+  </symbol></svg
+>
+<!--start descendants view-->
 {#if indentation == 0 && children.length == 0}
   This note has no descendants
 {:else}
@@ -29,8 +39,17 @@
             on:click={() => {
               expanded = !expanded;
             }}
-            >{#if expanded}⮝{:else}⮟{/if}</span
-          >&nbsp;{/if}
+            ><div class="expand_button">
+              {#if expanded}
+                <svg class="svg expanded">
+                  <use href="#expand-arrow-svg" />
+                </svg>
+              {:else}<svg class="svg">
+                  <use href="#expand-arrow-svg" />
+                </svg>
+              {/if}
+            </div></span
+          >{/if}
         <a
           class="link"
           title={note_path}
@@ -83,6 +102,7 @@
     border: 5px dotted black;
     border-width: 0 0 1px 1px;
   }
+
   li.container {
     border-bottom: 0px;
   }
@@ -110,5 +130,26 @@
 
   .expand-arrow:hover {
     color: gray;
+  }
+
+  div.expand_button {
+    display: inline;
+    height: 15px;
+    width: 15px;
+  }
+
+  div.expand_button svg.svg {
+    width: 15px;
+    height: 15px;
+    fill: darkgrey;
+    margin-top: 5px;
+  }
+
+  div.expand_button svg.svg:hover {
+    fill: gray;
+  }
+
+  div.expand_button svg.svg.expanded {
+    transform: rotate(90deg);
   }
 </style>
