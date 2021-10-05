@@ -133,14 +133,12 @@
   }
 
   div.expand_button {
-    display: inline;
-    height: 15px;
-    width: 15px;
+    display: inline; 
   }
 
   div.expand_button svg.svg {
-    width: 15px;
-    height: 15px;
+    width: 14px;
+    height: 14px;
     fill: darkgrey;
     margin-top: 5px;
   }
