@@ -1,6 +1,6 @@
 ## Map Of Content for Obsidian
 
-This plugin helps you set up your vault in a decentralized manner, where every note is connected to a central note through different other notes, just like files in folders that are in other folders except through links. 
+This plugin helps you set up your vault in a decentralized manner, where every note is connected to a central note through different other notes, just like files in folders that are in other folders, except through links. 
 
 It will find the shortest path from the central note to the currently open note and display it. It will also display the notes that can best be reached through the current note (it's descendants) and their descendants.
 
