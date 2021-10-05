@@ -33,7 +33,7 @@
 </script>
 
 <div class="path">
-  <label for="myBrowser">Choose the central note from this list:</label>
+  <label for="myBrowser">Path of your Central Note: (start typing to see suggestions)</label>
   <input bind:value={input_value} list="notes" id="CN_select" />
   <datalist id="notes">
     {#each all_files as filepath}
