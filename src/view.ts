@@ -23,13 +23,18 @@ export default class MOCView extends ItemView {
   constructor(leaf: WorkspaceLeaf,plugin: MOCPlugin) {
     super(leaf)
     this.plugin = plugin
-    this.db = plugin.db
-    this.app = plugin.app
-    // update the path view every time a file is opened
-      this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.rerender()))
+    this.db = this.plugin.db
+    this.app = this.plugin.app
+    this.plugin.app.workspace.onLayoutReady(() => this.init())
+
 
   }
+  init(){ 
  
+    // update the path view every time a file is opened
+    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.rerender()))  
+ 
+  }
   async onOpen(): Promise<void> {
 
   }

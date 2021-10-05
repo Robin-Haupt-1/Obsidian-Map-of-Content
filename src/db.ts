@@ -22,12 +22,15 @@ export class DBManager {
     constructor(app: App, plugin: MOCPlugin) {
         this.app = app;
         this.plugin = plugin
+        this.plugin.app.workspace.onLayoutReady(() => this.init())
+
+    }
+    init(){
         this.all_paths = []
         this.db = {}
         this.db_entries = Object.entries(this.db)
         this.update()
     }
-
     async update(){
         this.database_complete = false
 

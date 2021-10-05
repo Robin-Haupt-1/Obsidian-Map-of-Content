@@ -11,14 +11,18 @@ export default class MOCPlugin extends Plugin {
 	settings: MOCSettings;
 	db: DBManager;
 	// statusbartext: HTMLElement	
+
 	async onload() {
+		await this.loadSettings()
+
+		this.db = new DBManager(this.app, this)
+
 		this.registerView(MOC_VIEW_TYPE, (leaf) => (new MOCView(leaf, this)))
+
 		this.app.workspace.onLayoutReady(() => this.initializePlugin())
 	}
 
 	async initializePlugin() {
-		await this.loadSettings()
-		this.db = new DBManager(this.app, this)
 		this.addSettingTab(new MOCSettingTab(this.app, this, this.db));
 
 		this.initLeaf()
