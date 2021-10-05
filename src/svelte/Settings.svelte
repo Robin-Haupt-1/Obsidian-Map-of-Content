@@ -48,9 +48,9 @@
     }}>Save settings & rebuild Map of Content</button
   >
 </div>
-
+ 
 <br />
-Current central note: <span id="tli_path">{current_tli}</span>
+Current Central Note: <span id="tli_path">{current_tli}</span>
 
 <style>
   #CN_select {
