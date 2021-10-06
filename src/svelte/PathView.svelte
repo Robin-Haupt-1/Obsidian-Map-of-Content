@@ -94,8 +94,8 @@
             }}>update</a
         >
         your Map of Content and watch it grow!<br />
-        <div id="seedling-spacer-block">
-            <!--seedling svg from https://www.svgrepo.com/svg/263312/sprout-tree-->
+        <div id="seedling-container">
+            <!--seedling svg from https://www.svgrepo.com/svg/263312/sprout-tree -->
             <svg
                 id="seedling"
                 version="1.1"
@@ -351,7 +351,7 @@
         width: 24px;
         height: 0.7em;
     }
-    div#seedling-spacer-block {
+    div#seedling-container {
         position: fixed;
         bottom: 5%;
         width: 100%;
