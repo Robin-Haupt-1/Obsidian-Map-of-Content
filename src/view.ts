@@ -61,6 +61,7 @@ export default class MOCView extends ItemView {
 
     // make sure the database is usable
     if (!this.db.database_complete) {
+      //TODO: try once to this.db.update()
       errors.push("Your vault could not be analyzed. Try updating the Map of Content again and make sure your Central Note exists")
     }
     // make sure a file is opened
@@ -114,7 +115,7 @@ export default class MOCView extends ItemView {
   }
 
   getIcon(): string {
-    return ""
+    return "stacked-levels"
   }
 
 
