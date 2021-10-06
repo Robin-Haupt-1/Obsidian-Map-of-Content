@@ -27,13 +27,13 @@ export default class MOCPlugin extends Plugin {
 
 		this.initLeaf()
 
-		this.addRibbonIcon('sync', 'Rebuild Map of Content', async () => {
+		this.addRibbonIcon('sync', 'Update Map of Content', async () => {
 			await this.db.update()
 		});
 
 		this.addCommand({
 			id: 'rebuild-map-of-content',
-			name: 'Rebuild Map of Content',
+			name: 'Update Map of Content',
 			callback: () => {
 				this.db.update()
 
