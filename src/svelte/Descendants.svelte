@@ -7,7 +7,9 @@
   export let db: DBManager;
   export let indentation: number;
   export let app: App;
-
+  let dark_mode = document.body.classList.contains("theme-dark")
+    ? "dark-mode"
+    : "light-mode";
   let expanded = true ? indentation < 3 : false;
 
   let children = [];
@@ -29,7 +31,7 @@
 {#if indentation == 0 && children.length == 0}
   This note has no descendants
 {:else}
-  <li class="container">
+  <li class="container {dark_mode}">
     <p>
       {#if indentation == 0}
         {GetDisplayName(note_path, db)}
@@ -102,7 +104,11 @@
     border: 5px dotted black;
     border-width: 0 0 1px 1px;
   }
-
+  li.dark-mode {
+    padding-left: 1em;
+    border: 5px dotted lightgray;
+    border-width: 0 0 1px 1px;
+  }
   li.container {
     border-bottom: 0px;
   }
@@ -119,6 +125,10 @@
     padding-left: 2em;
   }
 
+  li.dark-mode ul {
+    border-top: 1px dotted lightgray;
+  }
+
   ul li:last-child ul {
     border-left: none;
     margin-left: -17px;
@@ -133,18 +143,27 @@
   }
 
   div.expand_button {
-    display: inline; 
+    display: inline;
   }
 
   div.expand_button svg.svg {
     width: 14px;
     height: 14px;
-    fill: darkgrey;
     margin-top: 5px;
   }
 
-  div.expand_button svg.svg:hover {
+  li.light-mode div.expand_button svg.svg {
+    fill: darkgrey;
+  }
+  li.light-mode div.expand_button svg.svg:hover {
     fill: gray;
+  }
+
+  li.dark-mode div.expand_button svg.svg {
+    fill: gray;
+  }
+  li.dark-mode div.expand_button svg.svg:hover {
+    fill: lightgray;
   }
 
   div.expand_button svg.svg.expanded {

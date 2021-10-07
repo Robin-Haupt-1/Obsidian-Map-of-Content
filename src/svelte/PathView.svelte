@@ -16,7 +16,9 @@
     let scroll_up_div;
     let main_div;
     let scroll_up_div_already_visible = false;
-
+    let dark_mode = document.body.classList.contains("theme-dark")
+        ? "dark-mode"
+        : "light-mode";
     onMount(() => {
         scroll_to_top();
     });
@@ -75,6 +77,7 @@
 >
 <div
     id="main_moc_div"
+    class={dark_mode}
     bind:this={main_div}
     on:scroll={(e) => on_scroll(e.target.scrollTop)}
 >
@@ -300,8 +303,8 @@
                 ><path d="M24 12l-12-9v5h-12v8h12v5l12-9z" /></svg
             >
         </div>{/if}
-</div>
-
+</div> 
+ 
 <style>
     div#main_moc_div {
         padding: initial;
@@ -309,6 +312,9 @@
         height: 100%;
         position: initial;
         overflow: auto;
+    }
+    div#main_moc_div.dark-mode {
+        color: lightgray;
     }
 
     div#scroll_up {
@@ -332,10 +338,20 @@
 
     div#scroll_up svg {
         transform: rotate(-90deg);
+    }
+
+    div.light-mode div#scroll_up svg {
         fill: lightgray;
     }
-    div#scroll_up:hover svg {
+    div.light-mode div#scroll_up:hover svg {
         fill: gray;
+    }
+
+    div.dark-mode div#scroll_up svg {
+        fill: gray;
+    }
+    div.dark-mode div#scroll_up:hover svg {
+        fill: lightgray;
     }
 
     a.link {
@@ -344,6 +360,7 @@
     ul {
         padding-left: 0;
     }
+
     svg.path-arrow {
         margin-right: 2px;
         margin-left: 2px;
@@ -351,19 +368,23 @@
         width: 24px;
         height: 0.7em;
     }
+    div.dark-mode svg.path-arrow {
+        fill: lightgray;
+    } 
+
     div#seedling-container {
         position: fixed;
         bottom: 5%;
         width: 100%;
-        height: 30%;
-        max-height: 300px;
+        height: 25%;
+        max-height: 200px;
         align-content: center;
     }
     svg#seedling {
         display: block;
         width: 100%;
         height: 100%;
-        opacity: 70%;
+        opacity: 60%;
         position: relative;
         margin-left: auto;
         margin-right: auto;
