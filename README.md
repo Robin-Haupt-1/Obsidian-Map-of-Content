@@ -10,6 +10,7 @@ If you have the notes "Central Note", "Animals", "Mammals", "Cats", "Dogs" and "
 
 ![Example Map of Content](https://raw.githubusercontent.com/Robin-Haupt-1/Obsidian-Map-of-Content/main/doc/view.png "Example Map of Content")
 
+This Map of Content will be displayed in the plugin pane, right of the editor.  
 
 You can choose which note should be at the center of your vault in the settings tab.
 
