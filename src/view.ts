@@ -59,8 +59,12 @@ export default class MOCView extends ItemView {
     let errors = []
     //console.log(this.open_file_path)
 
+    // during startup (before first db update is completed) show loading message
+    if (this.db.database_complete=="boot") {
+      errors.push("Please wait...")
+    }
     // make sure the database is usable
-    if (!this.db.database_complete) {
+    if (this.db.database_complete=="no") {
       //TODO: try once to this.db.update()
       errors.push("Your vault could not be analyzed. Try updating the Map of Content again and make sure your Central Note exists")
     }

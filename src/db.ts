@@ -17,22 +17,25 @@ export class DBManager {
     get_paths_ran: number
     descendants: Map<string, string[]>
     duplicate_file_status: Map<string, boolean>
-    database_complete: boolean // whether the db etc. are in a good state and can be used
+    database_complete: string // whether the db etc. are in a good state and can be used. can be "yes", "no" or "boot"
 
     constructor(app: App, plugin: MOCPlugin) {
         this.app = app;
         this.plugin = plugin
         this.plugin.app.workspace.onLayoutReady(() => this.init())
+        this.database_complete = "boot"
 
     }
-    init(){
+    init() {
         this.all_paths = []
         this.db = {}
         this.db_entries = Object.entries(this.db)
         this.update()
     }
-    async update(){
-        this.database_complete = false
+    async update() {
+        if (!(this.database_complete == "boot")) {
+            this.database_complete = "no"
+        }
 
         // make sure the Central note exists
         if (!this.plugin.CNexists()) {
@@ -47,10 +50,10 @@ export class DBManager {
         new Notice('Rebuilding Map of Content...');
         Log("Rebuilding Map of Content...")
 
-        await new Promise(r=>setTimeout(r, 0))
+        await new Promise(r => setTimeout(r, 0))
         // update db
         this.updateDB()
-        await new Promise(r=>setTimeout(r, 0))
+        await new Promise(r => setTimeout(r, 0))
 
         this.get_paths_ran = 0
         this.updateDepthInformation()
@@ -58,15 +61,15 @@ export class DBManager {
         // delete old path information
         this.all_paths.length = 0
         let path_so_far: Path = { all_members: [this.plugin.getCNPath()], items: [[this.plugin.getCNPath(), LINKED_CN]] }
-        await new Promise(r=>setTimeout(r, 0))
+        await new Promise(r => setTimeout(r, 0))
 
         this.followPaths(path_so_far)
-        await new Promise(r=>setTimeout(r, 0))
+        await new Promise(r => setTimeout(r, 0))
 
         this.updateDescendants()
-        
+
         // mark database as complete
-        this.database_complete = true
+        this.database_complete = "yes"
         new Notice("Rebuilding complete")
         Log("Rebuilding complete")
 
@@ -290,7 +293,7 @@ export class DBManager {
             if ((path.all_members.length - last_item.distance_from_CN) > 1) {
                 return
             }
- 
+
             this.followPaths(path)
             called_itself = true
         })
