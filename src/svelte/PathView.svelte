@@ -63,7 +63,7 @@
         />
     </symbol></svg
 >
-<!-- define both pointer arrow svg-->
+<!-- define both directions pointer arrow svg-->
 <svg display="none">
     <symbol
         id="pointer-arrow-both-svg-moc"
@@ -82,7 +82,7 @@
     on:scroll={(e) => on_scroll(e.target.scrollTop)}
 >
     {#if paths.length == 0}
-        This note has no connections to <a
+        This note doesn't have any connections to <a
             class="link"
             title={cn_path}
             on:click={(event) => NavigateToFile(app, cn_path, event)}
@@ -303,8 +303,8 @@
                 ><path d="M24 12l-12-9v5h-12v8h12v5l12-9z" /></svg
             >
         </div>{/if}
-</div> 
- 
+</div>
+
 <style>
     div#main_moc_div {
         padding: initial;
@@ -370,7 +370,7 @@
     }
     div.dark-mode svg.path-arrow {
         fill: lightgray;
-    } 
+    }
 
     div#seedling-container {
         position: fixed;
