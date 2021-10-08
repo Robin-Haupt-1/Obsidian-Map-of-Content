@@ -10,6 +10,7 @@ import { Log } from './utils';
 export default class MOCPlugin extends Plugin {
 	settings: MOCSettings;
 	db: DBManager;
+	view: MOCView;
 	// statusbartext: HTMLElement	
 
 	async onload() {
@@ -17,7 +18,7 @@ export default class MOCPlugin extends Plugin {
 
 		this.db = new DBManager(this.app, this)
 
-		this.registerView(MOC_VIEW_TYPE, (leaf) => (new MOCView(leaf, this)))
+		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view = new MOCView(leaf, this)))
 
 		this.app.workspace.onLayoutReady(() => this.initializePlugin())
 	}
@@ -26,7 +27,7 @@ export default class MOCPlugin extends Plugin {
 		this.addSettingTab(new MOCSettingTab(this.app, this, this.db));
 
 		this.initLeaf()
-
+		this.db.update()
 
 		this.addRibbonIcon('sync', 'Update Map of Content', async () => {
 			await this.db.update()
@@ -62,12 +63,17 @@ export default class MOCPlugin extends Plugin {
 
 	rerender() {
 		Log("rerender on main plugin called", true)
-		this.view((view) => { view.rerender() })
+		if (this.view) {
+			this.view.rerender()
+		}
 	}
 
 	onunload(): void {
 		Log('Unloading plugin');
-		this.view((view) => { view.onClose() })
+
+		if (this.view) {
+			this.view.onClose()
+		}
 		this.app.workspace.detachLeavesOfType(MOC_VIEW_TYPE)
 
 	}
@@ -84,7 +90,7 @@ export default class MOCPlugin extends Plugin {
 	async updateSettings(updates: Partial<MOCSettings>) {
 		Object.assign(this.settings, updates)
 		await this.saveData(this.settings)
-		this.view((view) => { view.rerender() })
+		this.rerender()
 	}
 
 	getSettingValue<K extends keyof MOCSettings>(setting: K): MOCSettings[K] {
@@ -128,7 +134,7 @@ export default class MOCPlugin extends Plugin {
 	}
 
 	/** get any open views and perform callback function on them */
-	view(callback: ViewCallback) {
+	oldview(callback: ViewCallback) {
 		let leaves = this.app.workspace.getLeavesOfType(MOC_VIEW_TYPE)
 		if (leaves.length) {
 			Log(`Found ${leaves.length} leaves`, true)
@@ -141,8 +147,19 @@ export default class MOCPlugin extends Plugin {
 			Log("No view attached", true)
 		}
 	}
-
-
+	/**set internal reference to the current view
+	 * TODO: Allow keeping several views
+	 */
+	registerViewInstance(view: MOCView) {
+		Log("View registered", true)
+		this.view = view
+	}
+	/** delete reference to view 
+	 * TODO: allow keeping several views
+	*/
+	unregisterViewInstance(view: MOCView) {
+		this.view = undefined
+	}
 }
 
 class MOCSettingTab extends PluginSettingTab {

@@ -20,25 +20,43 @@ export default class MOCView extends ItemView {
   open_file_path: string
 
 
-  constructor(leaf: WorkspaceLeaf,plugin: MOCPlugin) {
+  constructor(leaf: WorkspaceLeaf, plugin: MOCPlugin) {
     super(leaf)
     this.plugin = plugin
     this.db = this.plugin.db
     this.app = this.plugin.app
+    this.plugin.registerViewInstance(this)
     this.plugin.app.workspace.onLayoutReady(() => this.init())
 
+  }
 
-  }
-  init(){ 
- 
+  init() {
     // update the path view every time a file is opened
-    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.rerender()))  
- 
+    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.onFileOpen()))
+    //register with the main class
+    //show "loading" message
+    if (this.errorview) {
+      this.errorview.$destroy()
+      this.errorview = undefined
+    }
+    this.errorview = new Error({
+      target: (this as any).contentEl,
+      props: { message: "Loading..." },
+
+    })
   }
+
   async onOpen(): Promise<void> {
 
   }
 
+  /** rerender the view on file open, but only if the database has already been initiated */
+  onFileOpen() {
+    if (this.db.database_initialized) {
+      this.rerender()
+    }
+  }
+  
   /** reload paths and recreate the svelte instance */
   rerender(): void {
     Log("Rerender called on view", true)
@@ -60,22 +78,24 @@ export default class MOCView extends ItemView {
     //console.log(this.open_file_path)
 
     // during startup (before first db update is completed) show loading message
-    if (this.db.database_complete=="boot") {
+    if (!this.db.database_initialized) {
       errors.push("Please wait...")
     }
+
     // make sure the database is usable
-    if (this.db.database_complete=="no") {
+    else if (!this.db.database_complete) {
       //TODO: try once to this.db.update()
-      errors.push("Your vault could not be analyzed. Try updating the Map of Content again and make sure your Central Note exists")
+      errors.push(`Your Map of Content couldn't be created.<br><br> Make sure your Central Note path '${this.plugin.getCNPath()}' is correct. You can change this path in the settings tab.`)
     }
+
     // make sure a file is opened
-    let open_file = this.app.workspace.getActiveFile()
-    if (open_file == null) {
+    else if (this.app.workspace.getActiveFile() == null) {
       errors.push("No note has been opened")
     }
+
     // get path of open note 
     else {
-      this.open_file_path = open_file.path
+      this.open_file_path = this.app.workspace.getActiveFile().path
       if (this.db.getNoteFromPath(this.open_file_path) == undefined) {
         // make sure file is in library   
         errors.push("This note has not been indexed yet. Update the Map of Content")
@@ -126,6 +146,9 @@ export default class MOCView extends ItemView {
   onClose(): Promise<void> {
     // destroy old pathview/errorview instance
     // set symbol to undefined to avoid "This component has already been destroyed" message
+
+    Log("View closing", true)
+
     if (this._app) {
       this._app.$destroy()
       this._app = undefined
@@ -135,8 +158,10 @@ export default class MOCView extends ItemView {
       this.errorview.$destroy()
       this.errorview = undefined
     }
+    this.plugin.unregisterViewInstance(this)
 
     return Promise.resolve();
+
   }
 
 }
