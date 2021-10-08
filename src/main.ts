@@ -27,6 +27,7 @@ export default class MOCPlugin extends Plugin {
 
 		this.initLeaf()
 
+
 		this.addRibbonIcon('sync', 'Update Map of Content', async () => {
 			await this.db.update()
 		});
@@ -40,7 +41,7 @@ export default class MOCPlugin extends Plugin {
 			}
 		});
 
-		// Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? 
+		//Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? 
 		//this.statusbartext = this.addStatusBarItem()
 		//this.statusbartext.setText("Total number of notes: " + String(l.count()));
 
@@ -121,7 +122,9 @@ export default class MOCPlugin extends Plugin {
 
 	/**check whether the central note exists */
 	CNexists(): boolean {
-		return !(this.app.vault.getAbstractFileByPath(this.getCNPath()) == null)
+		let exists = !(this.app.vault.getAbstractFileByPath(this.getCNPath()) == null)
+		Log(exists ? "CN exists" : "CN does not exist", true)
+		return exists
 	}
 
 	/** get any open views and perform callback function on them */
