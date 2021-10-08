@@ -3,7 +3,7 @@
 </script>
 
 <div class="errors">
-  {message}
+  {@html message}
 </div>
 
 <style>
