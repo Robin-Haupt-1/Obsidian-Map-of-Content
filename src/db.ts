@@ -1,5 +1,5 @@
 import { LINKED_BOTH, LINKED_CN as LINKED_CN, LINKED_TO, LINKED_FROM } from "./constants";
-import type { App, Vault, LinkCache } from "obsidian";
+import type { App, Vault, LinkCache, EmbedCache } from "obsidian";
 import { Notice } from 'obsidian'
 import { Note, DB, Path } from './types'
 import { FileNameFromPath } from "./utils"
@@ -17,13 +17,14 @@ export class DBManager {
     get_paths_ran: number
     descendants: Map<string, string[]>
     duplicate_file_status: Map<string, boolean>
-    database_complete: string // whether the db etc. are in a good state and can be used. can be "yes", "no" or "boot"
+    database_complete: boolean // whether the db etc. are in a good state and can be used
+    database_initialized: boolean = false // false on plugin launch before the first (successful or failed) db update attempt
 
     constructor(app: App, plugin: MOCPlugin) {
         this.app = app;
         this.plugin = plugin
         this.plugin.app.workspace.onLayoutReady(() => this.init())
-        this.database_complete = "boot"
+        this.database_complete = false
 
     }
     init() {
@@ -31,51 +32,54 @@ export class DBManager {
         this.db = {}
         this.db_entries = Object.entries(this.db)
         this.update()
+
     }
     async update() {
-        if (!(this.database_complete == "boot")) {
-            this.database_complete = "no"
-        }
+
+        this.database_complete = false
 
         // make sure the Central note exists
         if (!this.plugin.CNexists()) {
             new Notice("Central note '" + this.plugin.getCNPath() + "' does not exist")
             new Notice("You can adjust the path of your Central Note in the settings tab")
-            return
+
         }
+        else {
 
-        // save timestamp for tracking duration of rebuilding
-        let start_tmsp = Date.now()
+            // save timestamp for tracking duration of rebuilding
+            let start_tmsp = Date.now()
 
-        new Notice('Rebuilding Map of Content...');
-        Log("Rebuilding Map of Content...")
+            new Notice('Updating the Map of Content...');
+            Log("Updating the Map of Content...")
 
-        await new Promise(r => setTimeout(r, 0))
-        // update db
-        this.updateDB()
-        await new Promise(r => setTimeout(r, 0))
+            await new Promise(r => setTimeout(r, 0))
+            // update db
+            this.updateDB()
+            await new Promise(r => setTimeout(r, 0))
 
-        this.get_paths_ran = 0
-        this.updateDepthInformation()
+            this.get_paths_ran = 0
+            this.updateDepthInformation()
 
-        // delete old path information
-        this.all_paths.length = 0
-        let path_so_far: Path = { all_members: [this.plugin.getCNPath()], items: [[this.plugin.getCNPath(), LINKED_CN]] }
-        await new Promise(r => setTimeout(r, 0))
+            // delete old path information
+            this.all_paths.length = 0
+            let path_so_far: Path = { all_members: [this.plugin.getCNPath()], items: [[this.plugin.getCNPath(), LINKED_CN]] }
+            await new Promise(r => setTimeout(r, 0))
 
-        this.followPaths(path_so_far)
-        await new Promise(r => setTimeout(r, 0))
+            this.followPaths(path_so_far)
+            await new Promise(r => setTimeout(r, 0))
 
-        this.updateDescendants()
+            this.updateDescendants()
 
-        // mark database as complete
-        this.database_complete = "yes"
-        new Notice("Rebuilding complete")
-        Log("Rebuilding complete")
+            // mark database as complete
+            this.database_complete = true
+            new Notice("Update complete")
+            Log("Update complete")
 
+            let end_tmsp = Date.now()
+            Log("Took " + String((end_tmsp - start_tmsp) / 1000))
+        }
+        this.database_initialized = true
 
-        let end_tmsp = Date.now()
-        Log("Took " + String((end_tmsp - start_tmsp) / 1000))
         this.plugin.rerender()
 
     }
@@ -158,6 +162,7 @@ export class DBManager {
             let path = file.path
             let new_note = new Note(path, file.extension, [], [], null);
 
+
             // update the db
             this.db[new_note.path] = new_note
 
@@ -173,24 +178,37 @@ export class DBManager {
                 return
             }
 
-            // first: save all the links this note links to
-            let linkcache = this.app.metadataCache.getCache(note.path).links
-            if (!linkcache) return // no links
+            //  save all the links this note links to
 
             let this_links_to: string[] = []
-            linkcache.forEach((val: LinkCache) => {
-                // check if the link is valid 
-                let link_dest = this.app.metadataCache.getFirstLinkpathDest(val.link, "/")
-                if (link_dest && !this_links_to.includes(link_dest.path)) {
-                    this_links_to.push(link_dest.path)
+            let linkcache = this.app.metadataCache.getCache(note.path).links
+            if (linkcache) {
+                linkcache.forEach((val: LinkCache) => {
+                    // check if the link is valid 
+                    let link_dest = this.app.metadataCache.getFirstLinkpathDest(val.link, "/")
+                    if (link_dest && !this_links_to.includes(link_dest.path)) {
+                        this_links_to.push(link_dest.path)
 
-                }
-            })
+                    }
+                })
+            }
+            let transclusions = this.app.metadataCache.getCache(note.path).embeds
+            if (transclusions) {
+                transclusions.forEach((val: EmbedCache) => {
+                    // check if the link is valid 
+                    let link_dest = this.app.metadataCache.getFirstLinkpathDest(val.link, "/")
+                    if (link_dest && !this_links_to.includes(link_dest.path)) {
+                        this_links_to.push(link_dest.path)
+
+                    }
+                })
+            }
+            if (!this_links_to.length) return // no links
 
             // save links_to information to db
             this.db[note.path].links_to = this_links_to
 
-            // second: add a "linked_from" reference to the db entry of all notes that are linked to from this note
+            // add a "linked_from" reference to the db entry of all notes that are linked to from this note
             this_links_to.forEach((link: string) => {
                 if (!this.db[link].linked_from.includes(note.path)) {
                     this.db[link].linked_from.push(note.path)
