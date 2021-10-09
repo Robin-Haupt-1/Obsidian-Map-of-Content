@@ -314,8 +314,8 @@
         overflow: auto;
     }
     div#main_moc_div.dark-mode {
-        color: lightgray;
-    }
+        color:#DCDDDE; 
+        }
 
     div#scroll_up {
         color: gray;
