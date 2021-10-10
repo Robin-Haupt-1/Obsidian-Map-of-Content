@@ -79,6 +79,7 @@ export default class MOCPlugin extends Plugin {
 	}
 
 	async loadSettings() {
+		//TODO synchronize legacy and new entries of the object
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 		Log("Central note path per vault" + this.settings.CN_path_per_vault, true)
 	}
@@ -99,7 +100,6 @@ export default class MOCPlugin extends Plugin {
 
 	/**get the path of the central note for the open vault */
 	getCNPath() {
-
 
 		let cn_settings_vault_names = this.settings.CN_path_per_vault.map((val: [string, string]) => val[0])
 
@@ -160,7 +160,17 @@ export default class MOCPlugin extends Plugin {
 	unregisterViewInstance(view: MOCView) {
 		this.view = undefined
 	}
+	/** check if the file is in any of the exluded folders or the filename contains excluded phrases*/
+	isExludedFile(file: TFile) {
+		let path_to_file = file.path
+		let in_excluded_folder = this.getSettingValue("exluded_folders").some((path: string) => path_to_file.startsWith(path))
+		if (in_excluded_folder) { return true }
+		let filename = file.basename + "." + file.extension
+		let has_excluded_filename = this.getSettingValue("exluded_filename_components").some((phrase: string) => filename.contains(phrase))
+		return has_excluded_filename
+	}
 }
+
 
 class MOCSettingTab extends PluginSettingTab {
 	plugin: MOCPlugin;
@@ -171,19 +181,61 @@ class MOCSettingTab extends PluginSettingTab {
 		super(app, plugin);
 		this.plugin = plugin;
 		this.db = db
+		this._app = undefined
+	}
+
+	display(): void {
+		if (this._app) {
+			this._app.$destroy()
+			this._app = undefined
+
+		}
 		this._app = new Settings({
 			target: (this as any).containerEl,
 			props: { app: this.app, db: this.db, plugin: this.plugin },
 		})
 	}
 
-	display(): void {
-		this._app.$destroy()
-		this._app = new Settings({
-			target: (this as any).containerEl,
-			props: { app: this.app, db: this.db, plugin: this.plugin },
+	/* initial trials in porting the settings to the native Obsidian presets:
+	displayv(): void {
+		let { containerEl } = this
+
+		this.containerEl.empty()
+
+		this.containerEl.createEl("h3", {
+			text: "General Settings",
 		})
-	}
+
+		new Setting(containerEl)
+			.setName("sdf")
+			.setDesc("sdfs")
+			.addDropdown((dropdown) => {
+				let all_files = this.plugin.app.vault.getFiles().map((file: TFile) => file.path);
+				all_files.forEach((file) => {
+					dropdown.addOption(file, file)
+
+
+				})
+			})
+
+
+		new Setting(containerEl)
+			.setName("sdf")
+			.setDesc("swdfs")
+			.addSearch((search) => {
+				search.registerOptionListener({ "sfs": ((sd) => "asdf"), "asdfas": ((sd) => { return "sdfas" }) }, "asd")
+				search.onChanged
+				search.setPlaceholder("adfasdf")
+				search.onChange((value) => {
+					console.log(value)
+				})
+			})
+			.addTextArea((df) => {
+
+			})
+
+
+	}*/
 
 }
 
