@@ -29,7 +29,7 @@
 >
 <!--start descendants view-->
 {#if indentation == 0 && children.length == 0}
-  This note has no descendants
+  No descendants
 {:else}
   <li class="container {dark_mode}">
     <p>

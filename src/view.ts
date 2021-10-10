@@ -27,6 +27,11 @@ export default class MOCView extends ItemView {
     this.app = this.plugin.app
     this.plugin.registerViewInstance(this)
     this.plugin.app.workspace.onLayoutReady(() => this.init())
+    
+    // rerender on css change to adapt to dark/light mode changes
+    this.plugin.app.workspace.on("css-change", () => {
+      this.rerender()
+    })
 
   }
 
@@ -56,7 +61,7 @@ export default class MOCView extends ItemView {
       this.rerender()
     }
   }
-  
+
   /** reload paths and recreate the svelte instance */
   rerender(): void {
     Log("Rerender called on view", true)
