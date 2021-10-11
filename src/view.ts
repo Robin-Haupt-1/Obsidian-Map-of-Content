@@ -90,20 +90,22 @@ export default class MOCView extends ItemView {
     // make sure the database is usable
     else if (!this.db.database_complete) {
       //TODO: try once to this.db.update()
-      errors.push(`Your Map of Content couldn't be created.<br><br> Make sure your Central Note path '${this.plugin.getCNPath()}' is correct. You can change this path in the settings tab.`)
+      errors.push(`Your Map of Content couldn't be created.<br><br> Make sure your Central Note path '${this.plugin.getSettingValue("CN_path")}' is correct. You can change this path in the settings tab.`)
     }
 
     // make sure a file is opened
     else if (this.app.workspace.getActiveFile() == null) {
-      errors.push("No note has been opened")
+      errors.push("No file has been opened")
     }
-
+    else if(this.plugin.isExludedFile(this.app.workspace.getActiveFile())){
+      errors.push("This file has been excluded from the Map of Content.")
+    }
     // get path of open note 
     else {
       this.open_file_path = this.app.workspace.getActiveFile().path
       if (this.db.getNoteFromPath(this.open_file_path) == undefined) {
         // make sure file is in library   
-        errors.push("This note has not been indexed yet. Update the Map of Content")
+        errors.push("This file hasn't been indexed yet. Update the Map of Content")
       }
     }
 
@@ -130,7 +132,7 @@ export default class MOCView extends ItemView {
     // create new pathview
     this._app = new PathView({
       target: (this as any).contentEl,
-      props: { paths: paths, app: this.app, db: this.db, cn_path: this.plugin.getCNPath(), open_note_path: this.open_file_path },
+      props: { paths: paths, app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: this.open_file_path },
 
     })
   }

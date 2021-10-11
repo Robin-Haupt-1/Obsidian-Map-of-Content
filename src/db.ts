@@ -6,10 +6,10 @@ import { FileNameFromPath } from "./utils"
 import type MOCPlugin from "./main"
 import { Log } from "./utils";
 
-
 export class DBManager {
     db: DB
     db_entries: any[]
+    db_keys: string[]
     app: App
     plugin: MOCPlugin
     vault: Vault
@@ -26,59 +26,61 @@ export class DBManager {
         this.all_paths = []
         this.db = {}
         this.db_entries = Object.entries(this.db)
-
     }
+
     init() {
-        
-    }
-    
-    async update() {
 
+    }
+
+    async update() {
         this.database_complete = false
 
-        // make sure the Central note exists
-        if (!this.plugin.CNexists()) {
-            new Notice("Central note '" + this.plugin.getCNPath() + "' does not exist")
-            new Notice("You can adjust the path of your Central Note in the settings tab")
+        try {
+            // make sure the Central note exists
+            if (!this.plugin.CNexists()) {
+                new Notice("Central note '" + this.plugin.getSettingValue("CN_path") + "' does not exist")
+                new Notice("You can adjust the path of your Central Note in the settings tab")
+            }
 
+            else {
+                // save timestamp for tracking duration of rebuilding
+                let start_tmsp = Date.now()
+
+                new Notice('Updating the Map of Content...');
+                Log("Updating the Map of Content...")
+
+                await new Promise(r => setTimeout(r, 0))
+                // update db
+                this.updateDB()
+                await new Promise(r => setTimeout(r, 0))
+
+                this.get_paths_ran = 0
+                this.updateDepthInformation()
+
+                // delete old path information
+                this.all_paths.length = 0
+                let path_so_far: Path = { all_members: [this.plugin.getSettingValue("CN_path")], items: [[this.plugin.getSettingValue("CN_path"), LINKED_CN]] }
+                await new Promise(r => setTimeout(r, 0))
+
+                this.followPaths(path_so_far)
+                await new Promise(r => setTimeout(r, 0))
+
+                this.updateDescendants()
+
+                // mark database as complete
+                this.database_complete = true
+                new Notice("Update complete")
+                Log("Update complete")
+
+                let end_tmsp = Date.now()
+                Log("Took " + String((end_tmsp - start_tmsp) / 1000))
+            }
+
+        } finally {
+            this.database_initialized = true
+            this.plugin.rerender()
         }
-        else {
 
-            // save timestamp for tracking duration of rebuilding
-            let start_tmsp = Date.now()
-
-            new Notice('Updating the Map of Content...');
-            Log("Updating the Map of Content...")
-
-            await new Promise(r => setTimeout(r, 0))
-            // update db
-            this.updateDB()
-            await new Promise(r => setTimeout(r, 0))
-
-            this.get_paths_ran = 0
-            this.updateDepthInformation()
-
-            // delete old path information
-            this.all_paths.length = 0
-            let path_so_far: Path = { all_members: [this.plugin.getCNPath()], items: [[this.plugin.getCNPath(), LINKED_CN]] }
-            await new Promise(r => setTimeout(r, 0))
-
-            this.followPaths(path_so_far)
-            await new Promise(r => setTimeout(r, 0))
-
-            this.updateDescendants()
-
-            // mark database as complete
-            this.database_complete = true
-            new Notice("Update complete")
-            Log("Update complete")
-
-            let end_tmsp = Date.now()
-            Log("Took " + String((end_tmsp - start_tmsp) / 1000))
-        }
-        this.database_initialized = true
-
-        this.plugin.rerender()
 
     }
 
@@ -128,13 +130,40 @@ export class DBManager {
         for (let note in this.db) { delete this.db[note]; }
         // read all files
         let vault_files = this.app.vault.getFiles()
-        this.duplicate_file_status = new Map<string, boolean>();
         Log("Total number of files in vault: " + String(vault_files.length), true)
+        // create new db entries 
+        let entries_created = 0
+        let all_files = []
+        vault_files.forEach((file) => {
+
+            // make sure the file isn't in any exluded folders 
+            if (!this.plugin.isExludedFile(file)) {
+
+                // logging
+                entries_created += 1
+                if (entries_created % 1000 == 0) {
+                    Log("Created new db entries: " + String(entries_created), true)
+                }
+                let new_note = new Note(file.path, file.extension, [], [], null);
+
+
+                // update the db
+                this.db[new_note.path] = new_note
+            }
+
+        })
+
+
+        // update the db_entries representation of the db
+        this.db_entries = Object.entries(this.db)
+        this.db_keys = Object.keys(this.db)
 
         // check for duplicate files
+        this.duplicate_file_status = new Map<string, boolean>();
         let checked_files = 0
-        vault_files.forEach((file) => {
-            let file_name = FileNameFromPath(file.path)
+        this.all_notes().forEach((note) => {
+            let file_name = FileNameFromPath(note.path)
+
             // logging
             checked_files += 1
             if (checked_files % 1000 == 0) {
@@ -149,22 +178,6 @@ export class DBManager {
 
         })
 
-        // create new db entries
-        checked_files = 0
-        vault_files.forEach((file) => {
-            // logging
-            checked_files += 1
-            if (checked_files % 1000 == 0) {
-                Log("Created new db entries: " + String(checked_files), true)
-            }
-            let path = file.path
-            let new_note = new Note(path, file.extension, [], [], null);
-
-
-            // update the db
-            this.db[new_note.path] = new_note
-
-        })
         // update the db_entries representation of the db
         this.db_entries = Object.entries(this.db)
 
@@ -172,30 +185,33 @@ export class DBManager {
         Log("analyzing links", true)
         this.all_notes().forEach((note: Note) => {
             if (note.extension != "md") {
-                // skip if its not an md file. Other file types can't link to anything
+                // skip if it's not an md file. Other file types can't link to anything
                 return
             }
 
             //  save all the links this note links to
-
             let this_links_to: string[] = []
             let linkcache = this.app.metadataCache.getCache(note.path).links
+            let all_links = []
             if (linkcache) {
                 linkcache.forEach((val: LinkCache) => {
                     // check if the link is valid 
                     let link_dest = this.app.metadataCache.getFirstLinkpathDest(val.link, "/")
-                    if (link_dest && !this_links_to.includes(link_dest.path)) {
+                    //TODO is it neccessary to avoid including links multiple times? maybe they can't even be duplicate in the linkcache
+                    if (link_dest && !this_links_to.includes(link_dest.path) && this.db_keys.contains(link_dest.path)) {
                         this_links_to.push(link_dest.path)
 
                     }
+
                 })
             }
+
             let transclusions = this.app.metadataCache.getCache(note.path).embeds
             if (transclusions) {
                 transclusions.forEach((val: EmbedCache) => {
                     // check if the link is valid 
                     let link_dest = this.app.metadataCache.getFirstLinkpathDest(val.link, "/")
-                    if (link_dest && !this_links_to.includes(link_dest.path)) {
+                    if (link_dest && !this_links_to.includes(link_dest.path) && this.db_keys.contains(link_dest.path)) {
                         this_links_to.push(link_dest.path)
 
                     }
@@ -217,12 +233,12 @@ export class DBManager {
 
     /** starting from the CN, follow all paths and store the information on how long the shortest path to each note is*/
     updateDepthInformation() {
-        Log("Analyzing distance from Central Note. CN path: " + this.plugin.getCNPath(), true)
+        Log("Analyzing distance from Central Note. CN path: " + this.plugin.getSettingValue("CN_path"), true)
         let depth = 0 // distance from the CN. starts at zero 
         let checked_links: string[] = []  // all the notes that have already been visited. dont visit them again to prevent endless loops
         let do_continue = true
         // start at the the CN
-        let links = [this.plugin.getCNPath()]
+        let links = [this.plugin.getSettingValue("CN_path")]
         while (do_continue) {
             let next_links: string[] = []
             links.forEach((link: string) => {
@@ -294,6 +310,7 @@ export class DBManager {
         let called_itself: boolean = false // whether the function called itself
 
         // function calls itself to explore every new path  
+
         new_paths_to_follow.forEach((path: Path) => {
             // the path without the next note that is to be explored
             let all_items_so_far = path.all_members.slice(0, -1)
@@ -313,6 +330,7 @@ export class DBManager {
             this.followPaths(path)
             called_itself = true
         })
+
         if (!called_itself) {
             // only add the path if it does't lead anywhere else. No need to have paths that are parts of other paths
             this.all_paths.push(path_so_far)

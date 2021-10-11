@@ -1,63 +1,89 @@
 <script lang="ts">
-  import type { App, TFile } from "obsidian";
+  import { App, Notice, TFile } from "obsidian";
   import type { DBManager } from "../db";
   import type MOCPlugin from "../main";
-  import { Log } from "../utils";
+  import { Log, GetAllFolders } from "../utils";
+  import ExcludedFolders from "./settings/ExcludedFolders.svelte";
+  import ExcludedFilenames from "./settings/ExcludedFilenames.svelte";
 
   export let app: App;
-  export let db: DBManager;
   export let plugin: MOCPlugin;
-
-  // Todo: choose whether to reverse paths to note
+  let cn_input;
+  // TODO choose whether to reverse paths to note
+  // TODO check the db is complete before allow settings changes (maybe have this svelte only do that and load all other components from other svelte files)
+  // TODO lazy load all the file names and folders?
   // Show paths and descendants in different views
 
   // get list of all files for dropdown menu
   let all_files = app.vault.getFiles().map((file: TFile) => file.path);
-  Log("Central note path: " + plugin.getCNPath(), true);
-  let input_value = "";
-  let current_tli = plugin.getCNPath();
+  Log("Central note path: " + plugin.getSettingValue("CN_path"), true);
+  let cn_path_input_value;
+  let current_tli = plugin.getSettingValue("CN_path");
 
   const updateCNPath = () => {
+    if (!cn_path_input_value) {
+      return;
+    }
     // change TLI path
-    plugin.setCNPath(input_value);
-    Log("New central note path: " + input_value, true);
-    document.getElementById("tli_path").textContent = input_value;
-
-    // recreate path information
-    db.update();
-    plugin.rerender();
+    plugin.updateSettings({ CN_path: cn_path_input_value });
+    Log("New central note path: " + cn_path_input_value, true);
+    document.getElementById("tli_path").textContent = cn_path_input_value;
+    new Notice("New Central Note path saved");
 
     // clear selection dropdown list
-    document.getElementById("CN_select").value = "";
+    //document.getElementById("CN_select").value = "";
+    cn_input.value = "";
+    cn_path_input_value = "";
   };
 </script>
 
-<div class="path">
-  <label for="myBrowser">Path of your Central Note (start typing to see suggestions):</label>
-  <input bind:value={input_value} list="notes" id="CN_select" />
-  <datalist id="notes">
-    {#each all_files as filepath}
-      <option value={filepath} />{/each}
-  </datalist>
+<div id="settings-container">
+  <div class="path">
+    <h2>Path of your Central Note</h2>
+    Current path:<span id="tli_path">{current_tli}</span><br />
+    <label for="myBrowser"> New path:</label>
+    <input
+      type="text"
+      bind:this={cn_input}
+      bind:value={cn_path_input_value}
+      list="notes"
+      id="CN_select"
+      placeholder="Start typing to see suggestions..."
+    />
+    <datalist id="notes">
+      {#each all_files as filepath}
+        <option value={filepath} />{/each}
+    </datalist>
 
-  <button
-    id="update_TLI_path_button"
-    type="button"
-    on:click={() => {
-      updateCNPath();
-    }}>Save settings & rebuild Map of Content</button
-  >
+    <button
+      id="update_TLI_path_button"
+      type="button"
+      on:click={() => {
+        updateCNPath();
+      }}>Save</button
+    >
+  </div>
+  <br />
+  <ExcludedFolders {app} {plugin} />
+  <ExcludedFilenames {app} {plugin} />
 </div>
- 
-<br />
-Current Central Note: <span id="tli_path">{current_tli}</span>
 
 <style>
+  #settings-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+  }
   #CN_select {
-    width: 200px;
+    min-width: 200px;
+    width: 50%;
+    font-size: 1em;
   }
   #update_TLI_path_button {
     margin-left: auto;
     margin-right: auto;
+  }
+  h2 {
+    text-align: left;
   }
 </style>

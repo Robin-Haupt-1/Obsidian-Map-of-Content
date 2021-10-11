@@ -60,3 +60,34 @@ export const NavigateToFile = async (
     app.workspace.openLinkText(path, "/")
     //await leaf.openFile(file);
 };
+
+/** Get the paths of all folders in the vault, empty or not */
+export const GetAllFolders = (app: App): string[] => {
+    let vault_files = app.vault.getFiles()
+    let all_folder_paths = []
+    vault_files.forEach((file) => {
+        // cut of filename
+        let folder_path = file.path.slice(0, file.path.length - (file.basename.length + file.extension.length + 1))
+        // add path to collected paths
+        if (folder_path.length && !all_folder_paths.contains(folder_path)) {
+            all_folder_paths.push(folder_path)
+        }
+    })
+
+    // store all parent folder paths as unique paths if they aren't yet because they don't include any notes directly
+    all_folder_paths.forEach((path) => {
+        let all_sub_paths = path.split("/")
+        for (let i = 1; i < all_sub_paths.length - 1; i++) {
+            let partial_path = all_sub_paths.slice(0, i).join("/") + "/"
+            if (!all_folder_paths.contains(partial_path)) {
+                all_folder_paths.push(partial_path)
+            }
+        }
+
+
+
+    })
+ 
+
+    return all_folder_paths
+}
