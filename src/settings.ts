@@ -22,8 +22,7 @@ export const DEFAULT_SETTINGS: MOCSettings = {
 /** take a legacy settings object and transform it till it conforms to the current version */
 export function UpgradeSettings(object: any, app: App) {
     try {
-        console.log(object)
-        // abort if settings are already in current version format
+         // abort if settings are already in current version format
         if (object["settings_version"] === DEFAULT_SETTINGS["settings_version"]) {
             Log("Settings already in current version", true)
             return object
