@@ -42,6 +42,28 @@ export default class MOCPlugin extends Plugin {
 			}
 		});
 
+		this.addCommand({
+			id: 'open-note-as-central-note',
+			name: 'Set open note as Central Note',
+			callback: () => {
+				let errors = []
+				// make sure a file is opened
+				if (this.app.workspace.getActiveFile() == null) {
+					errors.push("No file has been opened")
+				}
+				else if (this.isExludedFile(this.app.workspace.getActiveFile())) {
+					errors.push("This file has been excluded from the Map of Content.")
+				}
+				if (errors.length) {
+					new Notice(errors[0])
+					return
+				}
+				// get path of open note 
+				this.updateSettings({ CN_path: this.app.workspace.getActiveFile().path });
+				this.db.update()
+
+			}
+		});
 		//Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? 
 		//this.statusbartext = this.addStatusBarItem()
 		//this.statusbartext.setText("Total number of notes: " + String(l.count()));
@@ -165,7 +187,7 @@ class MOCSettingTab extends PluginSettingTab {
 		}
 		this._app = new Settings({
 			target: (this as any).containerEl,
-			props: { app: this.app,   plugin: this.plugin },
+			props: { app: this.app, plugin: this.plugin },
 		})
 	}
 	hide(): void {
