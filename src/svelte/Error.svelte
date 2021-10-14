@@ -2,9 +2,7 @@
   export let message: String;
 </script>
 
-<div class="errors">
-  {@html message}
-</div>
+
 
 <style>
   .errors {

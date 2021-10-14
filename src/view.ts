@@ -27,7 +27,7 @@ export default class MOCView extends ItemView {
     this.app = this.plugin.app
     this.plugin.registerViewInstance(this)
     this.plugin.app.workspace.onLayoutReady(() => this.init())
-    
+
     // rerender on css change to adapt to dark/light mode changes
     this.plugin.app.workspace.on("css-change", () => {
       this.rerender()
@@ -97,7 +97,7 @@ export default class MOCView extends ItemView {
     else if (this.app.workspace.getActiveFile() == null) {
       errors.push("No file has been opened")
     }
-    else if(this.plugin.isExludedFile(this.app.workspace.getActiveFile())){
+    else if (this.plugin.isExludedFile(this.app.workspace.getActiveFile())) {
       errors.push("This file has been excluded from the Map of Content.")
     }
     // get path of open note 
@@ -105,15 +105,15 @@ export default class MOCView extends ItemView {
       this.open_file_path = this.app.workspace.getActiveFile().path
       if (this.db.getNoteFromPath(this.open_file_path) == undefined) {
         // make sure file is in library   
-        errors.push("This file hasn't been indexed yet. Update the Map of Content")
+        errors.push("This file hasn't been indexed yet. Update the Map of Content to include it.")
       }
     }
 
     // Show error message if necessary
     if (errors.length > 0) {
-      this.errorview = new Error({
+      this._app = new PathView({
         target: (this as any).contentEl,
-        props: { message: errors[0] },
+        props: { paths: [], app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: "None", errors: errors },
 
       })
       return
@@ -132,7 +132,7 @@ export default class MOCView extends ItemView {
     // create new pathview
     this._app = new PathView({
       target: (this as any).contentEl,
-      props: { paths: paths, app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: this.open_file_path },
+      props: { paths: paths, app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: this.open_file_path, errors: [] },
 
     })
   }

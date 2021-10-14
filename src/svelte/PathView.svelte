@@ -4,13 +4,14 @@
     import { LINKED_BOTH, LINKED_TO, LINKED_FROM } from "../constants";
     import { GetDisplayName, IsCtrlPressed, NavigateToFile } from "../utils";
     import { onMount } from "svelte";
-    import SaplingImage from './SaplingImage.svelte'
+    import SaplingImage from "./SaplingImage.svelte";
     import Descendants from "./Descendants.svelte";
 
     export let paths: [string, string][][];
     export let app: App;
     export let db: DBManager;
     export let cn_path: string;
+    export let errors: string[];
 
     export let open_note_path: string;
     let scroll_up_div;
@@ -29,12 +30,12 @@
     }
     /**show to "scroll to top" arrow if the user has scrolled the view*/
     function on_scroll(position: number) {
-        if (position != 0 && !scroll_up_div_already_visible) {
+        if (position > 30 && !scroll_up_div_already_visible) {
             scroll_up_div.style.display = "block";
             scroll_up_div_already_visible = true;
         }
         //hide the arrow if user scrolls back to the top
-        else if (position === 0) {
+        else if (position <= 30 && scroll_up_div_already_visible) {
             scroll_up_div.style.display = "none";
             scroll_up_div_already_visible = false;
         }
@@ -75,13 +76,32 @@
         />
     </symbol></svg
 >
+<!-- define hamburger menu svg-->
+<svg display="none">
+    <symbol
+        id="hamburger-menu"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+    >
+        <path d="M24 6h-24v-4h24v4zm0 4h-24v4h24v-4zm0 8h-24v4h24v-4z" />
+    </symbol></svg
+>
 <div
     id="main_moc_div"
     class={dark_mode}
     bind:this={main_div}
     on:scroll={(e) => on_scroll(e.target.scrollTop)}
 >
-    {#if paths.length == 0}
+    <div id="top-bar">
+        <svg class="path-arrow">
+            <use href="#hamburger-menu" />
+        </svg>
+    </div>
+    {#if errors.length}
+        <div class="errors">
+            {@html errors[0]}
+        </div>
+    {:else if paths.length == 0}
         This file doesn't have any connections to <a
             class="link"
             title={cn_path}
@@ -97,7 +117,7 @@
             }}>update</a
         >
         your Map of Content and watch it grow!<br />
-        <SaplingImage/>
+        <SaplingImage />
     {:else}
         {#each paths as path}
             <div class="path">
@@ -160,6 +180,18 @@
 </div>
 
 <style>
+    div#top-bar {
+        display:none;
+        text-align: right;
+    }
+    div#top-bar svg {
+        float: right;
+        clear: both;
+        width: 24px;
+        margin-left:10px;
+        margin-bottom: 10px;
+        height: 24px;
+    }
     div#main_moc_div {
         padding: initial;
         width: initial;
@@ -168,8 +200,8 @@
         overflow: auto;
     }
     div#main_moc_div.dark-mode {
-        color:#DCDDDE; 
-        }
+        color: #dcddde;
+    }
 
     div#scroll_up {
         color: gray;
@@ -225,5 +257,12 @@
     div.dark-mode svg.path-arrow {
         fill: lightgray;
     }
-
+    .errors {
+        padding: 10px;
+        width: initial;
+        height: initial;
+        position: initial;
+        overflow-y: initial;
+        overflow-wrap: initial;
+    }
 </style>
