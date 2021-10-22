@@ -95,7 +95,7 @@ export default class MOCView extends ItemView {
 
     // make sure a file is opened
     else if (this.app.workspace.getActiveFile() == null) {
-      errors.push("No file has been opened")
+      errors.push("No file is open")
     }
     else if (this.plugin.isExludedFile(this.app.workspace.getActiveFile())) {
       errors.push("This file has been excluded from the Map of Content.")
@@ -105,7 +105,7 @@ export default class MOCView extends ItemView {
       this.open_file_path = this.app.workspace.getActiveFile().path
       if (this.db.getNoteFromPath(this.open_file_path) == undefined) {
         // make sure file is in library   
-        errors.push("This file hasn't been indexed yet. Update the Map of Content to include it.")
+        errors.push("This file hasn't been indexed yet. Please update the Map of Content to include it.")
       }
     }
 
