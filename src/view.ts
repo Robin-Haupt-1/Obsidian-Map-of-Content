@@ -8,14 +8,12 @@ import { MOC_VIEW_TYPE } from './constants'
 import type MOCPlugin from './main'
 import type { Path } from './types'
 import type { DBManager } from './db'
-
-import Error from './svelte/Error.svelte'
+ 
 
 import PathView from './svelte/PathView.svelte'
 export default class MOCView extends ItemView {
   db: DBManager
-  _app: PathView
-  errorview: Error
+  _app: PathView 
   plugin: MOCPlugin
   open_file_path: string
 
@@ -25,6 +23,7 @@ export default class MOCView extends ItemView {
     this.plugin = plugin
     this.db = this.plugin.db
     this.app = this.plugin.app
+    // register with the main class
     this.plugin.registerViewInstance(this)
     this.plugin.app.workspace.onLayoutReady(() => this.init())
 
@@ -38,17 +37,12 @@ export default class MOCView extends ItemView {
   init() {
     // update the path view every time a file is opened
     this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.onFileOpen()))
-    //register with the main class
-    //show "loading" message
-    if (this.errorview) {
-      this.errorview.$destroy()
-      this.errorview = undefined
-    }
-    this.errorview = new Error({
+    //show "loading" message 
+    this._app = new PathView({
       target: (this as any).contentEl,
-      props: { message: "Loading..." },
+      props: { paths: [], app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: "None", errors: ["Loading..."] },
 
-    })
+    }) 
   }
 
   async onOpen(): Promise<void> {
@@ -61,7 +55,7 @@ export default class MOCView extends ItemView {
       this.rerender()
     }
   }
-
+ 
   /** reload paths and recreate the svelte instance */
   rerender(): void {
     Log("Rerender called on view", true)
@@ -72,11 +66,7 @@ export default class MOCView extends ItemView {
       this._app.$destroy()
       this._app = undefined
     }
-
-    if (this.errorview) {
-      this.errorview.$destroy()
-      this.errorview = undefined
-    }
+ 
 
 
     let errors = []
@@ -160,11 +150,7 @@ export default class MOCView extends ItemView {
       this._app.$destroy()
       this._app = undefined
     }
-
-    if (this.errorview) {
-      this.errorview.$destroy()
-      this.errorview = undefined
-    }
+ 
     this.plugin.unregisterViewInstance(this)
 
     return Promise.resolve();
