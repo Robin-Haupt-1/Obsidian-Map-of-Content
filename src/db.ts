@@ -373,6 +373,23 @@ export class DBManager {
         })
 
     }
+    getLinksFromNote(path: string, contained_in_db: boolean=false):string[]{
+        let linkcache = this.app.metadataCache.getCache(path).links
+        let all_links:string[] = []
+        if (linkcache) {
+            linkcache.forEach((val: LinkCache) => {
+                // check if the link is valid 
+                let link_dest = this.app.metadataCache.getFirstLinkpathDest(val.link, "/")
+                //TODO is it neccessary to avoid including links multiple times? maybe they can't even be duplicate in the linkcache
+                if (link_dest && !all_links.includes(link_dest.path) && (!contained_in_db || this.db_keys.contains(link_dest.path))) {
+                    all_links.push(link_dest.path)
+
+                }
+
+            })
+        }
+        return all_links
+    }
 
 
 

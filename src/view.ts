@@ -1,6 +1,6 @@
 import 'svelte'
 
-import { ItemView, Notice, TFile, WorkspaceLeaf } from 'obsidian'
+import { ItemView, LinkCache, Notice, TFile, WorkspaceLeaf } from 'obsidian'
 
 
 import { Log } from './utils';
@@ -8,14 +8,18 @@ import { MOC_VIEW_TYPE } from './constants'
 import type MOCPlugin from './main'
 import type { Path } from './types'
 import type { DBManager } from './db'
- 
+
 
 import PathView from './svelte/PathView.svelte'
 export default class MOCView extends ItemView {
   db: DBManager
-  _app: PathView 
+  _app: PathView
   plugin: MOCPlugin
   open_file_path: string
+  max_indent: number = 5
+
+  monitoring_note: string
+  monitoring_note_links: string[]
 
 
   constructor(leaf: WorkspaceLeaf, plugin: MOCPlugin) {
@@ -36,13 +40,13 @@ export default class MOCView extends ItemView {
 
   init() {
     // update the path view every time a file is opened
-    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => this.onFileOpen()))
+    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => { this.monitorNote(file.path); this.onFileOpen() }))
     //show "loading" message 
     this._app = new PathView({
       target: (this as any).contentEl,
-      props: { paths: [], app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: "None", errors: ["Loading..."] },
+      props: { view: this, paths: [], app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: "None", errors: ["Loading..."] },
 
-    }) 
+    })
   }
 
   async onOpen(): Promise<void> {
@@ -55,7 +59,7 @@ export default class MOCView extends ItemView {
       this.rerender()
     }
   }
- 
+
   /** reload paths and recreate the svelte instance */
   rerender(): void {
     Log("Rerender called on view", true)
@@ -66,7 +70,7 @@ export default class MOCView extends ItemView {
       this._app.$destroy()
       this._app = undefined
     }
- 
+
 
 
     let errors = []
@@ -103,7 +107,7 @@ export default class MOCView extends ItemView {
     if (errors.length > 0) {
       this._app = new PathView({
         target: (this as any).contentEl,
-        props: { paths: [], app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: "None", errors: errors },
+        props: { view: this, paths: [], app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: "None", errors: errors },
 
       })
       return
@@ -122,7 +126,7 @@ export default class MOCView extends ItemView {
     // create new pathview
     this._app = new PathView({
       target: (this as any).contentEl,
-      props: { paths: paths, app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: this.open_file_path, errors: [] },
+      props: { view: this, paths: paths, app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: this.open_file_path, errors: [] },
 
     })
   }
@@ -150,11 +154,33 @@ export default class MOCView extends ItemView {
       this._app.$destroy()
       this._app = undefined
     }
- 
+
     this.plugin.unregisterViewInstance(this)
 
     return Promise.resolve();
 
+  }
+
+  monitorNote(path: string) {
+    console.log("Monitornote called on "+path)
+    let rerender = false;
+    if (this.monitoring_note) {
+      if (!(path === this.monitoring_note)) {
+
+        let now_links = this.db.getLinksFromNote(this.monitoring_note)
+        if (!(JSON.stringify(now_links) == JSON.stringify(this.monitoring_note_links))) {
+          console.log("links changed!")
+          rerender = true
+        }
+      }
+
+
+    }
+    this.monitoring_note = path
+    this.monitoring_note_links = this.db.getLinksFromNote(path)
+    if (rerender) {
+      this.db.update()
+    }
   }
 
 }
