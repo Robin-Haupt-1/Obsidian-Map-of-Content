@@ -12,10 +12,11 @@
     export let db: DBManager;
     export let cn_path: string;
     export let errors: string[];
+    export let view: any;
 
     export let open_note_path: string;
-    let max_indent=3;
-    
+    let max_indent = 3;
+    let renderDescendants = true;
     let scroll_up_div;
     let main_div;
     let scroll_up_div_already_visible = false;
@@ -25,7 +26,7 @@
     onMount(() => {
         scroll_to_top();
     });
-
+    let redrawCallbacks = [];
     /** Scroll the whole view to the top*/
     function scroll_to_top() {
         main_div.scrollTop = 0;
@@ -42,9 +43,36 @@
             scroll_up_div_already_visible = false;
         }
     }
+    function rerenderDescendants(new_max_indent) {
+        //renderDescendants=false;
+        //setTimeout(() => renderDescendants = true, 0);
+        console.log("redrawing, new max_indent " + String(new_max_indent));
+        for (let func of redrawCallbacks) {
+            func(new_max_indent);
+        }
+    }
+    function registerRedrawDescendantCallback(redraw: Function) {
+        redrawCallbacks.push(redraw);
+    }
+
+    function registerIndentCallback(indent: number) {
+        console.log("indentation registered: " + String(indent));
+        if (indent > max_indent) {
+            max_indent = indent;
+        }
+    }
 </script>
 
-<!-- define right pointer arrow svg-->
+<!-- expand svg-->
+<svg display="none">
+    <symbol
+        id="expand-arrow-svg"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        ><path d="M22 12l-20 12 5-12-5-12z" />
+    </symbol></svg
+>
+<!-- right pointer arrow svg-->
 <svg display="none">
     <symbol
         id="pointer-arrow-right-svg-moc"
@@ -55,7 +83,7 @@
         />
     </symbol></svg
 >
-<!-- define left pointer arrow svg-->
+<!-- left pointer arrow svg-->
 <svg display="none">
     <symbol
         id="pointer-arrow-left-svg-moc"
@@ -66,7 +94,7 @@
         />
     </symbol></svg
 >
-<!-- define both directions pointer arrow svg-->
+<!-- both directions pointer arrow svg-->
 <svg display="none">
     <symbol
         id="pointer-arrow-both-svg-moc"
@@ -78,7 +106,7 @@
         />
     </symbol></svg
 >
-<!-- define hamburger menu svg-->
+<!-- hamburger menu svg-->
 <svg display="none">
     <symbol
         id="hamburger-menu"
@@ -88,120 +116,209 @@
         <path d="M24 6h-24v-4h24v4zm0 4h-24v4h24v-4zm0 8h-24v4h24v-4z" />
     </symbol></svg
 >
-<div
-    id="main_moc_div"
-    class={dark_mode}
-    bind:this={main_div}
-    on:scroll={(e) => on_scroll(e.target.scrollTop)}
+<!-- sync svg-->
+<svg display="none">
+    <symbol
+        id="sync-circle"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+    >
+        <path
+            d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5 20l-1.359-2.038c-1.061.653-2.305 1.038-3.641 1.038-3.859 0-7-3.14-7-7h2c0 2.757 2.243 5 5 5 .927 0 1.786-.264 2.527-.708l-1.527-2.292h5.719l-1.719 6zm0-8c0-2.757-2.243-5-5-5-.927 0-1.786.264-2.527.708l1.527 2.292h-5.719l1.719-6 1.359 2.038c1.061-.653 2.305-1.038 3.641-1.038 3.859 0 7 3.14 7 7h-2z"
+        />
+    </symbol></svg
 >
+<!-- sync svg-->
+<svg display="none">
+    <symbol
+        id="sync-circle"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+    >
+        <path
+            d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5 20l-1.359-2.038c-1.061.653-2.305 1.038-3.641 1.038-3.859 0-7-3.14-7-7h2c0 2.757 2.243 5 5 5 .927 0 1.786-.264 2.527-.708l-1.527-2.292h5.719l-1.719 6zm0-8c0-2.757-2.243-5-5-5-.927 0-1.786.264-2.527.708l1.527 2.292h-5.719l1.719-6 1.359 2.038c1.061-.653 2.305-1.038 3.641-1.038 3.859 0 7 3.14 7 7h-2z"
+        />
+    </symbol></svg
+>
+<div id="all-container">
     <div id="top-bar">
-        <svg class="path-arrow">
-            <use href="#hamburger-menu" />
-        </svg>
-    </div>
-    {#if errors.length}
-        <div class="errors">
-            {@html errors[0]}
-        </div>
-    {:else if paths.length == 0}
-        This file doesn't have any connections to <a
-            class="link"
-            title={cn_path}
-            on:click={(event) => NavigateToFile(app, cn_path, event)}
-        >
-            {GetDisplayName(cn_path, db)}</a
-        >.<br /><br /> Link it to a file that is part of your Map of Content.
-        Then
-        <a
-            class="link"
-            on:click={() => {
-                db.update();
-            }}>update</a
-        >
-        your Map of Content and watch it grow!<br />
-        <SaplingImage />
-    {:else}
-        {#each paths as path}
-            <div class="path">
-                {#each path.reverse() as pathitem, i}
-                    {#if i == 0}
-                        <span title={pathitem[0]}>
-                            {GetDisplayName(pathitem[0], db)}</span
-                        >
-                    {:else}
-                        <a
-                            class="link"
-                            title={pathitem[0]}
-                            on:click={(event) =>
-                                NavigateToFile(app, pathitem[0], event)}
-                        >
-                            {GetDisplayName(pathitem[0], db)}</a
-                        >
-                    {/if}
-                    {#if pathitem[1] == LINKED_FROM}
-                        <svg class="path-arrow">
-                            <use href="#pointer-arrow-right-svg-moc" />
-                        </svg>
-                    {:else if pathitem[1] == LINKED_TO}
-                        <svg class="path-arrow">
-                            <use href="#pointer-arrow-left-svg-moc" />
-                        </svg>
-                    {:else if pathitem[1] == LINKED_BOTH}
-                        <svg class="path-arrow">
-                            <use href="#pointer-arrow-both-svg-moc" />
-                        </svg>
-                    {/if}
-                {/each}
-            </div>
-            <br />
-        {/each}
-
-        <br />
-        <ul>
-            <Descendants
-                {db}
-                {app}
-                note_path={open_note_path}
-                indentation={0}
-                {max_indent}
-            />
-        </ul>
-        <div
-            bind:this={scroll_up_div}
-            id="scroll_up"
-            title="Scroll to top"
-            on:click={() => scroll_to_top()}
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                ><path d="M24 12l-12-9v5h-12v8h12v5l12-9z" /></svg
+        <div id="top-bar-container">
+            <div
+                id="update-moc"
+                class="action"
+                on:click={() => {
+                    db.update();
+                }}
             >
-        </div>{/if}
+                <svg class="">
+                    <use href="#sync-circle" />
+                </svg>
+            </div>
+            
+            <div
+                id="minux-expand"
+                class="action"
+                on:click={() => {
+                    if (max_indent > 1) {
+                        rerenderDescendants(max_indent - 1);
+                        max_indent -= 1;
+                    }
+                }}
+            >
+                <svg class="" style="transform: rotate(-90deg)">
+                    <use href="#expand-arrow-svg" />
+                </svg>
+            </div>
+            <div
+                id="plus-expand"
+                class="action"
+                on:click={() => {
+                                       
+
+                    rerenderDescendants(max_indent + 1);
+                }}
+            >
+                <svg class="" style="transform: rotate(90deg)">
+                    <use href="#expand-arrow-svg" />
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div
+        id="main_moc_div"
+        class={dark_mode}
+        bind:this={main_div}
+        on:scroll={(e) => on_scroll(e.target.scrollTop)}
+    >
+        {#if errors.length}
+            <div class="errors">
+                {@html errors[0]}
+            </div>
+        {:else if paths.length == 0}
+            This file doesn't have any connections to <a
+                class="link"
+                title={cn_path}
+                on:click={(event) => NavigateToFile(app, cn_path, event)}
+            >
+                {GetDisplayName(cn_path, db)}</a
+            >.<br /><br /> Link it to a file that is part of your Map of
+            Content. Then
+            <a
+                class="link"
+                on:click={() => {
+                    db.update();
+                }}>update</a
+            >
+            your Map of Content and watch it grow!<br />
+            <SaplingImage />
+        {:else}
+            {#each paths as path}
+                <div class="path">
+                    {#each path.reverse() as pathitem, i}
+                        {#if i == 0}
+                            <span title={pathitem[0]}>
+                                {GetDisplayName(pathitem[0], db)}</span
+                            >
+                        {:else}
+                            <a
+                                class="link"
+                                title={pathitem[0]}
+                                on:click={(event) =>
+                                    NavigateToFile(app, pathitem[0], event)}
+                            >
+                                {GetDisplayName(pathitem[0], db)}</a
+                            >
+                        {/if}
+                        {#if pathitem[1] == LINKED_FROM}
+                            <svg class="path-arrow">
+                                <use href="#pointer-arrow-right-svg-moc" />
+                            </svg>
+                        {:else if pathitem[1] == LINKED_TO}
+                            <svg class="path-arrow">
+                                <use href="#pointer-arrow-left-svg-moc" />
+                            </svg>
+                        {:else if pathitem[1] == LINKED_BOTH}
+                            <svg class="path-arrow">
+                                <use href="#pointer-arrow-both-svg-moc" />
+                            </svg>
+                        {/if}
+                    {/each}
+                </div>
+                <br />
+            {/each}
+
+            <br />
+            <ul>
+                {#if renderDescendants}
+                    <Descendants
+                        {db}
+                        {app}
+                        {view}
+                        note_path={open_note_path}
+                        indentation={0}
+                        {max_indent}
+                        registerCallback={registerRedrawDescendantCallback}
+                        registerIndent={registerIndentCallback}
+                    />{/if}
+            </ul>
+            <div
+                bind:this={scroll_up_div}
+                id="scroll_up"
+                title="Scroll to top"
+                on:click={() => scroll_to_top()}
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    ><path d="M24 12l-12-9v5h-12v8h12v5l12-9z" /></svg
+                >
+            </div>{/if}
+    </div>
 </div>
 
 <style>
-    div#top-bar {
-        display:none;
-        text-align: right;
+    div#all-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
-    div#top-bar svg {
-        float: right;
-        clear: both;
-        width: 24px;
-        margin-left:10px;
+    div#top-bar {
+        height: 30px;
+        width: 100%;
         margin-bottom: 10px;
-        height: 24px;
+    }
+    div#top-bar div#top-bar-container div.action {
+        height: 20px;
+        width: 20px;
+        margin: 5px;
+        float: left;
+    }
+    div#top-bar div#top-bar-container {
+        height: 30px;
+        width: 130px;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+    div#top-bar div#top-bar-container div.action svg {
+        height: 20px;
+        width: 20px;
+        fill: darkgrey;
+    }
+    div#top-bar div#top-bar-container div.action:hover svg { 
+        fill: grey;
     }
     div#main_moc_div {
         padding: initial;
         width: initial;
-        height: 100%;
+        height: initial;
         position: initial;
         overflow: auto;
+        flex: 1;
     }
+
     div#main_moc_div.dark-mode {
         color: #dcddde;
     }
@@ -219,6 +336,7 @@
         right: 5px;
         top: 4px;
     }
+
     div#scroll_up {
         cursor: pointer;
         font-size: 25px;

@@ -7,8 +7,11 @@
   export let db: DBManager;
   export let indentation: number;
   export let max_indent: number;
-
+  export let view:any;
   export let app: App;
+  export let registerCallback:Function
+  export let registerIndent:Function
+  registerIndent(indentation)
   let dark_mode = document.body.classList.contains("theme-dark")
     ? "dark-mode"
     : "light-mode";
@@ -18,9 +21,15 @@
   if (db.descendants.has(note_path)) {
     children = db.descendants.get(note_path).slice();
   }
+  function redraw(new_max_indent:number){
+    //console.log("redraw called")
+    max_indent=new_max_indent
+    expanded = true ? indentation < max_indent : false;
+  }
+  registerCallback(redraw)
 </script>
 
-<!-- define expand svg-->
+<!-- expand svg-->
 <svg display="none">
   <symbol
     id="expand-arrow-svg"
@@ -73,6 +82,10 @@
             {app}
             note_path={child}
             indentation={indentation + 1}
+            {max_indent}
+            {view}
+            {registerCallback}
+            {registerIndent}
           />
         {/each}
       {/if}
