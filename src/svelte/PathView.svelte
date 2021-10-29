@@ -14,6 +14,8 @@
     export let errors: string[];
 
     export let open_note_path: string;
+    let max_indent=3;
+    
     let scroll_up_div;
     let main_div;
     let scroll_up_div_already_visible = false;
@@ -161,6 +163,7 @@
                 {app}
                 note_path={open_note_path}
                 indentation={0}
+                {max_indent}
             />
         </ul>
         <div

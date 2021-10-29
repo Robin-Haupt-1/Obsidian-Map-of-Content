@@ -6,11 +6,13 @@
   export let note_path: string;
   export let db: DBManager;
   export let indentation: number;
+  export let max_indent: number;
+
   export let app: App;
   let dark_mode = document.body.classList.contains("theme-dark")
     ? "dark-mode"
     : "light-mode";
-  let expanded = true ? indentation < 3 : false;
+  let expanded = true ? indentation < max_indent : false;
 
   let children = [];
   if (db.descendants.has(note_path)) {
