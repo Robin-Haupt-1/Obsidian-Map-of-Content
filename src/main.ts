@@ -16,7 +16,7 @@ export default class MOCPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings()
 
-		this.db = new DBManager(this.app, this)
+		this.db = new DBManager(this)
 
 		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view = new MOCView(leaf, this)))
 
