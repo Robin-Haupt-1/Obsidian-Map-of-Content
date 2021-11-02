@@ -19,9 +19,12 @@ export class DBManager {
     duplicate_file_status: Map<string, boolean>
     database_complete: boolean // whether the db etc. are in a good state and can be used
     database_initialized: boolean = false // false on plugin launch before the first (successful or failed) db update attempt
+    database_loading: boolean = false // true while the database is being built
+    //TODO consolidate database_initialized and database_loading into one
 
-    constructor(app: App, plugin: MOCPlugin) {
-        this.app = app;
+
+    constructor(plugin: MOCPlugin) {
+        this.app = plugin.app;
         this.plugin = plugin
         this.all_paths = []
         this.db = {}
@@ -32,8 +35,9 @@ export class DBManager {
 
     }
 
-    async update() {
+    async update(silent: boolean = false) {
         this.database_complete = false
+        this.database_loading = true
 
         try {
             // make sure the Central note exists
@@ -45,9 +49,10 @@ export class DBManager {
             else {
                 // save timestamp for tracking duration of rebuilding
                 let start_tmsp = Date.now()
-
-                new Notice('Updating the Map of Content...');
-                Log("Updating the Map of Content...")
+                if (!silent) {
+                    new Notice('Updating the Map of Content...');
+                    Log("Updating the Map of Content...")
+                }
 
                 await new Promise(r => setTimeout(r, 0))
                 // update db
@@ -67,17 +72,21 @@ export class DBManager {
 
                 this.updateDescendants()
 
-                // mark database as complete
-                this.database_complete = true
-                new Notice("Update complete")
-                Log("Update complete")
+                if (!silent) {
+                    new Notice("Update complete")
+                    Log("Update complete")
+                }
 
                 let end_tmsp = Date.now()
                 Log("Took " + String((end_tmsp - start_tmsp) / 1000))
+
+                // mark database as complete
+                this.database_complete = true
             }
 
         } finally {
             this.database_initialized = true
+            this.database_loading = false
             this.plugin.rerender()
         }
 
@@ -373,9 +382,9 @@ export class DBManager {
         })
 
     }
-    getLinksFromNote(path: string, contained_in_db: boolean=false):string[]{
+    getLinksFromNote(path: string, contained_in_db: boolean = false): string[] {
         let linkcache = this.app.metadataCache.getCache(path).links
-        let all_links:string[] = []
+        let all_links: string[] = []
         if (linkcache) {
             linkcache.forEach((val: LinkCache) => {
                 // check if the link is valid 
