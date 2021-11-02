@@ -10,10 +10,10 @@ import type { Path } from './types'
 import type { DBManager } from './db'
 
 
-import PathView from './svelte/PathView.svelte'
+import View from './svelte/View.svelte'
 export default class MOCView extends ItemView {
   db: DBManager
-  _app: PathView
+  _app: View
   plugin: MOCPlugin
   open_file_path: string
   max_indent: number = 5
@@ -42,7 +42,7 @@ export default class MOCView extends ItemView {
     // update the path view every time a file is opened
     this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => { this.monitorNote(file.path); this.onFileOpen() }))
     //show "loading" message 
-    this._app = new PathView({
+    this._app = new View({
       target: (this as any).contentEl,
       props: { view: this, paths: [], app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: "None", errors: ["Loading..."] },
 
@@ -77,8 +77,8 @@ export default class MOCView extends ItemView {
     //console.log(this.open_file_path)
 
     // during startup (before first db update is completed) show loading message
-    if (!this.db.database_initialized) {
-      errors.push("Please wait...")
+    if (!this.db.database_initialized || this.db.database_loading) {
+      errors.push("Loading...")
     }
 
     // make sure the database is usable
@@ -105,7 +105,7 @@ export default class MOCView extends ItemView {
 
     // Show error message if necessary
     if (errors.length > 0) {
-      this._app = new PathView({
+      this._app = new View({
         target: (this as any).contentEl,
         props: { view: this, paths: [], app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: "None", errors: errors },
 
@@ -124,7 +124,7 @@ export default class MOCView extends ItemView {
     )
 
     // create new pathview
-    this._app = new PathView({
+    this._app = new View({
       target: (this as any).contentEl,
       props: { view: this, paths: paths, app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: this.open_file_path, errors: [] },
 
@@ -179,7 +179,7 @@ export default class MOCView extends ItemView {
     this.monitoring_note = path
     this.monitoring_note_links = this.db.getLinksFromNote(path)
     if (rerender) {
-      this.db.update()
+      this.db.update(true)
     }
   }
 
