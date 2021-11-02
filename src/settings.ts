@@ -2,6 +2,11 @@ import type { App } from 'obsidian'
 
 import type MOCPlugin from "./main"
 import { Log } from './utils'
+import {  getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
+import { CENTRAL_NOTE_PATH_DEFAULT, MOC_VIEW_TYPE, ViewCallback } from './constants'
+import type { DBManager } from './db'
+import MOCView from './view';
+import Settings from './svelte/Settings.svelte'; 
 
 export interface MOCSettings {
     CN_path: string // path of the note that serves as Central Note
@@ -71,3 +76,75 @@ export function UpgradeSettings(object: any, app: App) {
         return {}
     }
 }
+
+
+export class MOCSettingTab extends PluginSettingTab {
+	plugin: MOCPlugin;
+	_app: Settings;
+	db: DBManager
+
+	constructor(plugin: MOCPlugin ) {
+		super(plugin.app, plugin);
+		this.plugin = plugin;
+		this.db = plugin.db
+		this._app = undefined
+	}
+
+	display(): void {
+		if (this._app) {
+			this._app.$destroy()
+			this._app = undefined
+
+		}
+		this._app = new Settings({
+			target: (this as any).containerEl,
+			props: { app: this.app, plugin: this.plugin },
+		})
+	}
+	hide(): void {
+		this.plugin.db.update()
+	}
+
+	/* initial trials in porting the settings to the native Obsidian presets:
+	displayv(): void {
+		let { containerEl } = this
+
+		this.containerEl.empty()
+
+		this.containerEl.createEl("h3", {
+			text: "General Settings",
+		})
+
+		new Setting(containerEl)
+			.setName("sdf")
+			.setDesc("sdfs")
+			.addDropdown((dropdown) => {
+				let all_files = this.plugin.app.vault.getFiles().map((file: TFile) => file.path);
+				all_files.forEach((file) => {
+					dropdown.addOption(file, file)
+
+
+				})
+			})
+
+
+		new Setting(containerEl)
+			.setName("sdf")
+			.setDesc("swdfs")
+			.addSearch((search) => {
+				search.registerOptionListener({ "sfs": ((sd) => "asdf"), "asdfas": ((sd) => { return "sdfas" }) }, "asd")
+				search.onChanged
+				search.setPlaceholder("adfasdf")
+				search.onChange((value) => {
+					console.log(value)
+				})
+			})
+			.addTextArea((df) => {
+
+			})
+
+
+	}*/
+
+}
+

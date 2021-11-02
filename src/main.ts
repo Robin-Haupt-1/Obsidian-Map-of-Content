@@ -4,7 +4,7 @@ import { CENTRAL_NOTE_PATH_DEFAULT, MOC_VIEW_TYPE, ViewCallback } from './consta
 import { DBManager } from './db'
 import MOCView from './view';
 import Settings from './svelte/Settings.svelte';
-import { MOCSettings, DEFAULT_SETTINGS, UpgradeSettings } from './settings';
+import { MOCSettings, DEFAULT_SETTINGS, UpgradeSettings,MOCSettingTab} from './settings';
 import { Log } from './utils';
 
 export default class MOCPlugin extends Plugin {
@@ -24,7 +24,7 @@ export default class MOCPlugin extends Plugin {
 	}
 
 	async initializePlugin() {
-		this.addSettingTab(new MOCSettingTab(this.app, this, this.db));
+		this.addSettingTab(new MOCSettingTab(this));
 
 		this.initLeaf()
 		this.db.update()
@@ -164,76 +164,5 @@ export default class MOCPlugin extends Plugin {
 		let has_excluded_filename = this.getSettingValue("exluded_filename_components").some((phrase: string) => filename.contains(phrase))
 		return has_excluded_filename
 	}
-}
-
-
-class MOCSettingTab extends PluginSettingTab {
-	plugin: MOCPlugin;
-	_app: Settings;
-	db: DBManager
-
-	constructor(app: App, plugin: MOCPlugin, db: DBManager) {
-		super(app, plugin);
-		this.plugin = plugin;
-		this.db = db
-		this._app = undefined
-	}
-
-	display(): void {
-		if (this._app) {
-			this._app.$destroy()
-			this._app = undefined
-
-		}
-		this._app = new Settings({
-			target: (this as any).containerEl,
-			props: { app: this.app, plugin: this.plugin },
-		})
-	}
-	hide(): void {
-		this.plugin.db.update()
-	}
-
-	/* initial trials in porting the settings to the native Obsidian presets:
-	displayv(): void {
-		let { containerEl } = this
-
-		this.containerEl.empty()
-
-		this.containerEl.createEl("h3", {
-			text: "General Settings",
-		})
-
-		new Setting(containerEl)
-			.setName("sdf")
-			.setDesc("sdfs")
-			.addDropdown((dropdown) => {
-				let all_files = this.plugin.app.vault.getFiles().map((file: TFile) => file.path);
-				all_files.forEach((file) => {
-					dropdown.addOption(file, file)
-
-
-				})
-			})
-
-
-		new Setting(containerEl)
-			.setName("sdf")
-			.setDesc("swdfs")
-			.addSearch((search) => {
-				search.registerOptionListener({ "sfs": ((sd) => "asdf"), "asdfas": ((sd) => { return "sdfas" }) }, "asd")
-				search.onChanged
-				search.setPlaceholder("adfasdf")
-				search.onChange((value) => {
-					console.log(value)
-				})
-			})
-			.addTextArea((df) => {
-
-			})
-
-
-	}*/
-
 }
 
