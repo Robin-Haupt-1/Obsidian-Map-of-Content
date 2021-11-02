@@ -11,6 +11,8 @@
   export let app: App;
   export let registerCallback:Function
   export let registerIndent:Function
+  export let registerManualExpand:Function
+
   registerIndent(indentation)
   let dark_mode = document.body.classList.contains("theme-dark")
     ? "dark-mode"
@@ -24,7 +26,15 @@
   function redraw(new_max_indent:number){
     //console.log("redraw called")
     max_indent=new_max_indent
-    expanded = true ? indentation < max_indent : false;
+    expanded = true ? indentation < max_indent : false; 
+  }
+
+  function toggleExpand(){
+    expanded = !expanded;
+    if (expanded){
+      registerManualExpand()
+      registerIndent(indentation+1)
+    }
   }
   registerCallback(redraw)
 </script>
@@ -50,7 +60,7 @@
           <span
             class="expand-arrow"
             on:click={() => {
-              expanded = !expanded;
+              toggleExpand()
             }}
             ><div class="expand_button">
               {#if expanded}
@@ -86,6 +96,7 @@
             {view}
             {registerCallback}
             {registerIndent}
+            {registerManualExpand}
           />
         {/each}
       {/if}

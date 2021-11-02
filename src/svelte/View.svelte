@@ -18,6 +18,7 @@
     let max_indent = 3;
     let renderDescendants = true;
     let scroll_up_div;
+    let manually_expanded = false;
     let main_div;
     let scroll_up_div_already_visible = false;
     let dark_mode = document.body.classList.contains("theme-dark")
@@ -27,6 +28,7 @@
         scroll_to_top();
     });
     let redrawCallbacks = [];
+
     /** Scroll the whole view to the top*/
     function scroll_to_top() {
         main_div.scrollTop = 0;
@@ -57,9 +59,12 @@
 
     function registerIndentCallback(indent: number) {
         console.log("indentation registered: " + String(indent));
-        if (indent > max_indent) {
+        if (indent > max_indent) { 
             max_indent = indent;
         }
+    }
+    function registerManualExpand(){
+        manually_expanded=true;
     }
 </script>
 
@@ -154,9 +159,9 @@
                     <use href="#sync-circle" />
                 </svg>
             </div>
-            
+
             <div
-                id="minux-expand"
+                id="minus-expand"
                 class="action"
                 on:click={() => {
                     if (max_indent > 1) {
@@ -173,9 +178,13 @@
                 id="plus-expand"
                 class="action"
                 on:click={() => {
-                                       
-
-                    rerenderDescendants(max_indent + 1);
+                    if (manually_expanded) {
+                        rerenderDescendants(max_indent);
+                        manually_expanded=false;
+                    }
+                    else{
+                        rerenderDescendants(max_indent+1);
+                    }
                 }}
             >
                 <svg class="" style="transform: rotate(90deg)">
@@ -259,6 +268,7 @@
                         {max_indent}
                         registerCallback={registerRedrawDescendantCallback}
                         registerIndent={registerIndentCallback}
+                        {registerManualExpand}
                     />{/if}
             </ul>
             <div
@@ -278,7 +288,7 @@
     </div>
 </div>
 
-<style>
+<style>/** TODO create svg-light-dark class instead of ten */
     div#all-container {
         display: flex;
         flex-direction: column;
@@ -297,7 +307,7 @@
     }
     div#top-bar div#top-bar-container {
         height: 30px;
-        width: 130px;
+        width: 90px;
         margin-left: auto;
         margin-right: auto;
         display: block;
@@ -307,7 +317,7 @@
         width: 20px;
         fill: darkgrey;
     }
-    div#top-bar div#top-bar-container div.action:hover svg { 
+    div#top-bar div#top-bar-container div.action:hover svg {
         fill: grey;
     }
     div#main_moc_div {
