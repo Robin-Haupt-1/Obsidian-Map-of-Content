@@ -59,12 +59,12 @@
 
     function registerIndentCallback(indent: number) {
         console.log("indentation registered: " + String(indent));
-        if (indent > max_indent) { 
+        if (indent > max_indent) {
             max_indent = indent;
         }
     }
-    function registerManualExpand(){
-        manually_expanded=true;
+    function registerManualExpand() {
+        manually_expanded = true;
     }
 </script>
 
@@ -151,6 +151,7 @@
             <div
                 id="update-moc"
                 class="action"
+                title="Update the Map of Content"
                 on:click={() => {
                     db.update();
                 }}
@@ -163,6 +164,7 @@
             <div
                 id="minus-expand"
                 class="action"
+                title="Show fewer descendants"
                 on:click={() => {
                     if (max_indent > 1) {
                         rerenderDescendants(max_indent - 1);
@@ -177,13 +179,13 @@
             <div
                 id="plus-expand"
                 class="action"
+                title="Show more descendants"
                 on:click={() => {
                     if (manually_expanded) {
                         rerenderDescendants(max_indent);
-                        manually_expanded=false;
-                    }
-                    else{
-                        rerenderDescendants(max_indent+1);
+                        manually_expanded = false;
+                    } else {
+                        rerenderDescendants(max_indent + 1);
                     }
                 }}
             >
@@ -288,7 +290,8 @@
     </div>
 </div>
 
-<style>/** TODO create svg-light-dark class instead of ten */
+<style>
+    /** TODO create svg-light-dark class instead of ten */
     div#all-container {
         display: flex;
         flex-direction: column;
