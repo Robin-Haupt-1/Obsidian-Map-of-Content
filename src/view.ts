@@ -41,12 +41,7 @@ export default class MOCView extends ItemView {
   init() {
     // update the path view every time a file is opened
     this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => { this.monitorNote(file.path); this.onFileOpen() }))
-    //show "loading" message 
-    this._app = new View({
-      target: (this as any).contentEl,
-      props: { view: this, paths: [], app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: "None", errors: ["Loading..."] },
-
-    })
+    this.rerender()
   }
 
   async onOpen(): Promise<void> {
@@ -77,8 +72,10 @@ export default class MOCView extends ItemView {
     //console.log(this.open_file_path)
 
     // during startup (before first db update is completed) show loading message
-    if (!this.db.database_initialized || this.db.database_loading) {
+    if (!this.db.database_initialized) {
       errors.push("Loading...")
+    } else if (this.db.database_loading) {
+      errors.push("Updating...")
     }
 
     // make sure the database is usable
@@ -102,31 +99,28 @@ export default class MOCView extends ItemView {
         errors.push("This file hasn't been indexed yet. Please update the Map of Content to include it.")
       }
     }
-
-    // Show error message if necessary
+    let open_note_path = "None"
     if (errors.length > 0) {
-      this._app = new View({
-        target: (this as any).contentEl,
-        props: { view: this, paths: [], app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: "None", errors: errors },
+      this.open_file_path = "None"
+      var paths = []
+    } else {
+      // get paths to open note
+      let all_paths = this.db.findPaths(this.open_file_path)
+      if (all_paths.length == 0) {
+        Log("No paths to this note", true)
+      }
 
-      })
-      return
+      paths = all_paths.map((p: Path) =>
+        p.items.slice()
+      )
+
     }
-    // get paths to open note
-    let all_paths = this.db.findPaths(this.open_file_path)
-    if (all_paths.length == 0) {
-      Log("No paths to this note", true)
-    }
 
-    // 
-    let paths = all_paths.map((p: Path) =>
-      p.items.slice()
-    )
 
-    // create new pathview
+    // create new pathview 
     this._app = new View({
       target: (this as any).contentEl,
-      props: { view: this, paths: paths, app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: this.open_file_path, errors: [] },
+      props: { plugin: this.plugin, view: this, paths: paths, app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: this.open_file_path, errors: errors },
 
     })
   }
@@ -162,7 +156,7 @@ export default class MOCView extends ItemView {
   }
 
   monitorNote(path: string) {
-    console.log("Monitornote called on "+path)
+    console.log("Monitornote called on " + path)
     let rerender = false;
     if (this.monitoring_note) {
       if (!(path === this.monitoring_note)) {
