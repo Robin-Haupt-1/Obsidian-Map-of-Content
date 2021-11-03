@@ -27,6 +27,7 @@ export default class MOCView extends ItemView {
     this.plugin = plugin
     this.db = this.plugin.db
     this.app = this.plugin.app
+
     // register with the main class
     this.plugin.registerViewInstance(this)
     this.plugin.app.workspace.onLayoutReady(() => this.init())
@@ -98,8 +99,7 @@ export default class MOCView extends ItemView {
         // make sure file is in library   
         errors.push("This file hasn't been indexed yet. Please update the Map of Content to include it.")
       }
-    }
-    let open_note_path = "None"
+    } 
     if (errors.length > 0) {
       this.open_file_path = "None"
       var paths = []

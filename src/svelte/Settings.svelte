@@ -40,7 +40,7 @@
 <div id="settings-container">
   <div class="path">
     <h2>Path of your Central Note</h2>
-    Current path:<span id="tli_path">{current_tli}</span><br />
+    Current path: <span id="tli_path">{current_tli}</span><br />
     <label for="myBrowser"> New path:</label>
     <input
       type="text"

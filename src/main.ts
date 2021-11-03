@@ -1,4 +1,3 @@
-
 import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
 import { CENTRAL_NOTE_PATH_DEFAULT, MOC_VIEW_TYPE, ViewCallback } from './constants'
 import { DBManager } from './db'
@@ -25,7 +24,6 @@ export default class MOCPlugin extends Plugin {
 
 	async initializePlugin() {
 		this.addSettingTab(new MOCSettingTab(this));
-
 		this.initLeaf()
 		this.db.update()
 
@@ -99,8 +97,7 @@ export default class MOCPlugin extends Plugin {
 
 	async loadSettings() {
 		let data = await this.loadData()
-		// upgrade settings to newest format if necessary
-		// TODO only save new if changed
+		// upgrade settings to newest format if necessary 
 		data = UpgradeSettings(data, this.app)
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
 		this.saveSettings()

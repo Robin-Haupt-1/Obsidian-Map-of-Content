@@ -1,8 +1,14 @@
 <script lang="ts">
     import type { App } from "obsidian";
     import type { DBManager } from "../db";
+    import type MOCPlugin from "../../main";
     import { LINKED_BOTH, LINKED_TO, LINKED_FROM } from "../constants";
-    import { GetDisplayName, IsCtrlPressed, NavigateToFile } from "../utils";
+    import {
+        GetDisplayName,
+        IsCtrlPressed,
+        NavigateToFile,
+        Log,
+    } from "../utils";
     import { onMount } from "svelte";
     import SaplingImage from "./SaplingImage.svelte";
     import Descendants from "./Descendants.svelte";
@@ -13,8 +19,9 @@
     export let cn_path: string;
     export let errors: string[];
     export let view: any;
-
+    export let plugin: MOCPlugin;
     export let open_note_path: string;
+
     let max_indent = 3;
     let renderDescendants = true;
     let scroll_up_div;
@@ -48,7 +55,7 @@
     function rerenderDescendants(new_max_indent) {
         //renderDescendants=false;
         //setTimeout(() => renderDescendants = true, 0);
-        console.log("redrawing, new max_indent " + String(new_max_indent));
+        Log("redrawing, new max_indent " + String(new_max_indent), true);
         for (let func of redrawCallbacks) {
             func(new_max_indent);
         }
@@ -58,7 +65,7 @@
     }
 
     function registerIndentCallback(indent: number) {
-        console.log("indentation registered: " + String(indent));
+        Log("indentation registered: " + String(indent), true);
         if (indent > max_indent) {
             max_indent = indent;
         }
@@ -201,7 +208,9 @@
         bind:this={main_div}
         on:scroll={(e) => on_scroll(e.target.scrollTop)}
     >
-        {#if errors.length}
+        {#if !(plugin.getSettingValue("showed_update_notice_for_version") === plugin.getSettingValue("plugin_version"))}
+            <div class="errors">Updated!</div>
+        {:else if errors.length}
             <div class="errors">
                 {@html errors[0]}
             </div>
@@ -291,7 +300,6 @@
 </div>
 
 <style>
-    /** TODO create svg-light-dark class instead of ten */
     div#all-container {
         display: flex;
         flex-direction: column;
@@ -373,7 +381,6 @@
     div.dark-mode div#scroll_up:hover svg {
         fill: lightgray;
     }
-
     a.link {
         cursor: pointer;
     }
