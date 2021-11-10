@@ -2,41 +2,39 @@
   import type { App } from "obsidian";
   import type { DBManager } from "../db";
   import { GetDisplayName, NavigateToFile } from "../utils";
+  import type { expandManager } from "./helpers/expandManager";
 
   export let note_path: string;
   export let db: DBManager;
   export let indentation: number;
-  export let max_indent: number;
-  export let view:any;
+  export let view: any;
   export let app: App;
-  export let registerCallback:Function
-  export let registerIndent:Function
-  export let registerManualExpand:Function
+  export let expandMan: expandManager;
 
-  registerIndent(indentation)
+  expandMan.logIndent(indentation);
   let dark_mode = document.body.classList.contains("theme-dark")
     ? "dark-mode"
     : "light-mode";
-  let expanded = true ? indentation < max_indent : false;
+
+  let expanded = true ? indentation < expandMan.initial_max_indent : false;
 
   let children = [];
   if (db.descendants.has(note_path)) {
     children = db.descendants.get(note_path).slice();
   }
-  function redraw(new_max_indent:number){
-    //console.log("redraw called")
-    max_indent=new_max_indent
-    expanded = true ? indentation < max_indent : false; 
+
+  function redraw(new_max_indent: number) {
+    expanded = true ? indentation < new_max_indent : false;
   }
 
-  function toggleExpand(){
+  function toggleExpand() {
     expanded = !expanded;
-    if (expanded){
-      registerManualExpand()
-      registerIndent(indentation+1)
+    if (expanded) {
+      expandMan.onManualExpand();
+      expandMan.logIndent(indentation + 1);
     }
   }
-  registerCallback(redraw)
+  expandMan.registerRedrawDescendantCallback(redraw);
 </script>
 
 <!-- expand svg-->
@@ -60,7 +58,7 @@
           <span
             class="expand-arrow"
             on:click={() => {
-              toggleExpand()
+              toggleExpand();
             }}
             ><div class="expand_button">
               {#if expanded}
@@ -92,11 +90,8 @@
             {app}
             note_path={child}
             indentation={indentation + 1}
-            {max_indent}
             {view}
-            {registerCallback}
-            {registerIndent}
-            {registerManualExpand}
+            {expandMan}
           />
         {/each}
       {/if}
