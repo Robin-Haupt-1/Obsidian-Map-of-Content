@@ -31,16 +31,27 @@
     new Notice("New Central Note path saved");
 
     // clear selection dropdown list
-    //document.getElementById("CN_select").value = "";
     cn_input.value = "";
     cn_path_input_value = "";
   };
+let auto_update_file_switch_checkbox
+const toggleUpdateOnFileSwitch=()=>{
+
+  plugin.updateSettings({"auto_update_on_file_change":!plugin.getSettingValue("auto_update_on_file_change")})
+  if (plugin.getSettingValue("auto_update_on_file_change")){
+    auto_update_file_switch_checkbox.checked=true
+  }
+  else{
+      auto_update_file_switch_checkbox.checked=false}
+
+
+}
 </script>
 
 <div id="settings-container">
   <div class="path">
     <h2>Path of your Central Note</h2>
-    Current path: <span id="tli_path">{current_tli}</span><br />
+    Current path:<span id="tli_path">{current_tli}</span><br />
     <label for="myBrowser"> New path:</label>
     <input
       type="text"
@@ -50,6 +61,7 @@
       id="CN_select"
       placeholder="Start typing to see suggestions..."
     />
+
     <datalist id="notes">
       {#each all_files as filepath}
         <option value={filepath} />{/each}
@@ -62,6 +74,23 @@
         updateCNPath();
       }}>Save</button
     >
+  </div>
+  <br />
+  <div><!--TODO use js or some sort of switch statement instead of defining the checkbox twice-->
+    <h2>Auto-updating the Map of Content</h2>
+    Update when switching between files {#if plugin.getSettingValue("auto_update_on_file_change")}<input
+        bind:this={auto_update_file_switch_checkbox}
+        type="checkbox"
+        id="auto-update-file-switch"
+        on:click={toggleUpdateOnFileSwitch}
+
+        checked
+      />{:else}<input
+        bind:this={auto_update_file_switch_checkbox}
+        type="checkbox"
+        id="auto-update-file-switch"
+        on:click={toggleUpdateOnFileSwitch}
+      />{/if}
   </div>
   <br />
   <ExcludedFolders {app} {plugin} />

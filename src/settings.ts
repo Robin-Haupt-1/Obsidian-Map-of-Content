@@ -15,7 +15,7 @@ export interface MOCSettings {
 	settings_version: string,
 	plugin_version: string,
 	showed_update_notice_for_version:string,
-	auto_update_on_note_change:boolean
+	auto_update_on_file_change:boolean
 
 }
 
@@ -26,7 +26,7 @@ export const DEFAULT_SETTINGS: MOCSettings = {
 	settings_version: "0.1.12",
 	plugin_version: "0.1.12",
 	showed_update_notice_for_version:"None",
-	auto_update_on_note_change:true
+	auto_update_on_file_change:true
 }
 
 /** take a legacy settings object and transform it till it conforms to the current version */
