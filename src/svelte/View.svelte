@@ -12,6 +12,7 @@
     import { onMount } from "svelte";
     import SaplingImage from "./SaplingImage.svelte";
     import Descendants from "./Descendants.svelte";
+    import { expandManager } from "./helpers/expandManager";
 
     export let paths: [string, string][][];
     export let app: App;
@@ -21,58 +22,25 @@
     export let view: any;
     export let plugin: MOCPlugin;
     export let open_note_path: string;
-
-    let max_indent = 3;
-    let renderDescendants = true;
+    let expandMan = new expandManager();
     let scroll_up_div;
-    let manually_expanded = false;
     let main_div;
     let scroll_up_div_already_visible = false;
     let dark_mode = document.body.classList.contains("theme-dark")
         ? "dark-mode"
         : "light-mode";
+
     onMount(() => {
-        scroll_to_top();
+        //main_div.scrollTop = 0;
     });
-    let redrawCallbacks = [];
 
     /** Scroll the whole view to the top*/
     function scroll_to_top() {
         main_div.scrollTop = 0;
     }
-    /**show to "scroll to top" arrow if the user has scrolled the view*/
-    function on_scroll(position: number) {
-        if (position > 30 && !scroll_up_div_already_visible) {
-            scroll_up_div.style.display = "block";
-            scroll_up_div_already_visible = true;
-        }
-        //hide the arrow if user scrolls back to the top
-        else if (position <= 30 && scroll_up_div_already_visible) {
-            scroll_up_div.style.display = "none";
-            scroll_up_div_already_visible = false;
-        }
-    }
-    function rerenderDescendants(new_max_indent) {
-        //renderDescendants=false;
-        //setTimeout(() => renderDescendants = true, 0);
-        Log("redrawing, new max_indent " + String(new_max_indent), true);
-        for (let func of redrawCallbacks) {
-            func(new_max_indent);
-        }
-    }
-    function registerRedrawDescendantCallback(redraw: Function) {
-        redrawCallbacks.push(redraw);
-    }
 
-    function registerIndentCallback(indent: number) {
-        Log("indentation registered: " + String(indent), true);
-        if (indent > max_indent) {
-            max_indent = indent;
-        }
-    }
-    function registerManualExpand() {
-        manually_expanded = true;
-    }
+    /**show to "scroll to top" arrow if the user has scrolled the view*/
+    function on_scroll(position: number) {}
 </script>
 
 <!-- expand svg-->
@@ -140,19 +108,7 @@
         />
     </symbol></svg
 >
-<!-- sync svg-->
-<svg display="none">
-    <symbol
-        id="sync-circle"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-    >
-        <path
-            d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5 20l-1.359-2.038c-1.061.653-2.305 1.038-3.641 1.038-3.859 0-7-3.14-7-7h2c0 2.757 2.243 5 5 5 .927 0 1.786-.264 2.527-.708l-1.527-2.292h5.719l-1.719 6zm0-8c0-2.757-2.243-5-5-5-.927 0-1.786.264-2.527.708l1.527 2.292h-5.719l1.719-6 1.359 2.038c1.061-.653 2.305-1.038 3.641-1.038 3.859 0 7 3.14 7 7h-2z"
-        />
-    </symbol></svg
->
-<div id="all-container">
+<div id="all-container" class={dark_mode}>
     <div id="top-bar">
         <div id="top-bar-container">
             <div
@@ -173,10 +129,7 @@
                 class="action"
                 title="Show fewer descendants"
                 on:click={() => {
-                    if (max_indent > 1) {
-                        rerenderDescendants(max_indent - 1);
-                        max_indent -= 1;
-                    }
+                    expandMan.contract();
                 }}
             >
                 <svg class="" style="transform: rotate(-90deg)">
@@ -188,12 +141,7 @@
                 class="action"
                 title="Show more descendants"
                 on:click={() => {
-                    if (manually_expanded) {
-                        rerenderDescendants(max_indent);
-                        manually_expanded = false;
-                    } else {
-                        rerenderDescendants(max_indent + 1);
-                    }
+                    expandMan.expand();
                 }}
             >
                 <svg class="" style="transform: rotate(90deg)">
@@ -204,11 +152,23 @@
     </div>
     <div
         id="main_moc_div"
-        class={dark_mode}
         bind:this={main_div}
-        on:scroll={(e) => on_scroll(e.target.scrollTop)}
+        on:scroll={(e) => {
+            if (e.target.scrollTop > 30 && !scroll_up_div_already_visible) {
+                scroll_up_div.style.display = "block";
+                scroll_up_div_already_visible = true;
+            }
+            //hide the arrow if user scrolls back to the top
+            else if (
+                e.target.scrollTop <= 30 &&
+                scroll_up_div_already_visible
+            ) {
+                scroll_up_div.style.display = "none";
+                scroll_up_div_already_visible = false;
+            }
+        }}
     >
-        {#if !(plugin.getSettingValue("showed_update_notice_for_version") === plugin.getSettingValue("plugin_version"))}
+        {#if !(plugin.getSettingValue("showed_update_notice_for_version") === plugin.getSettingValue("plugin_version")) && false}
             <div class="errors">Updated!</div>
         {:else if errors.length}
             <div class="errors">
@@ -269,24 +229,22 @@
 
             <br />
             <ul>
-                {#if renderDescendants}
-                    <Descendants
-                        {db}
-                        {app}
-                        {view}
-                        note_path={open_note_path}
-                        indentation={0}
-                        {max_indent}
-                        registerCallback={registerRedrawDescendantCallback}
-                        registerIndent={registerIndentCallback}
-                        {registerManualExpand}
-                    />{/if}
+                <Descendants
+                    {db}
+                    {app}
+                    {view}
+                    note_path={open_note_path}
+                    indentation={0}
+                    {expandMan}
+                />
             </ul>
             <div
                 bind:this={scroll_up_div}
                 id="scroll_up"
                 title="Scroll to top"
-                on:click={() => scroll_to_top()}
+                on:click={() => {
+                    main_div.scrollTop = 0;
+                }}
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -331,6 +289,14 @@
     div#top-bar div#top-bar-container div.action:hover svg {
         fill: grey;
     }
+    div.dark-mode div#top-bar div#top-bar-container div.action svg {
+        height: 20px;
+        width: 20px;
+        fill: grey;
+    }
+    div.dark-mode div#top-bar div#top-bar-container div.action:hover svg {
+        fill: darkgrey;
+    }
     div#main_moc_div {
         padding: initial;
         width: initial;
@@ -340,7 +306,7 @@
         flex: 1;
     }
 
-    div#main_moc_div.dark-mode {
+    div.dark-mode {
         color: #dcddde;
     }
 
