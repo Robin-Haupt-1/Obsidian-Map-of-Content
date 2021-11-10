@@ -109,8 +109,7 @@ export default class MOCPlugin extends Plugin {
 
 	async updateSettings(updates: Partial<MOCSettings>) {
 		Object.assign(this.settings, updates)
-		await this.saveData(this.settings)
-		this.rerender()
+		await this.saveData(this.settings) 
 	}
 
 	getSettingValue<K extends keyof MOCSettings>(setting: K): MOCSettings[K] {
@@ -125,20 +124,7 @@ export default class MOCPlugin extends Plugin {
 		return exists
 	}
 
-	/** get any open views and perform callback function on them */
-	oldview(callback: ViewCallback) {
-		let leaves = this.app.workspace.getLeavesOfType(MOC_VIEW_TYPE)
-		if (leaves.length) {
-			Log(`Found ${leaves.length} leaves`, true)
-			leaves.forEach((leaf) => {
-				let view = leaf.view as MOCView
-				callback(view)
-			})
-		}
-		else {
-			Log("No view attached", true)
-		}
-	}
+ 
 	/**set internal reference to the current view
 	 * TODO: Allow keeping several views
 	 */
