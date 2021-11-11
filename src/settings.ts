@@ -29,6 +29,10 @@ export const DEFAULT_SETTINGS: MOCSettings = {
 	auto_update_on_file_change:true
 }
 
+export class SettingsManager{
+
+}
+
 /** take a legacy settings object and transform it till it conforms to the current version */
 export function UpgradeSettings(object: any, app: App) {
 	try {
@@ -93,4 +97,31 @@ export function UpgradeSettings(object: any, app: App) {
 	}
 }
 
- 
+ export class MOCSettingTab extends PluginSettingTab {
+	plugin: MOCPlugin;
+	_app: Settings;
+	db: DBManager
+
+	constructor(plugin: MOCPlugin) {
+		super(plugin.app, plugin);
+		this.plugin = plugin;
+		this.db = plugin.db
+		this._app = undefined
+	}
+
+	display(): void {
+		if (this._app) {
+			this._app.$destroy()
+			this._app = undefined
+
+		}
+		this._app = new Settings({
+			target: (this as any).containerEl,
+			props: { app: this.app, plugin: this.plugin },
+		})
+	}
+	hide(): void {
+		this.plugin.db.update()
+	}
+
+}
