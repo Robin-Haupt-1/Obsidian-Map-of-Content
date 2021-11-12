@@ -27,56 +27,6 @@
     let scroll_up_div_already_visible = false;
 </script>
 
-
-<!-- hamburger menu svg-->
-<svg display="none">
-    <symbol
-        id="hamburger-menu"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-    >
-        <path d="M24 6h-24v-4h24v4zm0 4h-24v4h24v-4zm0 8h-24v4h24v-4z" />
-    </symbol></svg
->
-<!-- sync svg-->
-<svg display="none">
-    <symbol
-        id="sync-circle"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-    >
-        <path
-            d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5 20l-1.359-2.038c-1.061.653-2.305 1.038-3.641 1.038-3.859 0-7-3.14-7-7h2c0 2.757 2.243 5 5 5 .927 0 1.786-.264 2.527-.708l-1.527-2.292h5.719l-1.719 6zm0-8c0-2.757-2.243-5-5-5-.927 0-1.786.264-2.527.708l1.527 2.292h-5.719l1.719-6 1.359 2.038c1.061-.653 2.305-1.038 3.641-1.038 3.859 0 7 3.14 7 7h-2z"
-        />
-    </symbol></svg
->
-<!-- plus button svg-->
-<svg display="none">
-    <symbol
-        id="plus-button"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill-rule="evenodd"
-        clip-rule="evenodd"
-    >
-        <path
-            d="M11.5 0c6.347 0 11.5 5.153 11.5 11.5s-5.153 11.5-11.5 11.5-11.5-5.153-11.5-11.5 5.153-11.5 11.5-11.5zm0 1c5.795 0 10.5 4.705 10.5 10.5s-4.705 10.5-10.5 10.5-10.5-4.705-10.5-10.5 4.705-10.5 10.5-10.5zm.5 10h6v1h-6v6h-1v-6h-6v-1h6v-6h1v6z"
-        />
-    </symbol></svg
->
-<!-- minus button svg-->
-<svg display="none">
-    <symbol
-        id="minus-button"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-    >
-        <path
-            d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-12v-2h12v2z"
-        />
-    </symbol></svg
->
-
 <div
     id="all-container"
     class={document.body.classList.contains("theme-dark")
@@ -92,8 +42,10 @@
                 db.update();
             }}
         >
-            <svg class="">
-                <use href="#sync-circle" />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path
+                    d="M23 12c0 1.042-.154 2.045-.425 3h-2.101c.335-.94.526-1.947.526-3 0-4.962-4.037-9-9-9-1.706 0-3.296.484-4.655 1.314l1.858 2.686h-6.994l2.152-7 1.849 2.673c1.684-1.049 3.659-1.673 5.79-1.673 6.074 0 11 4.925 11 11zm-6.354 7.692c-1.357.826-2.944 1.308-4.646 1.308-4.962 0-9-4.038-9-9 0-1.053.191-2.06.525-3h-2.1c-.271.955-.425 1.958-.425 3 0 6.075 4.925 11 11 11 2.127 0 4.099-.621 5.78-1.667l1.853 2.667 2.152-6.989h-6.994l1.855 2.681z"
+                />
             </svg>
         </div>
 
@@ -105,8 +57,10 @@
                 expandMan.contract();
             }}
         >
-            <svg class="">
-                <use href="#minus-button" />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path
+                    d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-12v-2h12v2z"
+                />
             </svg>
         </div>
         <div
@@ -117,8 +71,15 @@
                 expandMan.expand();
             }}
         >
-            <svg class="">
-                <use href="#plus-button" />
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+            >
+                <path
+                    d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-5v5h-2v-5h-5v-2h5v-5h2v5h5v2z"
+                />
             </svg>
         </div>
     </div>
@@ -181,7 +142,7 @@
                                 {GetDisplayName(pathitem[0], db)}</a
                             >
                         {/if}
-                        
+
                         {#if pathitem[1] == LINKED_FROM}
                             <svg
                                 class="path-arrow"
