@@ -109,6 +109,32 @@
         />
     </symbol></svg
 >
+<!-- plus button svg-->
+<svg display="none">
+    <symbol
+        id="plus-button"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill-rule="evenodd" clip-rule="evenodd"
+    >
+        <path
+            d="M11.5 0c6.347 0 11.5 5.153 11.5 11.5s-5.153 11.5-11.5 11.5-11.5-5.153-11.5-11.5 5.153-11.5 11.5-11.5zm0 1c5.795 0 10.5 4.705 10.5 10.5s-4.705 10.5-10.5 10.5-10.5-4.705-10.5-10.5 4.705-10.5 10.5-10.5zm.5 10h6v1h-6v6h-1v-6h-6v-1h6v-6h1v6z"
+        />
+    </symbol></svg
+>
+<!-- minus button svg-->
+<svg display="none">
+    <symbol
+        id="minus-button"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+    >
+        <path
+            d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-12v-2h12v2z"
+        />
+    </symbol></svg
+>
+
 <div id="all-container" class={dark_mode}>
     <div id="top-bar">
         <div id="top-bar-container">
@@ -133,8 +159,8 @@
                     expandMan.contract();
                 }}
             >
-                <svg class="" style="transform: rotate(-90deg)">
-                    <use href="#expand-arrow-svg" />
+                <svg class=""  >
+                    <use href="#minus-button" />
                 </svg>
             </div>
             <div
@@ -145,8 +171,8 @@
                     expandMan.expand();
                 }}
             >
-                <svg class="" style="transform: rotate(90deg)">
-                    <use href="#expand-arrow-svg" />
+                <svg class="" >
+                    <use href="#plus-button" />
                 </svg>
             </div>
         </div>
