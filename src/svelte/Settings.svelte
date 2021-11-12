@@ -16,7 +16,7 @@
 
   // get list of all files for dropdown menu
   let all_files = app.vault.getFiles().map((file: TFile) => file.path);
-  Log("Central note path: " + plugin.getSettingValue("CN_path"), true);
+  Log("Central note path: " + plugin.getSettingValue("CN_path") );
   let cn_path_input_value;
   let current_tli = plugin.getSettingValue("CN_path");
 
@@ -26,7 +26,7 @@
     }
     // change TLI path
     plugin.updateSettings({ CN_path: cn_path_input_value });
-    Log("New central note path: " + cn_path_input_value, true);
+    Log("New central note path: " + cn_path_input_value );
     document.getElementById("tli_path").textContent = cn_path_input_value;
     new Notice("New Central Note path saved");
 

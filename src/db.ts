@@ -50,9 +50,9 @@ export class DBManager {
                 let start_tmsp = Date.now()
                 if (!silent) {
                     new Notice('Updating the Map of Content...');
-                    Log("Updating the Map of Content...")
+                    
                 }
-
+                Log("Updating the Map of Content...")
                 await new Promise(r => setTimeout(r, 0))
                 // update db
                 this.updateDB()
@@ -73,9 +73,9 @@ export class DBManager {
 
                 if (!silent) {
                     new Notice("Update complete")
-                    Log("Update complete")
+                    
                 }
-
+                Log("Update complete")
                 let end_tmsp = Date.now()
                 Log("Took " + String((end_tmsp - start_tmsp) / 1000))
 
@@ -132,12 +132,12 @@ export class DBManager {
 
     updateDB() {
         // step 1: update the plugins internal representation of all notes in the vault
-        Log("Updating the library...", true)
+        Log("Updating the library..." )
         // delete old state 
         for (let note in this.db) { delete this.db[note]; }
         // read all files
         let vault_files = this.app.vault.getFiles()
-        Log("Total number of files in vault: " + String(vault_files.length), true)
+        Log("Total number of files in vault: " + String(vault_files.length) )
         // create new db entries 
         let entries_created = 0
         let all_files = []
@@ -149,7 +149,7 @@ export class DBManager {
                 // logging
                 entries_created += 1
                 if (entries_created % 1000 == 0) {
-                    Log("Created new db entries: " + String(entries_created), true)
+                    Log("Created new db entries: " + String(entries_created) )
                 }
                 let new_note = new Note(file.path, file.extension, [], [], null);
 
@@ -174,7 +174,7 @@ export class DBManager {
             // logging
             checked_files += 1
             if (checked_files % 1000 == 0) {
-                Log("checked for duplicates: " + String(checked_files), true)
+                Log("checked for duplicates: " + String(checked_files) )
             }
             if (this.duplicate_file_status.has(file_name)) { // If the file name is encountered twice or more, set it's duplicate status to true
                 this.duplicate_file_status.set(file_name, true)
@@ -189,7 +189,7 @@ export class DBManager {
         this.db_entries = Object.entries(this.db)
 
         // step 2: analyze links 
-        Log("analyzing links", true)
+        Log("analyzing links" )
         this.all_notes().forEach((note: Note) => {
             if (note.extension != "md") {
                 // skip if it's not an md file. Other file types can't link to anything
@@ -240,7 +240,7 @@ export class DBManager {
 
     /** starting from the CN, follow all paths and store the information on how long the shortest path to each note is*/
     updateDepthInformation() {
-        Log("Analyzing distance from Central Note. CN path: " + this.plugin.getSettingValue("CN_path"), true)
+        Log("Analyzing distance from Central Note. CN path: " + this.plugin.getSettingValue("CN_path") )
         let depth = 0 // distance from the CN. starts at zero 
         let checked_links: string[] = []  // all the notes that have already been visited. dont visit them again to prevent endless loops
         let do_continue = true
@@ -285,7 +285,7 @@ export class DBManager {
         // logging
         this.get_paths_ran += 1
         if (this.get_paths_ran % 10000 == 0) {
-            Log("get paths ran " + String(this.get_paths_ran), true)
+            Log("get paths ran " + String(this.get_paths_ran) )
         }
 
         let note = this.db[path_so_far.all_members.last()]
@@ -365,7 +365,7 @@ export class DBManager {
                     // logging
                     descendants_ran += 1
                     if (descendants_ran % 1000 == 0) {
-                        Log("descendants ran " + String(descendants_ran), true)
+                        Log("descendants ran " + String(descendants_ran) )
                     }
                     let next_path_member = p.all_members[index + 1]
                     // add note as descendant if it isn't already stored in array

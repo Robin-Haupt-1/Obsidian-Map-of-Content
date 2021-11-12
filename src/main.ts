@@ -67,7 +67,7 @@ export default class MOCPlugin extends Plugin {
 
 	initLeaf(): void {
 		if (this.app.workspace.getLeavesOfType(MOC_VIEW_TYPE).length) {
-			Log("View already attached", true)
+			Log("View already attached" )
 		} else {
 			this.app.workspace.getRightLeaf(true).setViewState({
 				type: MOC_VIEW_TYPE,
@@ -77,7 +77,7 @@ export default class MOCPlugin extends Plugin {
 	}
 
 	rerender() {
-		Log("rerender on main plugin called", true)
+		Log("rerender on main plugin called" )
 		if (this.view) {
 			this.view.rerender()
 		}
@@ -117,7 +117,7 @@ export default class MOCPlugin extends Plugin {
 	/**check whether the central note exists */
 	CNexists(): boolean {
 		let exists = !(this.app.vault.getAbstractFileByPath(this.getSettingValue("CN_path")) == null)
-		Log(exists ? "CN exists" : "CN does not exist", true)
+		Log(exists ? "CN exists" : "CN does not exist" )
 		return exists
 	}
 
@@ -126,7 +126,7 @@ export default class MOCPlugin extends Plugin {
 	 * TODO: Allow keeping several views
 	 */
 	registerViewInstance(view: MOCView) {
-		Log("View registered", true)
+		Log("View registered" )
 		this.view = view
 	}
 	/** delete reference to view 

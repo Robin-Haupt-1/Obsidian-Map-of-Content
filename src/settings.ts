@@ -35,13 +35,13 @@ export function UpgradeSettings(object: any, app: App) {
 	try {
 		// if fresh install, go with defaults
 		if (object==undefined){
-			Log("fresh install, returning empty settings object",true)
+			Log("fresh install, returning empty settings object" )
 			return {}
 		}
 
 		// abort if settings are already in current version format
 		if (object["settings_version"] === DEFAULT_SETTINGS["settings_version"]) {
-			Log("Settings already in current version", true)
+			Log("Settings already in current version" )
 			return object
 		}
 
@@ -49,7 +49,7 @@ export function UpgradeSettings(object: any, app: App) {
 		object = JSON.parse(JSON.stringify(object))
 
 		let object_keys = Object.keys(object)
-		Log("old settings object: " + String(object_keys), true)
+		Log("old settings object: " + String(object_keys) )
 		let old_version = undefined
 
 		// determine which version the legacy object is from
@@ -64,7 +64,7 @@ export function UpgradeSettings(object: any, app: App) {
 
 		if (old_version === "pre-0.1.10") {
 			// extract the CN path from CN_path_per_vault and save it as CN_path
-			Log("Converting CN path from pre-0.1.10 to 0.1.10", true)
+			Log("Converting CN path from pre-0.1.10 to 0.1.10" )
 
 			// get just the name of all vaults there's a CN stored for
 			let cn_settings_vault_names = object["CN_path_per_vault"].map((val: [string, string]) => val[0])
@@ -96,7 +96,7 @@ export function UpgradeSettings(object: any, app: App) {
 		return UpgradeSettings(object,app)
 	} catch {
 		// it things don't work out, delete all old settings data (better than breaking the plugin)
-		Log("error while transforming settings object",true)
+		Log("error while transforming settings object")
 		return {}
 	}
 }

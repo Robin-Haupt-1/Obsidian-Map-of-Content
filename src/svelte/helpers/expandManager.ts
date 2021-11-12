@@ -10,7 +10,7 @@ import { onMount } from "svelte";
 export class expandManager {
     constructor() {
 
-        Log("expandManager created",true)
+        Log("expandManager created" )
     }
 
     initial_max_indent = 3;
@@ -34,7 +34,7 @@ export class expandManager {
     }
 
     rerenderDescendants(new_max_indent) {
-        Log("redrawing, new max_indent " + String(new_max_indent), true);
+        Log("redrawing, new max_indent " + String(new_max_indent) );
         for (let func of this.redrawCallbacks) {
             func(new_max_indent);
         }
@@ -44,7 +44,7 @@ export class expandManager {
     }
 
     logIndent(indent: number) {
-        Log("indentation registered: " + String(indent), true);
+        Log("indentation registered: " + String(indent) );
         if (indent > this.initial_max_indent) {
             this.initial_max_indent = indent;
         }
