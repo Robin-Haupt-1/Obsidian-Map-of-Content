@@ -34,18 +34,19 @@
     cn_input.value = "";
     cn_path_input_value = "";
   };
-let auto_update_file_switch_checkbox
-const toggleUpdateOnFileSwitch=()=>{
-
-  plugin.updateSettings({"auto_update_on_file_change":!plugin.getSettingValue("auto_update_on_file_change")})
-  if (plugin.getSettingValue("auto_update_on_file_change")){
-    auto_update_file_switch_checkbox.checked=true
-  }
-  else{
-      auto_update_file_switch_checkbox.checked=false}
-
-
-}
+  let auto_update_file_switch_checkbox;
+  const toggleUpdateOnFileSwitch = () => {
+    plugin.updateSettings({
+      auto_update_on_file_change: !plugin.getSettingValue(
+        "auto_update_on_file_change"
+      ),
+    });
+    if (plugin.getSettingValue("auto_update_on_file_change")) {
+      auto_update_file_switch_checkbox.checked = true;
+    } else {
+      auto_update_file_switch_checkbox.checked = false;
+    }
+  };
 </script>
 
 <div id="settings-container">
@@ -75,22 +76,17 @@ const toggleUpdateOnFileSwitch=()=>{
       }}>Save</button
     >
   </div>
-  <br />
-  <div><!--TODO use js or some sort of switch statement instead of defining the checkbox twice-->
+  <br/>
+  <div>
+    <!--TODO use js or some sort of switch statement instead of defining the checkbox twice-->
     <h2>Auto-updating the Map of Content</h2>
-    Update when switching between files {#if plugin.getSettingValue("auto_update_on_file_change")}<input
+    Update when switching between files  <input
         bind:this={auto_update_file_switch_checkbox}
         type="checkbox"
         id="auto-update-file-switch"
         on:click={toggleUpdateOnFileSwitch}
-
-        checked
-      />{:else}<input
-        bind:this={auto_update_file_switch_checkbox}
-        type="checkbox"
-        id="auto-update-file-switch"
-        on:click={toggleUpdateOnFileSwitch}
-      />{/if}
+        checked={plugin.getSettingValue("auto_update_on_file_change")}
+      /> 
   </div>
   <br />
   <ExcludedFolders {app} {plugin} />
