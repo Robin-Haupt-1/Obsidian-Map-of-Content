@@ -12,7 +12,7 @@
     import { onMount } from "svelte";
     import SaplingImage from "./SaplingImage.svelte";
     import Descendants from "./Descendants.svelte";
-    import UpdateNotice from "./UpdateNotice.svelte"; 
+    import UpdateNotice from "./UpdateNotice.svelte";
     import { expandManager } from "./helpers/expandManager";
 
     export let paths: [string, string][][];
@@ -115,7 +115,8 @@
         id="plus-button"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
-        fill-rule="evenodd" clip-rule="evenodd"
+        fill-rule="evenodd"
+        clip-rule="evenodd"
     >
         <path
             d="M11.5 0c6.347 0 11.5 5.153 11.5 11.5s-5.153 11.5-11.5 11.5-11.5-5.153-11.5-11.5 5.153-11.5 11.5-11.5zm0 1c5.795 0 10.5 4.705 10.5 10.5s-4.705 10.5-10.5 10.5-10.5-4.705-10.5-10.5 4.705-10.5 10.5-10.5zm.5 10h6v1h-6v6h-1v-6h-6v-1h6v-6h1v6z"
@@ -137,7 +138,7 @@
 
 <div id="all-container" class={dark_mode}>
     <div id="top-bar">
-        <div id="top-bar-container">
+        
             <div
                 id="update-moc"
                 class="action"
@@ -159,7 +160,7 @@
                     expandMan.contract();
                 }}
             >
-                <svg class=""  >
+                <svg class="">
                     <use href="#minus-button" />
                 </svg>
             </div>
@@ -171,11 +172,11 @@
                     expandMan.expand();
                 }}
             >
-                <svg class="" >
+                <svg class="">
                     <use href="#plus-button" />
                 </svg>
             </div>
-        </div>
+         
     </div>
     <div
         id="main_moc_div"
@@ -195,8 +196,8 @@
             }
         }}
     >
-        {#if (plugin.getSettingValue("do_show_update_notice") )  }
-            <UpdateNotice {app} {view} {plugin}/>
+        {#if plugin.getSettingValue("do_show_update_notice")}
+            <UpdateNotice {app} {view} {plugin} />
         {:else if errors.length}
             <div class="errors">
                 {@html errors[0]}
@@ -291,37 +292,32 @@
         height: 100%;
     }
     div#top-bar {
-        height: 30px;
+        min-height: 30px;
         width: 100%;
         margin-bottom: 10px;
+        display: flex;
+        justify-content: center;
+        flex-wrap:wrap;
     }
-    div#top-bar div#top-bar-container div.action {
+    div#top-bar div.action {
         height: 20px;
         width: 20px;
-        margin: 5px;
-        float: left;
-    }
-    div#top-bar div#top-bar-container {
-        height: 30px;
-        width: 90px;
-        margin-left: auto;
-        margin-right: auto;
-        display: block;
-    }
-    div#top-bar div#top-bar-container div.action svg {
+        margin: 5px; 
+    } 
+    div#top-bar  div.action svg {
         height: 20px;
         width: 20px;
         fill: darkgrey;
     }
-    div#top-bar div#top-bar-container div.action:hover svg {
+    div#top-bar   div.action:hover svg {
         fill: grey;
     }
-    div.dark-mode div#top-bar div#top-bar-container div.action svg {
+    div.dark-mode div#top-bar  div.action svg {
         height: 20px;
         width: 20px;
         fill: grey;
     }
-    div.dark-mode div#top-bar div#top-bar-container div.action:hover svg {
+    div.dark-mode div#top-bar  div.action:hover svg {
         fill: darkgrey;
     }
     div#main_moc_div {
