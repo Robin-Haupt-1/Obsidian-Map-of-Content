@@ -18,7 +18,7 @@
         : "light-mode";
     /** Scroll the whole view to the top*/
     function acceptNotice() {
-        settings.updateSettings({"do_show_update_notice":false})
+        settings.set({"do_show_update_notice":false})
         view.rerender()
     }
 </script>

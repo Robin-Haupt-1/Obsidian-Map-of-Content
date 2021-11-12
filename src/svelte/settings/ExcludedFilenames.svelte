@@ -8,7 +8,7 @@
     export let plugin: MOCPlugin;
     let excludedlist;
 
-    let exluded_filename_components = plugin.settings.getSettingValue(
+    let exluded_filename_components = plugin.settings.get(
         "exluded_filename_components"
     );
     let all_files = app.vault
@@ -17,6 +17,7 @@
 
     let excluded_files = allExcludedFiles();
     // TODO show all exluded files in TextEdit not list
+    
     // add all existing excluded folders to select element
 
     var list_options_no = 0;
@@ -43,7 +44,7 @@
     /** update the list of exluded files and save the updated settings*/
     function save() {
         excluded_files = allExcludedFiles();
-        plugin.settings.updateSettings({
+        plugin.settings.set({
             exluded_filename_components: exluded_filename_components,
         });
     }

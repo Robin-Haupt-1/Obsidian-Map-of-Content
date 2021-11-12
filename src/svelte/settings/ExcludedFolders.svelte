@@ -9,7 +9,7 @@
     export let app: App;
     export let plugin: MOCPlugin;
     let excludedlist;
-    let excluded_folders = plugin.settings.getSettingValue("exluded_folders");
+    let excluded_folders = plugin.settings.get("exluded_folders");
     // TODO show all exluded files in TextEdit not list
     // Select box based on https://www.c-sharpcorner.com/UploadFile/mahakgupta/add-and-remove-listbox-items-in-javascript/
     let all_folders = GetAllFolders(app);
@@ -41,7 +41,7 @@
     /** update the list of exluded files and save the updated settings*/
     function save() {
         excluded_files = allExcludedFiles();
-        plugin.settings.updateSettings({ exluded_folders: excluded_folders });
+        plugin.settings.set({ exluded_folders: excluded_folders });
     }
 
     function addValue() {

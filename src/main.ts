@@ -52,7 +52,7 @@ export default class MOCPlugin extends Plugin {
 					new Notice(errors[0])
 					return
 				}
- 				this.settings.updateSettings({ CN_path: this.app.workspace.getActiveFile().path });
+ 				this.settings.set({ CN_path: this.app.workspace.getActiveFile().path });
 				this.db.update()
 
 			}
@@ -89,7 +89,7 @@ export default class MOCPlugin extends Plugin {
 	
 
  	CNexists(): boolean {
-		let exists = !(this.app.vault.getAbstractFileByPath(this.settings.getSettingValue("CN_path")) == null)
+		let exists = !(this.app.vault.getAbstractFileByPath(this.settings.get("CN_path")) == null)
 		Log(exists ? "CN exists" : "CN does not exist" )
 		return exists
 	}
@@ -105,10 +105,10 @@ export default class MOCPlugin extends Plugin {
  
 	isExludedFile(file: TFile) {
 		let path_to_file = file.path
-		let in_excluded_folder = this.settings.getSettingValue("exluded_folders").some((path: string) => path_to_file.startsWith(path))
+		let in_excluded_folder = this.settings.get("exluded_folders").some((path: string) => path_to_file.startsWith(path))
 		if (in_excluded_folder) { return true }
 		let filename = file.basename + "." + file.extension
-		let has_excluded_filename = this.settings.getSettingValue("exluded_filename_components").some((phrase: string) => filename.contains(phrase))
+		let has_excluded_filename = this.settings.get("exluded_filename_components").some((phrase: string) => filename.contains(phrase))
 		return has_excluded_filename
 	}
 }

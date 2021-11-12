@@ -7,13 +7,7 @@ import type { DBManager } from './db'
 import Settings from './svelte/Settings.svelte';
 
 export interface MOCSettings {
-	CN_path: string
-	exluded_folders: string[],
-	exluded_filename_components: string[],
-	settings_version: string,
-	plugin_version: string,
-	do_show_update_notice: boolean,
-	auto_update_on_file_change: boolean
+	CN_path: string, exluded_folders: string[], exluded_filename_components: string[], settings_version: string, plugin_version: string, do_show_update_notice: boolean, auto_update_on_file_change: boolean
 }
 
 export const DEFAULT_SETTINGS: MOCSettings = {
@@ -44,12 +38,12 @@ export class SettingsManager {
 		await this.plugin.saveData(this.settings);
 	}
 
-	async updateSettings(updates: Partial<MOCSettings>) {
+	async set(updates: Partial<MOCSettings>) {
 		Object.assign(this.settings, updates)
 		await this.plugin.saveData(this.settings)
 	}
 
-	getSettingValue<K extends keyof MOCSettings>(setting: K): MOCSettings[K] {
+	get<K extends keyof MOCSettings>(setting: K): MOCSettings[K] {
 		return this.settings[setting]
 	}
 

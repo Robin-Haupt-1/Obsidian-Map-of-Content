@@ -1,93 +1,33 @@
 <script lang="ts">
-    import type { App } from "obsidian";
-    import type { DBManager } from "../db";
     import type MOCPlugin from "../../main";
     import { LINKED_BOTH, LINKED_TO, LINKED_FROM } from "../constants";
+    import type MOCView from "../view";
     import {
         GetDisplayName,
         IsCtrlPressed,
         NavigateToFile,
         Log,
     } from "../utils";
-    import { onMount } from "svelte";
-    import SaplingImage from "./SaplingImage.svelte";
+    import SeedlingImage from "./SeedlingImage.svelte";
     import Descendants from "./Descendants.svelte";
     import UpdateNotice from "./UpdateNotice.svelte";
     import { expandManager } from "./helpers/expandManager";
 
+    export let view: MOCView;
     export let paths: [string, string][][];
-    export let app: App;
-    export let db: DBManager;
-    export let cn_path: string;
     export let errors: string[];
-    export let view: any;
-    export let plugin: MOCPlugin;
-    export let open_note_path: string;
+    let plugin = view.plugin;
+    let app = plugin.app;
+    let db = plugin.db;
+    let cn_path = plugin.settings.get("CN_path");
     let expandMan = new expandManager();
     let scroll_up_div;
-    let settings=plugin.settings
+    let settings = plugin.settings;
     let main_div;
     let scroll_up_div_already_visible = false;
-    let dark_mode = document.body.classList.contains("theme-dark")
-        ? "dark-mode"
-        : "light-mode";
-
-    onMount(() => {
-        //main_div.scrollTop = 0;
-    });
-
-    /** Scroll the whole view to the top*/
-    function scroll_to_top() {
-        main_div.scrollTop = 0;
-    }
-
-    /**show to "scroll to top" arrow if the user has scrolled the view*/
-    function on_scroll(position: number) {}
 </script>
 
-<!-- expand svg-->
-<svg display="none">
-    <symbol
-        id="expand-arrow-svg"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        ><path d="M22 12l-20 12 5-12-5-12z" />
-    </symbol></svg
->
-<!-- right pointer arrow svg-->
-<svg display="none">
-    <symbol
-        id="pointer-arrow-right-svg-moc"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 15.05"
-        ><path
-            d=" M 21.883,8 14.356,14.235 15,15 24,7.479 15,0 14.355,0.764 21.884,7 H 0 v 1 z"
-        />
-    </symbol></svg
->
-<!-- left pointer arrow svg-->
-<svg display="none">
-    <symbol
-        id="pointer-arrow-left-svg-moc"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 15.05"
-        ><path
-            d="M 2.117,7 9.644,0.765 9,0 0,7.521 9,15 9.645,14.236 2.116,8 H 24 V 7 Z"
-        />
-    </symbol></svg
->
-<!-- both directions pointer arrow svg-->
-<svg display="none">
-    <symbol
-        id="pointer-arrow-both-svg-moc"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 15.05"
-    >
-        <path
-            d="M 9 0 L 0 7.5214844 L 9 15 L 9.6445312 14.236328 L 2.1152344 8 L 21.882812 8 L 14.355469 14.234375 L 15 15 L 24 7.4785156 L 15 0 L 14.355469 0.76367188 L 21.884766 7 L 2.1171875 7 L 9.6445312 0.765625 L 9 0 z "
-        />
-    </symbol></svg
->
+
 <!-- hamburger menu svg-->
 <svg display="none">
     <symbol
@@ -137,47 +77,50 @@
     </symbol></svg
 >
 
-<div id="all-container" class={dark_mode}>
+<div
+    id="all-container"
+    class={document.body.classList.contains("theme-dark")
+        ? "dark-mode"
+        : "light-mode"}
+>
     <div id="top-bar">
-        
-            <div
-                id="update-moc"
-                class="action"
-                title="Update the Map of Content"
-                on:click={() => {
-                    db.update();
-                }}
-            >
-                <svg class="">
-                    <use href="#sync-circle" />
-                </svg>
-            </div>
+        <div
+            id="update-moc"
+            class="action"
+            title="Update the Map of Content"
+            on:click={() => {
+                db.update();
+            }}
+        >
+            <svg class="">
+                <use href="#sync-circle" />
+            </svg>
+        </div>
 
-            <div
-                id="minus-expand"
-                class="action"
-                title="Show fewer descendants"
-                on:click={() => {
-                    expandMan.contract();
-                }}
-            >
-                <svg class="">
-                    <use href="#minus-button" />
-                </svg>
-            </div>
-            <div
-                id="plus-expand"
-                class="action"
-                title="Show more descendants"
-                on:click={() => {
-                    expandMan.expand();
-                }}
-            >
-                <svg class="">
-                    <use href="#plus-button" />
-                </svg>
-            </div>
-         
+        <div
+            id="minus-expand"
+            class="action"
+            title="Show fewer descendants"
+            on:click={() => {
+                expandMan.contract();
+            }}
+        >
+            <svg class="">
+                <use href="#minus-button" />
+            </svg>
+        </div>
+        <div
+            id="plus-expand"
+            class="action"
+            title="Show more descendants"
+            on:click={() => {
+                expandMan.expand();
+            }}
+        >
+            <svg class="">
+                <use href="#plus-button" />
+            </svg>
+        </div>
     </div>
     <div
         id="main_moc_div"
@@ -197,7 +140,7 @@
             }
         }}
     >
-        {#if settings.getSettingValue("do_show_update_notice")}
+        {#if settings.get("do_show_update_notice")}
             <UpdateNotice {app} {view} {plugin} />
         {:else if errors.length}
             <div class="errors">
@@ -219,7 +162,7 @@
                 }}>update</a
             >
             your Map of Content and watch it grow!<br />
-            <SaplingImage />
+            <SeedlingImage />
         {:else}
             {#each paths as path}
                 <div class="path">
@@ -238,17 +181,36 @@
                                 {GetDisplayName(pathitem[0], db)}</a
                             >
                         {/if}
+                        
                         {#if pathitem[1] == LINKED_FROM}
-                            <svg class="path-arrow">
-                                <use href="#pointer-arrow-right-svg-moc" />
+                            <svg
+                                class="path-arrow"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 15.05"
+                            >
+                                <path
+                                    d=" M 21.883,8 14.356,14.235 15,15 24,7.479 15,0 14.355,0.764 21.884,7 H 0 v 1 z"
+                                />
                             </svg>
                         {:else if pathitem[1] == LINKED_TO}
-                            <svg class="path-arrow">
-                                <use href="#pointer-arrow-left-svg-moc" />
+                            <svg
+                                class="path-arrow"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 15.05"
+                            >
+                                <path
+                                    d="M 2.117,7 9.644,0.765 9,0 0,7.521 9,15 9.645,14.236 2.116,8 H 24 V 7 Z"
+                                />
                             </svg>
                         {:else if pathitem[1] == LINKED_BOTH}
-                            <svg class="path-arrow">
-                                <use href="#pointer-arrow-both-svg-moc" />
+                            <svg
+                                class="path-arrow"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 15.05"
+                            >
+                                <path
+                                    d="M 9 0 L 0 7.5214844 L 9 15 L 9.6445312 14.236328 L 2.1152344 8 L 21.882812 8 L 14.355469 14.234375 L 15 15 L 24 7.4785156 L 15 0 L 14.355469 0.76367188 L 21.884766 7 L 2.1171875 7 L 9.6445312 0.765625 L 9 0 z "
+                                />
                             </svg>
                         {/if}
                     {/each}
@@ -262,7 +224,7 @@
                     {db}
                     {app}
                     {view}
-                    note_path={open_note_path}
+                    note_path={view.open_file_path}
                     indentation={0}
                     {expandMan}
                 />
@@ -298,27 +260,27 @@
         margin-bottom: 10px;
         display: flex;
         justify-content: center;
-        flex-wrap:wrap;
+        flex-wrap: wrap;
     }
     div#top-bar div.action {
         height: 20px;
         width: 20px;
-        margin: 5px; 
-    } 
-    div#top-bar  div.action svg {
+        margin: 5px;
+    }
+    div#top-bar div.action svg {
         height: 20px;
         width: 20px;
         fill: darkgrey;
     }
-    div#top-bar   div.action:hover svg {
+    div#top-bar div.action:hover svg {
         fill: grey;
     }
-    div.dark-mode div#top-bar  div.action svg {
+    div.dark-mode div#top-bar div.action svg {
         height: 20px;
         width: 20px;
         fill: grey;
     }
-    div.dark-mode div#top-bar  div.action:hover svg {
+    div.dark-mode div#top-bar div.action:hover svg {
         fill: darkgrey;
     }
     div#main_moc_div {
