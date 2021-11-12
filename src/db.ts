@@ -18,8 +18,7 @@ export class DBManager {
     descendants: Map<string, string[]>
     duplicate_file_status: Map<string, boolean>
     database_complete: boolean // whether the db etc. are in a good state and can be used
-    database_initialized: boolean = false // false on plugin launch before the first (successful or failed) db update attempt
-    database_loading: boolean = false // true while the database is being built
+    database_loading: boolean = true // true while the database is being built
     //TODO consolidate database_initialized and database_loading into one
 
 
@@ -42,8 +41,8 @@ export class DBManager {
         try {
             // make sure the Central note exists
             if (!this.plugin.CNexists()) {
-                new Notice("Central note '" + this.plugin.getSettingValue("CN_path") + "' does not exist")
-                new Notice("You can adjust the path of your Central Note in the settings tab")
+                //new Notice("Central note '" + this.plugin.getSettingValue("CN_path") + "' does not exist")
+                //new Notice("You can adjust the path of your Central Note in the settings tab")
             }
 
             else {
@@ -85,8 +84,7 @@ export class DBManager {
             }
 
         } finally {
-            this.database_initialized = true
-            this.database_loading = false
+             this.database_loading = false
             this.plugin.rerender()
         }
 

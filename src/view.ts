@@ -33,6 +33,7 @@ export default class MOCView extends ItemView {
     this.plugin.app.workspace.onLayoutReady(() => this.init())
 
     // rerender on css change to adapt to dark/light mode changes
+    // TODO pass command to svelte, not recreate it
     this.plugin.app.workspace.on("css-change", () => {
       this.rerender()
     })
@@ -41,7 +42,7 @@ export default class MOCView extends ItemView {
 
   init() {
     // update the path view every time a file is opened
-    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => { this.monitorNote(file.path); this.onFileOpen() }))
+    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => { this.monitorNote(file.path); this.rerender() }))
     this.rerender()
   }
 
@@ -50,10 +51,8 @@ export default class MOCView extends ItemView {
   }
 
   /** rerender the view on file open, but only if the database has already been initiated */
-  onFileOpen() {
-    if (this.db.database_initialized) {
-      this.rerender()
-    }
+  onFileOpen() { 
+      this.rerender() 
   }
 
   /** reload paths and recreate the svelte instance */
@@ -73,9 +72,7 @@ export default class MOCView extends ItemView {
     //console.log(this.open_file_path)
 
     // during startup (before first db update is completed) show loading message
-    if (!this.db.database_initialized) {
-      errors.push("Loading...")
-    } else if (this.db.database_loading) {
+    if (this.db.database_loading) {
       errors.push("Updating...")
     }
 
@@ -96,10 +93,10 @@ export default class MOCView extends ItemView {
     else {
       this.open_file_path = this.app.workspace.getActiveFile().path
       if (this.db.getNoteFromPath(this.open_file_path) == undefined) {
-        // make sure file is in library   
-        errors.push("This file hasn't been indexed yet. Please update the Map of Content to include it.")
+        errors.push("Updating...")
+        this.db.update(true)
       }
-    } 
+    }
     if (errors.length > 0) {
       this.open_file_path = "None"
       var paths = []
@@ -113,9 +110,7 @@ export default class MOCView extends ItemView {
       paths = all_paths.map((p: Path) =>
         p.items.slice()
       )
-
     }
-
 
     // create new pathview 
     this._app = new View({
@@ -156,6 +151,17 @@ export default class MOCView extends ItemView {
   }
 
   monitorNote(path: string) {
+
+    if (!this.plugin.getSettingValue("auto_update_on_file_change")) {
+      Log("not monitoring note because disabled",true)
+      return
+    }
+    if (this.app.workspace.getActiveFile() == null || this.plugin.isExludedFile(this.app.workspace.getActiveFile())) {
+      Log("not monitoring because no file / excluded file", true)
+    }
+
+    path = this.app.workspace.getActiveFile().path
+
     console.log("Monitornote called on " + path)
     let rerender = false;
     if (this.monitoring_note) {
