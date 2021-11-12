@@ -1,7 +1,7 @@
 import { LINKED_BOTH, LINKED_CN as LINKED_CN, LINKED_TO, LINKED_FROM } from "./constants";
 import type { App, Vault, LinkCache, EmbedCache } from "obsidian";
 import { Notice } from 'obsidian'
-import { Note, DB, Path } from './types'
+import { FileItem, DB, Path } from './types'
 import { FileNameFromPath } from "./utils"
 import type MOCPlugin from "./main"
 import { Log } from "./utils";
@@ -14,13 +14,12 @@ export class DBManager {
     plugin: MOCPlugin
     vault: Vault
     all_paths: Path[]
-    get_paths_ran: number
     descendants: Map<string, string[]>
     duplicate_file_status: Map<string, boolean>
-    database_complete: boolean // whether the db etc. are in a good state and can be used
-    database_loading: boolean = true // true while the database is being built
-    //TODO consolidate database_initialized and database_loading into one
+    database_complete: boolean  
+    database_updating: boolean = true 
 
+    get_paths_ran: number
 
     constructor(plugin: MOCPlugin) {
         this.app = plugin.app;
@@ -36,32 +35,23 @@ export class DBManager {
 
     async update(silent: boolean = false) {
         this.database_complete = false
-        this.database_loading = true
+        this.database_updating = true
 
         try {
-            // make sure the Central note exists
-            if (!this.plugin.CNexists()) {
-                //new Notice("Central note '" + this.plugin.getSettingValue("CN_path") + "' does not exist")
-                //new Notice("You can adjust the path of your Central Note in the settings tab")
-            }
-
-            else {
-                // save timestamp for tracking duration of rebuilding
+            if (this.plugin.CNexists()) {
                 let start_tmsp = Date.now()
                 if (!silent) {
                     new Notice('Updating the Map of Content...');
-                    
+
                 }
                 Log("Updating the Map of Content...")
                 await new Promise(r => setTimeout(r, 0))
-                // update db
                 this.updateDB()
                 await new Promise(r => setTimeout(r, 0))
 
                 this.get_paths_ran = 0
                 this.updateDepthInformation()
 
-                // delete old path information
                 this.all_paths.length = 0
                 let path_so_far: Path = { all_members: [this.plugin.getSettingValue("CN_path")], items: [[this.plugin.getSettingValue("CN_path"), LINKED_CN]] }
                 await new Promise(r => setTimeout(r, 0))
@@ -73,26 +63,23 @@ export class DBManager {
 
                 if (!silent) {
                     new Notice("Update complete")
-                    
-                }
-                Log("Update complete")
-                let end_tmsp = Date.now()
-                Log("Took " + String((end_tmsp - start_tmsp) / 1000))
 
-                // mark database as complete
+                }
+                let end_tmsp = Date.now()
+                Log("Update complete, Took " + String((end_tmsp - start_tmsp) / 1000))
+
                 this.database_complete = true
             }
 
         } finally {
-            this.database_loading = false
+            this.database_updating = false
             this.plugin.rerender()
         }
 
 
     }
 
-    /**Return the internal note representation object for a given path */
-    getNoteFromPath(path: string) {
+    getNoteFromPath(path: string): FileItem {
         if (path in this.db) {
             return this.db[path]
         }
@@ -126,18 +113,18 @@ export class DBManager {
 
     }
 
-    all_notes(): Note[] {
+    all_notes(): FileItem[] {
         return this.db_entries.map(([key, value]) => value)
     }
 
     updateDB() {
         // step 1: update the plugins internal representation of all notes in the vault
-        Log("Updating the library..." )
+        Log("Updating the library...")
         // delete old state 
         for (let note in this.db) { delete this.db[note]; }
         // read all files
         let vault_files = this.app.vault.getFiles()
-        Log("Total number of files in vault: " + String(vault_files.length) )
+        Log("Total number of files in vault: " + String(vault_files.length))
         // create new db entries 
         let entries_created = 0
         let all_files = []
@@ -149,9 +136,9 @@ export class DBManager {
                 // logging
                 entries_created += 1
                 if (entries_created % 1000 == 0) {
-                    Log("Created new db entries: " + String(entries_created) )
+                    Log("Created new db entries: " + String(entries_created))
                 }
-                let new_note = new Note(file.path, file.extension, [], [], null);
+                let new_note = new FileItem(file.path, file.extension, [], [], null);
 
 
                 // update the db
@@ -174,7 +161,7 @@ export class DBManager {
             // logging
             checked_files += 1
             if (checked_files % 1000 == 0) {
-                Log("checked for duplicates: " + String(checked_files) )
+                Log("checked for duplicates: " + String(checked_files))
             }
             if (this.duplicate_file_status.has(file_name)) { // If the file name is encountered twice or more, set it's duplicate status to true
                 this.duplicate_file_status.set(file_name, true)
@@ -189,8 +176,8 @@ export class DBManager {
         this.db_entries = Object.entries(this.db)
 
         // step 2: analyze links 
-        Log("analyzing links" )
-        this.all_notes().forEach((note: Note) => {
+        Log("analyzing links")
+        this.all_notes().forEach((note: FileItem) => {
             if (note.extension != "md") {
                 // skip if it's not an md file. Other file types can't link to anything
                 return
@@ -240,7 +227,7 @@ export class DBManager {
 
     /** starting from the CN, follow all paths and store the information on how long the shortest path to each note is*/
     updateDepthInformation() {
-        Log("Analyzing distance from Central Note. CN path: " + this.plugin.getSettingValue("CN_path") )
+        Log("Analyzing distance from Central Note. CN path: " + this.plugin.getSettingValue("CN_path"))
         let depth = 0 // distance from the CN. starts at zero 
         let checked_links: string[] = []  // all the notes that have already been visited. dont visit them again to prevent endless loops
         let do_continue = true
@@ -285,7 +272,7 @@ export class DBManager {
         // logging
         this.get_paths_ran += 1
         if (this.get_paths_ran % 10000 == 0) {
-            Log("get paths ran " + String(this.get_paths_ran) )
+            Log("get paths ran " + String(this.get_paths_ran))
         }
 
         let note = this.db[path_so_far.all_members.last()]
@@ -365,7 +352,7 @@ export class DBManager {
                     // logging
                     descendants_ran += 1
                     if (descendants_ran % 1000 == 0) {
-                        Log("descendants ran " + String(descendants_ran) )
+                        Log("descendants ran " + String(descendants_ran))
                     }
                     let next_path_member = p.all_members[index + 1]
                     // add note as descendant if it isn't already stored in array

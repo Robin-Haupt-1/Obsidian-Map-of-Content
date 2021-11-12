@@ -1,5 +1,5 @@
 
-export class Note {
+export class FileItem {
     path: string
     extension: string
     links_to: string[]
@@ -23,7 +23,7 @@ export class Note {
 
 }
 export interface DB {
-    [index: string]: Note
+    [index: string]: FileItem
 }
 export interface Path {
     items: [string, any][]

@@ -65,26 +65,21 @@ export default class MOCView extends ItemView {
 
 
     let errors = []
- 
-    // during startup (before first db update is completed) show loading message
-    if (this.db.database_loading) {
+
+    if (this.db.database_updating) {
       errors.push("Updating...")
     }
 
-    // make sure the database is usable
     else if (!this.db.database_complete) {
-      //TODO: try once to this.db.update()
       errors.push(`Your Map of Content couldn't be created.<br><br> Make sure your Central Note path '${this.plugin.getSettingValue("CN_path")}' is correct. You can change this path in the settings tab.`)
     }
 
-    // make sure a file is opened
     else if (this.app.workspace.getActiveFile() == null) {
       errors.push("No file is open")
     }
     else if (this.plugin.isExludedFile(this.app.workspace.getActiveFile())) {
       errors.push("This file has been excluded from the Map of Content.")
     }
-    // get path of open note 
     else {
       this.open_file_path = this.app.workspace.getActiveFile().path
       if (this.db.getNoteFromPath(this.open_file_path) == undefined) {
@@ -92,11 +87,8 @@ export default class MOCView extends ItemView {
         this.db.update(true)
       }
     }
-    if (errors.length > 0) {
-      this.open_file_path = "None"
-      var paths = []
-    } else {
-      // get paths to open note
+    let paths = []
+    if (errors.length == 0) {
       let all_paths = this.db.findPaths(this.open_file_path)
       if (all_paths.length == 0) {
         Log("No paths to this note")
@@ -105,9 +97,12 @@ export default class MOCView extends ItemView {
       paths = all_paths.map((p: Path) =>
         p.items.slice()
       )
+    } else {
+
+      this.open_file_path = "None"
+      paths = []
     }
 
-    // create new pathview 
     this._app = new View({
       target: (this as any).contentEl,
       props: { plugin: this.plugin, view: this, paths: paths, app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: this.open_file_path, errors: errors },
@@ -116,14 +111,13 @@ export default class MOCView extends ItemView {
   }
 
   onClose(): Promise<void> {
-    // destroy old pathview/errorview instance
-    // set symbol to undefined to avoid "This component has already been destroyed" message
 
     Log("View closing")
 
     if (this._app) {
       this._app.$destroy()
-      this._app = undefined
+      this._app = undefined      // set symbol to undefined to avoid "This component has already been destroyed" message
+
     }
 
     this.plugin.unregisterViewInstance(this)
@@ -138,20 +132,20 @@ export default class MOCView extends ItemView {
       return
     }
     if (!this.plugin.getSettingValue("auto_update_on_file_change")) {
-      Log("not monitoring note because disabled" )
+      Log("not monitoring note because disabled")
       return
     }
     if (active_file == null || this.plugin.isExludedFile(active_file)) {
-      Log("not monitoring because no file / excluded file" )
+      Log("not monitoring because no file / excluded file")
       return
     }
     if (this.monitoring_note && this.app.metadataCache.getCache(this.monitoring_note) == undefined) {
-      Log("note name must have changed" )
+      Log("note name must have changed")
     }
     let path = active_file.path
 
     Log("Monitornote called on: " + path)
-    Log("Old monitoring note: " + this.monitoring_note )
+    Log("Old monitoring note: " + this.monitoring_note)
     let rerender = false;
     if (this.monitoring_note && this.app.metadataCache.getCache(this.monitoring_note)) {
       if (!(path === this.monitoring_note)) {

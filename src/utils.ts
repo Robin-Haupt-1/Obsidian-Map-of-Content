@@ -1,17 +1,15 @@
 import type { DBManager } from "./db"
 import type { App } from "obsidian";
 
-
-/** log to the console */
+ 
 export const Log = (message: string) => {
-     let log_dev = true // whether to print development log messages
-    if (log_dev) console.log("[Map of Content] " + message)
+    let print_log = true  
+    if (print_log) console.log("[Map of Content] " + message)
 
 
 }
 
-/**  remove the given extension (by default ".md") from path  */
-export const CleanExtension = (path: string, extension: string = ".md") => {
+export const RemoveExtension = (path: string, extension: string = ".md") => {
     if (path.endsWith(extension)) {
         return path.slice(0, -extension.length)
     }
@@ -29,17 +27,15 @@ export const FileNameFromPath = (path: string): string => {
     return path.split("/").last()
 }
 
-/**  return the full path if there are two or more notes with the same filename and extension, else only the filename  
- * @todo only return as many segments (folders) of the path as are neccessary to uniquely differentiate the note
-*/
+/**  return the full path if there are two or more notes with the same filename and extension, else only the filename  */
 export const GetDisplayName = (path: string, db: DBManager): string => {
     let file_name = FileNameFromPath(path)
     let display_name = null
 
     if (db.duplicate_file_status.get(file_name)) {
-        display_name = CleanExtension(path)
+        display_name = RemoveExtension(path)
     } else {
-        display_name = CleanExtension(file_name)
+        display_name = RemoveExtension(file_name)
     }
     return display_name
 }
@@ -57,8 +53,7 @@ export const NavigateToFile = async (
     const leaf = IsCtrlPressed(event)
         ? app.workspace.splitActiveLeaf()
         : app.workspace.getUnpinnedLeaf();
-    app.workspace.openLinkText(path, "/")
-    //await leaf.openFile(file);
+    app.workspace.openLinkText(path, "/") 
 };
 
 /** Get the paths of all folders in the vault, empty or not */
@@ -87,7 +82,7 @@ export const GetAllFolders = (app: App): string[] => {
 
 
     })
- 
+
 
     return all_folder_paths
 }

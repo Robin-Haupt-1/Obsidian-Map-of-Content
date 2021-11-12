@@ -1,17 +1,16 @@
 import { App, getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
 import { CENTRAL_NOTE_PATH_DEFAULT, MOC_VIEW_TYPE, ViewCallback } from './constants'
 import { DBManager } from './db'
-import MOCView from './view';
-import Settings from './svelte/Settings.svelte';
-import { MOCSettings, DEFAULT_SETTINGS, UpgradeSettings,MOCSettingTab} from './settings';
+import MOCView from './view'; 
+import { MOCSettings, DEFAULT_SETTINGS, UpgradeSettings,MOCSettingTab, SettingsManager} from './settings';
 import { Log } from './utils';
 
 export default class MOCPlugin extends Plugin {
 	settings: MOCSettings;
 	db: DBManager;
 	view: MOCView;
-	// statusbartext: HTMLElement	
-
+	settings:SettingsManager
+ 
 	async onload() {
 		await this.loadSettings() 
 		this.db = new DBManager(this) 
@@ -39,7 +38,7 @@ export default class MOCPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'open-note-as-central-note',
-			name: 'Set open note as Central Note',
+			name: 'Set current note as Central Note',
 			callback: () => {
 				let errors = []
 				// make sure a file is opened
@@ -53,16 +52,11 @@ export default class MOCPlugin extends Plugin {
 					new Notice(errors[0])
 					return
 				}
-				// get path of open note 
-				this.updateSettings({ CN_path: this.app.workspace.getActiveFile().path });
+ 				this.updateSettings({ CN_path: this.app.workspace.getActiveFile().path });
 				this.db.update()
 
 			}
-		});
-		//Todo:  maybe implement some status bar text? like no of linked, unlinked, last time refreshed? 
-		//this.statusbartext = this.addStatusBarItem()
-		//this.statusbartext.setText("Total number of notes: " + String(l.count()));
-
+		}); 
 	}
 
 	initLeaf(): void {
@@ -94,8 +88,7 @@ export default class MOCPlugin extends Plugin {
 
 	async loadSettings() {
 		let data = await this.loadData()
-		// upgrade settings to newest format if necessary 
-		data = UpgradeSettings(data, this.app)
+ 		data = UpgradeSettings(data, this.app)
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
 		this.saveSettings()
 	}
@@ -114,28 +107,21 @@ export default class MOCPlugin extends Plugin {
 	}
 
 
-	/**check whether the central note exists */
-	CNexists(): boolean {
+ 	CNexists(): boolean {
 		let exists = !(this.app.vault.getAbstractFileByPath(this.getSettingValue("CN_path")) == null)
 		Log(exists ? "CN exists" : "CN does not exist" )
 		return exists
 	}
 
- 
-	/**set internal reference to the current view
-	 * TODO: Allow keeping several views
-	 */
+  
 	registerViewInstance(view: MOCView) {
 		Log("View registered" )
 		this.view = view
-	}
-	/** delete reference to view 
-	 * TODO: allow keeping several views
-	*/
+	} 
 	unregisterViewInstance(view: MOCView) {
 		this.view = undefined
 	}
-	/** check if the file is in any of the exluded folders or the filename contains excluded phrases */
+ 
 	isExludedFile(file: TFile) {
 		let path_to_file = file.path
 		let in_excluded_folder = this.getSettingValue("exluded_folders").some((path: string) => path_to_file.startsWith(path))
