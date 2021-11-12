@@ -6,7 +6,4 @@ export const LINKED_CN = "None"
 export const LINKED_BOTH = " <=> "
 export const MOC_VIEW_TYPE = "map-of-content"
 
-
-export interface ViewCallback{
-    (view:MOCView):void;
-}
+ 

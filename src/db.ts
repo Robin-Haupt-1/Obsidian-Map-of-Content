@@ -4,7 +4,7 @@ import { Notice } from 'obsidian'
 import { FileItem, DB, Path } from './types'
 import { FileNameFromPath } from "./utils"
 import type MOCPlugin from "./main"
-import { Log } from "./utils";
+import { Log, isExludedFile } from "./utils";
 import type { SettingsManager } from "./settings";
 
 export class DBManager {
@@ -45,7 +45,6 @@ export class DBManager {
                 let start_tmsp = Date.now()
                 if (!silent) {
                     new Notice('Updating the Map of Content...');
-
                 }
                 Log("Updating the Map of Content...")
                 await new Promise(r => setTimeout(r, 0))
@@ -129,33 +128,23 @@ export class DBManager {
         let vault_files = this.app.vault.getFiles()
         Log("Total number of files in vault: " + String(vault_files.length))
         // create new db entries 
-        let entries_created = 0
-        let all_files = []
+        let entries_created = 0 
         vault_files.forEach((file) => {
-
-            // make sure the file isn't in any exluded folders 
-            if (!this.plugin.isExludedFile(file)) {
-
+            if (!isExludedFile(file)) {
                 // logging
                 entries_created += 1
                 if (entries_created % 1000 == 0) {
                     Log("Created new db entries: " + String(entries_created))
                 }
-                let new_note = new FileItem(file.path, file.extension, [], [], null);
 
-
-                // update the db
-                this.db[new_note.path] = new_note
+                this.db[file.path] = new FileItem(file.path, file.extension, [], [], null);
             }
 
         })
 
-
-        // update the db_entries representation of the db
         this.db_entries = Object.entries(this.db)
         this.db_keys = Object.keys(this.db)
 
-        // check for duplicate files
         this.duplicate_file_status = new Map<string, boolean>();
         let checked_files = 0
         this.all_notes().forEach((note) => {
