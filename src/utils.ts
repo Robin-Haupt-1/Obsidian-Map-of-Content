@@ -4,6 +4,7 @@ import type { App } from "obsidian";
 
 /** log to the console */
 export const Log = (message: string, dev: boolean = false) => {
+    //TODO change default behaviour to only printing in dev mode (save setting the parameter all the time)
     let log_dev = true // whether to print development log messages
     if (!dev || log_dev) console.log("[Map of Content] " + message)
 
@@ -49,7 +50,6 @@ export const NavigateToFile = async (
     path: string,
     event: MouseEvent
 ) => {
-
 
     let file = app.metadataCache.getFirstLinkpathDest(path, "/");
 

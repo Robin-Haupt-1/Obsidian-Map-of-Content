@@ -1,12 +1,8 @@
 <script lang="ts">
     import type { App } from "obsidian";
     import type { DBManager } from "../db";
-    import type MOCPlugin from "../../main";
-    import { LINKED_BOTH, LINKED_TO, LINKED_FROM } from "../constants";
-    import {
-        GetDisplayName,
-        IsCtrlPressed,
-        NavigateToFile,
+    import type MOCPlugin from "../../main"; 
+    import { 
         Log,
     } from "../utils";
     import { onMount } from "svelte";
@@ -46,7 +42,7 @@
         to my <a href="https://www.paypal.com/paypalme/robinhaupt">Paypal</a> or
         <a href="https://ko-fi.com/robinhaupt">Ko-Fi</a> account. <br /><br>And
         please spread the word about it to your friends or on social media, so
-        we can help more people organize their notes in a better way!
+        we can help more people organize their notes in an amazing way!
         <button on:click={acceptNotice}>Accept</button>
     </div>
 </div>

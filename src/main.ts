@@ -13,19 +13,16 @@ export default class MOCPlugin extends Plugin {
 	// statusbartext: HTMLElement	
 
 	async onload() {
-		await this.loadSettings()
-
-		this.db = new DBManager(this)
-
-		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view = new MOCView(leaf, this)))
-
+		await this.loadSettings() 
+		this.db = new DBManager(this) 
+		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view = new MOCView(leaf, this))) 
 		this.app.workspace.onLayoutReady(() => this.initializePlugin())
 	}
 
 	async initializePlugin() {
 		this.addSettingTab(new MOCSettingTab(this));
 		this.initLeaf()
-		this.db.update()
+		this.db.update(true)
 
 		this.addRibbonIcon('sync', 'Update Map of Content', async () => {
 			await this.db.update()

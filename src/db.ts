@@ -84,7 +84,7 @@ export class DBManager {
             }
 
         } finally {
-             this.database_loading = false
+            this.database_loading = false
             this.plugin.rerender()
         }
 

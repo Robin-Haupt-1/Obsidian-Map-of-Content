@@ -8,9 +8,8 @@ import { MOC_VIEW_TYPE } from './constants'
 import type MOCPlugin from './main'
 import type { Path } from './types'
 import type { DBManager } from './db'
-
-
 import View from './svelte/View.svelte'
+
 export default class MOCView extends ItemView {
   db: DBManager
   _app: View
@@ -42,7 +41,8 @@ export default class MOCView extends ItemView {
 
   init() {
     // update the path view every time a file is opened
-    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => { this.monitorNote(file.path); this.rerender() }))
+    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => {    this.monitorNote();      this.rerender() }))
+    this.monitorNote()
     this.rerender()
   }
 
@@ -50,11 +50,7 @@ export default class MOCView extends ItemView {
 
   }
 
-  /** rerender the view on file open, but only if the database has already been initiated */
-  onFileOpen() { 
-      this.rerender() 
-  }
-
+ 
   /** reload paths and recreate the svelte instance */
   rerender(): void {
     Log("Rerender called on view", true)
@@ -120,19 +116,6 @@ export default class MOCView extends ItemView {
     })
   }
 
-  getViewType(): string {
-    return MOC_VIEW_TYPE
-  }
-
-  getDisplayText(): string {
-    return "Map of Content"
-  }
-
-  getIcon(): string {
-    return "stacked-levels"
-  }
-
-
   onClose(): Promise<void> {
     // destroy old pathview/errorview instance
     // set symbol to undefined to avoid "This component has already been destroyed" message
@@ -150,21 +133,28 @@ export default class MOCView extends ItemView {
 
   }
 
-  monitorNote(path: string) {
-
+  async monitorNote() {
+    let active_file=this.app.workspace.getActiveFile()
+    if (active_file == null) {
+      return
+    }
     if (!this.plugin.getSettingValue("auto_update_on_file_change")) {
       Log("not monitoring note because disabled",true)
       return
     }
-    if (this.app.workspace.getActiveFile() == null || this.plugin.isExludedFile(this.app.workspace.getActiveFile())) {
+    if (active_file == null || this.plugin.isExludedFile(active_file)) {
       Log("not monitoring because no file / excluded file", true)
+      return
     }
+    if (this.monitoring_note&&this.app.metadataCache.getCache(this.monitoring_note)==undefined) {
+      Log("note name must have changed",true)
+    }
+    let path = active_file.path
 
-    path = this.app.workspace.getActiveFile().path
-
-    console.log("Monitornote called on " + path)
+    Log("Monitornote called on: " + path,true)
+    Log("Old monitoring note: "+this.monitoring_note,true)
     let rerender = false;
-    if (this.monitoring_note) {
+    if (this.monitoring_note&&this.app.metadataCache.getCache(this.monitoring_note)) {
       if (!(path === this.monitoring_note)) {
 
         let now_links = this.db.getLinksFromNote(this.monitoring_note)
@@ -181,6 +171,19 @@ export default class MOCView extends ItemView {
     if (rerender) {
       this.db.update(true)
     }
+  }
+
+
+  getViewType(): string {
+    return MOC_VIEW_TYPE
+  }
+
+  getDisplayText(): string {
+    return "Map of Content"
+  }
+
+  getIcon(): string {
+    return "stacked-levels"
   }
 
 }

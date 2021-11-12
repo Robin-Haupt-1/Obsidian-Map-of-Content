@@ -2,10 +2,8 @@ import type { App } from 'obsidian'
 
 import type MOCPlugin from "./main"
 import { Log } from './utils'
-import { getLinkpath, LinkCache, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
-import { CENTRAL_NOTE_PATH_DEFAULT, MOC_VIEW_TYPE, ViewCallback } from './constants'
-import type { DBManager } from './db'
-import MOCView from './view';
+import {  PluginSettingTab } from 'obsidian'; 
+import type { DBManager } from './db' 
 import Settings from './svelte/Settings.svelte';
 
 export interface MOCSettings {
@@ -16,7 +14,6 @@ export interface MOCSettings {
 	plugin_version: string,
 	do_show_update_notice:boolean,
 	auto_update_on_file_change:boolean
-
 }
 
 export const DEFAULT_SETTINGS: MOCSettings = {
@@ -127,7 +124,7 @@ export function UpgradeSettings(object: any, app: App) {
 			props: { app: this.app, plugin: this.plugin },
 		})
 	}
-	
+
 	hide(): void {
 		this.plugin.db.update()
 	}
