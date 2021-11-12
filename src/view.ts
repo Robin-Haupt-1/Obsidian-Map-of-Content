@@ -41,7 +41,7 @@ export default class MOCView extends ItemView {
 
   init() {
     // update the path view every time a file is opened
-    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => {    this.monitorNote();      this.rerender() }))
+    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => { this.monitorNote(); this.rerender() }))
     this.monitorNote()
     this.rerender()
   }
@@ -50,10 +50,10 @@ export default class MOCView extends ItemView {
 
   }
 
- 
+
   /** reload paths and recreate the svelte instance */
   rerender(): void {
-    Log("Rerender called on view", true)
+    Log("Rerender called on view")
 
     // destroy old pathview/errorview instance
     // set symbol to undefined to avoid "This component has already been destroyed" message
@@ -65,8 +65,7 @@ export default class MOCView extends ItemView {
 
 
     let errors = []
-    //console.log(this.open_file_path)
-
+ 
     // during startup (before first db update is completed) show loading message
     if (this.db.database_loading) {
       errors.push("Updating...")
@@ -100,7 +99,7 @@ export default class MOCView extends ItemView {
       // get paths to open note
       let all_paths = this.db.findPaths(this.open_file_path)
       if (all_paths.length == 0) {
-        Log("No paths to this note", true)
+        Log("No paths to this note")
       }
 
       paths = all_paths.map((p: Path) =>
@@ -120,7 +119,7 @@ export default class MOCView extends ItemView {
     // destroy old pathview/errorview instance
     // set symbol to undefined to avoid "This component has already been destroyed" message
 
-    Log("View closing", true)
+    Log("View closing")
 
     if (this._app) {
       this._app.$destroy()
@@ -134,32 +133,32 @@ export default class MOCView extends ItemView {
   }
 
   async monitorNote() {
-    let active_file=this.app.workspace.getActiveFile()
+    let active_file = this.app.workspace.getActiveFile()
     if (active_file == null) {
       return
     }
     if (!this.plugin.getSettingValue("auto_update_on_file_change")) {
-      Log("not monitoring note because disabled",true)
+      Log("not monitoring note because disabled" )
       return
     }
     if (active_file == null || this.plugin.isExludedFile(active_file)) {
-      Log("not monitoring because no file / excluded file", true)
+      Log("not monitoring because no file / excluded file" )
       return
     }
-    if (this.monitoring_note&&this.app.metadataCache.getCache(this.monitoring_note)==undefined) {
-      Log("note name must have changed",true)
+    if (this.monitoring_note && this.app.metadataCache.getCache(this.monitoring_note) == undefined) {
+      Log("note name must have changed" )
     }
     let path = active_file.path
 
-    Log("Monitornote called on: " + path,true)
-    Log("Old monitoring note: "+this.monitoring_note,true)
+    Log("Monitornote called on: " + path)
+    Log("Old monitoring note: " + this.monitoring_note )
     let rerender = false;
-    if (this.monitoring_note&&this.app.metadataCache.getCache(this.monitoring_note)) {
+    if (this.monitoring_note && this.app.metadataCache.getCache(this.monitoring_note)) {
       if (!(path === this.monitoring_note)) {
 
         let now_links = this.db.getLinksFromNote(this.monitoring_note)
         if (!(JSON.stringify(now_links) == JSON.stringify(this.monitoring_note_links))) {
-          console.log("links changed!")
+          Log("links changed!")
           rerender = true
         }
       }
