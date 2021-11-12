@@ -9,12 +9,12 @@ import MOCView from './view';
 import Settings from './svelte/Settings.svelte';
 
 export interface MOCSettings {
-	CN_path: string // path of the note that serves as Central Note
+	CN_path: string 
 	exluded_folders: string[],
 	exluded_filename_components: string[],
 	settings_version: string,
 	plugin_version: string,
-	showed_update_notice_for_version:string,
+	do_show_update_notice:boolean,
 	auto_update_on_file_change:boolean
 
 }
@@ -25,7 +25,7 @@ export const DEFAULT_SETTINGS: MOCSettings = {
 	exluded_filename_components: [],
 	settings_version: "0.1.12",
 	plugin_version: "0.1.12",
-	showed_update_notice_for_version:"None",
+	do_show_update_notice:false,
 	auto_update_on_file_change:true
 }
 
@@ -36,6 +36,12 @@ export class SettingsManager{
 /** take a legacy settings object and transform it till it conforms to the current version */
 export function UpgradeSettings(object: any, app: App) {
 	try {
+		// if fresh install, go with defaults
+		if (object==undefined){
+			Log("fresh install, returning empty settings object",true)
+			return {}
+		}
+
 		// abort if settings are already in current version format
 		if (object["settings_version"] === DEFAULT_SETTINGS["settings_version"]) {
 			Log("Settings already in current version", true)
@@ -93,6 +99,7 @@ export function UpgradeSettings(object: any, app: App) {
 		return UpgradeSettings(object,app)
 	} catch {
 		// it things don't work out, delete all old settings data (better than breaking the plugin)
+		Log("error while transforming settings object",true)
 		return {}
 	}
 }
@@ -120,6 +127,7 @@ export function UpgradeSettings(object: any, app: App) {
 			props: { app: this.app, plugin: this.plugin },
 		})
 	}
+	
 	hide(): void {
 		this.plugin.db.update()
 	}

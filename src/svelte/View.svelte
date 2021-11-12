@@ -12,6 +12,7 @@
     import { onMount } from "svelte";
     import SaplingImage from "./SaplingImage.svelte";
     import Descendants from "./Descendants.svelte";
+    import UpdateNotice from "./UpdateNotice.svelte"; 
     import { expandManager } from "./helpers/expandManager";
 
     export let paths: [string, string][][];
@@ -168,8 +169,8 @@
             }
         }}
     >
-        {#if !(plugin.getSettingValue("showed_update_notice_for_version") === plugin.getSettingValue("plugin_version")) && false}
-            <div class="errors">Updated!</div>
+        {#if (plugin.getSettingValue("do_show_update_notice") )  }
+            <UpdateNotice {app} {view} {plugin}/>
         {:else if errors.length}
             <div class="errors">
                 {@html errors[0]}
