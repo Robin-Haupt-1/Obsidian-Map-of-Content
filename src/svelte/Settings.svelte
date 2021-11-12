@@ -9,23 +9,22 @@
   export let app: App;
   export let plugin: MOCPlugin;
   let cn_input;
-  // TODO choose whether to reverse paths to note
-  // TODO check the db is complete before allow settings changes (maybe have this svelte only do that and load all other components from other svelte files)
+  let settings=plugin.settings
+   // TODO check the db is complete before allow settings changes (maybe have this svelte only do that and load all other components from other svelte files)
   // TODO lazy load all the file names and folders?
-  // Show paths and descendants in different views
-
+ 
   // get list of all files for dropdown menu
   let all_files = app.vault.getFiles().map((file: TFile) => file.path);
-  Log("Central note path: " + plugin.getSettingValue("CN_path") );
+  Log("Central note path: " + settings.getSettingValue("CN_path") );
   let cn_path_input_value;
-  let current_tli = plugin.getSettingValue("CN_path");
+  let current_tli = settings.getSettingValue("CN_path");
 
   const updateCNPath = () => {
     if (!cn_path_input_value) {
       return;
     }
     // change TLI path
-    plugin.updateSettings({ CN_path: cn_path_input_value });
+    settings.updateSettings({ CN_path: cn_path_input_value });
     Log("New central note path: " + cn_path_input_value );
     document.getElementById("tli_path").textContent = cn_path_input_value;
     new Notice("New Central Note path saved");
@@ -36,12 +35,12 @@
   };
   let auto_update_file_switch_checkbox;
   const toggleUpdateOnFileSwitch = () => {
-    plugin.updateSettings({
-      auto_update_on_file_change: !plugin.getSettingValue(
+    settings.updateSettings({
+      auto_update_on_file_change: !settings.getSettingValue(
         "auto_update_on_file_change"
       ),
     });
-    if (plugin.getSettingValue("auto_update_on_file_change")) {
+    if (settings.getSettingValue("auto_update_on_file_change")) {
       auto_update_file_switch_checkbox.checked = true;
     } else {
       auto_update_file_switch_checkbox.checked = false;
@@ -85,7 +84,7 @@
         type="checkbox"
         id="auto-update-file-switch"
         on:click={toggleUpdateOnFileSwitch}
-        checked={plugin.getSettingValue("auto_update_on_file_change")}
+        checked={settings.getSettingValue("auto_update_on_file_change")}
       /> 
   </div>
   <br />

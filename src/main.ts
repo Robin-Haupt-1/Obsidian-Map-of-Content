@@ -6,13 +6,13 @@ import { MOCSettings, DEFAULT_SETTINGS, UpgradeSettings,MOCSettingTab, SettingsM
 import { Log } from './utils';
 
 export default class MOCPlugin extends Plugin {
-	settings: MOCSettings;
 	db: DBManager;
 	view: MOCView;
 	settings:SettingsManager
  
 	async onload() {
-		await this.loadSettings() 
+		this.settings=new SettingsManager(this)
+		await this.settings.loadSettings() 
 		this.db = new DBManager(this) 
 		this.registerView(MOC_VIEW_TYPE, (leaf) => (this.view = new MOCView(leaf, this))) 
 		this.app.workspace.onLayoutReady(() => this.initializePlugin())
@@ -52,7 +52,7 @@ export default class MOCPlugin extends Plugin {
 					new Notice(errors[0])
 					return
 				}
- 				this.updateSettings({ CN_path: this.app.workspace.getActiveFile().path });
+ 				this.settings.updateSettings({ CN_path: this.app.workspace.getActiveFile().path });
 				this.db.update()
 
 			}
@@ -86,29 +86,10 @@ export default class MOCPlugin extends Plugin {
 		this.app.workspace.detachLeavesOfType(MOC_VIEW_TYPE)
 	}
 
-	async loadSettings() {
-		let data = await this.loadData()
- 		data = UpgradeSettings(data, this.app)
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
-		this.saveSettings()
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
-
-	async updateSettings(updates: Partial<MOCSettings>) {
-		Object.assign(this.settings, updates)
-		await this.saveData(this.settings) 
-	}
-
-	getSettingValue<K extends keyof MOCSettings>(setting: K): MOCSettings[K] {
-		return this.settings[setting]
-	}
-
+	
 
  	CNexists(): boolean {
-		let exists = !(this.app.vault.getAbstractFileByPath(this.getSettingValue("CN_path")) == null)
+		let exists = !(this.app.vault.getAbstractFileByPath(this.settings.getSettingValue("CN_path")) == null)
 		Log(exists ? "CN exists" : "CN does not exist" )
 		return exists
 	}
@@ -124,10 +105,10 @@ export default class MOCPlugin extends Plugin {
  
 	isExludedFile(file: TFile) {
 		let path_to_file = file.path
-		let in_excluded_folder = this.getSettingValue("exluded_folders").some((path: string) => path_to_file.startsWith(path))
+		let in_excluded_folder = this.settings.getSettingValue("exluded_folders").some((path: string) => path_to_file.startsWith(path))
 		if (in_excluded_folder) { return true }
 		let filename = file.basename + "." + file.extension
-		let has_excluded_filename = this.getSettingValue("exluded_filename_components").some((phrase: string) => filename.contains(phrase))
+		let has_excluded_filename = this.settings.getSettingValue("exluded_filename_components").some((phrase: string) => filename.contains(phrase))
 		return has_excluded_filename
 	}
 }

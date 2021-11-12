@@ -8,7 +8,7 @@
     export let plugin: MOCPlugin;
     let excludedlist;
 
-    let exluded_filename_components = plugin.getSettingValue(
+    let exluded_filename_components = plugin.settings.getSettingValue(
         "exluded_filename_components"
     );
     let all_files = app.vault
@@ -43,7 +43,7 @@
     /** update the list of exluded files and save the updated settings*/
     function save() {
         excluded_files = allExcludedFiles();
-        plugin.updateSettings({
+        plugin.settings.updateSettings({
             exluded_filename_components: exluded_filename_components,
         });
     }

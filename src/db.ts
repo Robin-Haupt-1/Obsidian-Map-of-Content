@@ -5,9 +5,11 @@ import { FileItem, DB, Path } from './types'
 import { FileNameFromPath } from "./utils"
 import type MOCPlugin from "./main"
 import { Log } from "./utils";
+import type { SettingsManager } from "./settings";
 
 export class DBManager {
     db: DB
+    settings:SettingsManager
     db_entries: any[]
     db_keys: string[]
     app: App
@@ -24,6 +26,7 @@ export class DBManager {
     constructor(plugin: MOCPlugin) {
         this.app = plugin.app;
         this.plugin = plugin
+        this.settings=plugin.settings
         this.all_paths = []
         this.db = {}
         this.db_entries = Object.entries(this.db)
@@ -53,7 +56,7 @@ export class DBManager {
                 this.updateDepthInformation()
 
                 this.all_paths.length = 0
-                let path_so_far: Path = { all_members: [this.plugin.getSettingValue("CN_path")], items: [[this.plugin.getSettingValue("CN_path"), LINKED_CN]] }
+                let path_so_far: Path = { all_members: [this.settings.getSettingValue("CN_path")], items: [[this.settings.getSettingValue("CN_path"), LINKED_CN]] }
                 await new Promise(r => setTimeout(r, 0))
 
                 this.followPaths(path_so_far)
@@ -227,12 +230,12 @@ export class DBManager {
 
     /** starting from the CN, follow all paths and store the information on how long the shortest path to each note is*/
     updateDepthInformation() {
-        Log("Analyzing distance from Central Note. CN path: " + this.plugin.getSettingValue("CN_path"))
+        Log("Analyzing distance from Central Note. CN path: " + this.settings.getSettingValue("CN_path"))
         let depth = 0 // distance from the CN. starts at zero 
         let checked_links: string[] = []  // all the notes that have already been visited. dont visit them again to prevent endless loops
         let do_continue = true
         // start at the the CN
-        let links = [this.plugin.getSettingValue("CN_path")]
+        let links = [this.settings.getSettingValue("CN_path")]
         while (do_continue) {
             let next_links: string[] = []
             links.forEach((link: string) => {

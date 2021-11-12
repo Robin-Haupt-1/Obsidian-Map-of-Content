@@ -10,13 +10,15 @@
     export let app: App;
     export let view: any;
     export let plugin: MOCPlugin;
+    let settings=plugin.settings
+
     let main_div;
     let dark_mode = document.body.classList.contains("theme-dark")
         ? "dark-mode"
         : "light-mode";
     /** Scroll the whole view to the top*/
     function acceptNotice() {
-        plugin.updateSettings({"do_show_update_notice":false})
+        settings.updateSettings({"do_show_update_notice":false})
         view.rerender()
     }
 </script>

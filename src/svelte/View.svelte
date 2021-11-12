@@ -25,6 +25,7 @@
     export let open_note_path: string;
     let expandMan = new expandManager();
     let scroll_up_div;
+    let settings=plugin.settings
     let main_div;
     let scroll_up_div_already_visible = false;
     let dark_mode = document.body.classList.contains("theme-dark")
@@ -196,7 +197,7 @@
             }
         }}
     >
-        {#if plugin.getSettingValue("do_show_update_notice")}
+        {#if settings.getSettingValue("do_show_update_notice")}
             <UpdateNotice {app} {view} {plugin} />
         {:else if errors.length}
             <div class="errors">

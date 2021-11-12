@@ -9,11 +9,13 @@ import type MOCPlugin from './main'
 import type { Path } from './types'
 import type { DBManager } from './db'
 import View from './svelte/View.svelte'
+import type { SettingsManager } from './settings';
 
 export default class MOCView extends ItemView {
   db: DBManager
   _app: View
   plugin: MOCPlugin
+  settings:SettingsManager
   open_file_path: string
   max_indent: number = 5
 
@@ -25,6 +27,7 @@ export default class MOCView extends ItemView {
     super(leaf)
     this.plugin = plugin
     this.db = this.plugin.db
+    this.settings=plugin.settings
     this.app = this.plugin.app
 
     // register with the main class
@@ -71,7 +74,7 @@ export default class MOCView extends ItemView {
     }
 
     else if (!this.db.database_complete) {
-      errors.push(`Your Map of Content couldn't be created.<br><br> Make sure your Central Note path '${this.plugin.getSettingValue("CN_path")}' is correct. You can change this path in the settings tab.`)
+      errors.push(`Your Map of Content couldn't be created.<br><br> Make sure your Central Note path '${this.settings.getSettingValue("CN_path")}' is correct. You can change this path in the settings tab.`)
     }
 
     else if (this.app.workspace.getActiveFile() == null) {
@@ -105,7 +108,7 @@ export default class MOCView extends ItemView {
 
     this._app = new View({
       target: (this as any).contentEl,
-      props: { plugin: this.plugin, view: this, paths: paths, app: this.app, db: this.db, cn_path: this.plugin.getSettingValue("CN_path"), open_note_path: this.open_file_path, errors: errors },
+      props: { plugin: this.plugin, view: this, paths: paths, app: this.app, db: this.db, cn_path: this.settings.getSettingValue("CN_path"), open_note_path: this.open_file_path, errors: errors },
 
     })
   }
@@ -131,7 +134,7 @@ export default class MOCView extends ItemView {
     if (active_file == null) {
       return
     }
-    if (!this.plugin.getSettingValue("auto_update_on_file_change")) {
+    if (!this.settings.getSettingValue("auto_update_on_file_change")) {
       Log("not monitoring note because disabled")
       return
     }

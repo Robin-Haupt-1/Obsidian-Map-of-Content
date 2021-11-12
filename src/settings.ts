@@ -27,6 +27,32 @@ export const DEFAULT_SETTINGS: MOCSettings = {
 }
 
 export class SettingsManager {
+	settings: MOCSettings;
+	plugin: MOCPlugin;
+	constructor(plugin: any) {
+		this.plugin = plugin;
+	}
+	async loadSettings() {
+		// TODO consolidate these next three lines into one
+		let data = await this.plugin.loadData()
+		data = UpgradeSettings(data, this.plugin.app)
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
+		this.saveSettings()
+	}
+
+	async saveSettings() {
+		await this.plugin.saveData(this.settings);
+	}
+
+	async updateSettings(updates: Partial<MOCSettings>) {
+		Object.assign(this.settings, updates)
+		await this.plugin.saveData(this.settings)
+	}
+
+	getSettingValue<K extends keyof MOCSettings>(setting: K): MOCSettings[K] {
+		return this.settings[setting]
+	}
+
 
 }
 
