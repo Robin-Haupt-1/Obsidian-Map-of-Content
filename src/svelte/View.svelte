@@ -8,7 +8,7 @@
         NavigateToFile,
         Log,
     } from "../utils";
-    import SeedlingImage from "./SeedlingImage.svelte";
+    import NoLinkImage from "./NoLinkImage.svelte";
     import Descendants from "./Descendants.svelte";
     import UpdateNotice from "./UpdateNotice.svelte";
     import { expandManager } from "./helpers/expandManager";
@@ -123,7 +123,7 @@
                 }}>update</a
             >
             your Map of Content and watch it grow!<br />
-            <SeedlingImage />
+            <NoLinkImage />
         {:else}
             {#each paths as path}
                 <div class="path">

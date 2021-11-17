@@ -73,7 +73,7 @@ export class SettingsManager {
 				old_version = object["settings_version"]
 			}
 
-			console.log("old settings version: " + old_version)
+			Log("old settings version: " + old_version)
 
 			if (old_version === "pre-0.1.10") {
 				// extract the CN path from CN_path_per_vault and save it as CN_path
