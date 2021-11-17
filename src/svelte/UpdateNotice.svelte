@@ -25,27 +25,21 @@
 
 <div id="all-container">
     <div id="main_moc_div" class={dark_mode} bind:this={main_div}>
-        <div class="errors">Updated!</div>
-        <h3 style="text-align:center">This plugin has been updated</h3>
+        <h3 style="text-align:center">The Map of Content plugin has been updated</h3> 
 
         The latest changes are:
         <ul>
             <li>
                 Your Map of Content will be updated automatically when you
-                switch between notes (but only if you've changed any links)
-            </li>
+                switch between notes, if you've changed any links
+            </li><br>
             <li>
                 There's a new top bar with buttons to show or hide more
                 descendants in the tree, and to update the Map of Content
             </li>
         </ul>
         <br />
-        If you'd like to support the development of this addon, please consider donating
-        to my <a href="https://www.paypal.com/paypalme/robinhaupt">Paypal</a> or
-        <a href="https://ko-fi.com/robinhaupt">Ko-Fi</a> account. <br /><br>And
-        please spread the word about it to your friends or on social media, so
-        we can help more people organize their notes in an amazing way!
-        <button on:click={acceptNotice}>Accept</button>
+        <button on:click={acceptNotice} style="display:block;margin:auto;">Close</button> 
     </div>
 </div>
 
