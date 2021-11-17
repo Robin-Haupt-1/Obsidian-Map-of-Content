@@ -9,13 +9,14 @@
   export let app: App;
   export let plugin: MOCPlugin;
   let cn_input;
-  let settings=plugin.settings
-   // TODO check the db is complete before allow settings changes (maybe have this svelte only do that and load all other components from other svelte files)
+  let settings = plugin.settings;
+
+  // TODO check the db is complete before allow settings changes (maybe have this svelte only do that and load all other components from other svelte files)
   // TODO lazy load all the file names and folders?
- 
+
   // get list of all files for dropdown menu
   let all_files = app.vault.getFiles().map((file: TFile) => file.path);
-  Log("Central note path: " + settings.get("CN_path") );
+  Log("Central note path: " + settings.get("CN_path"));
   let cn_path_input_value;
   let current_tli = settings.get("CN_path");
 
@@ -25,7 +26,7 @@
     }
     // change TLI path
     settings.set({ CN_path: cn_path_input_value });
-    Log("New central note path: " + cn_path_input_value );
+    Log("New central note path: " + cn_path_input_value);
     document.getElementById("tli_path").textContent = cn_path_input_value;
     new Notice("New Central Note path saved");
 
@@ -36,9 +37,7 @@
   let auto_update_file_switch_checkbox;
   const toggleUpdateOnFileSwitch = () => {
     settings.set({
-      auto_update_on_file_change: !settings.get(
-        "auto_update_on_file_change"
-      ),
+      auto_update_on_file_change: !settings.get("auto_update_on_file_change"),
     });
     if (settings.get("auto_update_on_file_change")) {
       auto_update_file_switch_checkbox.checked = true;
@@ -75,17 +74,16 @@
       }}>Save</button
     >
   </div>
-  <br/>
+  <br />
   <div>
-    <!--TODO use js or some sort of switch statement instead of defining the checkbox twice-->
     <h2>Auto-updating the Map of Content</h2>
-    Update when switching between files  <input
-        bind:this={auto_update_file_switch_checkbox}
-        type="checkbox"
-        id="auto-update-file-switch"
-        on:click={toggleUpdateOnFileSwitch}
-        checked={settings.get("auto_update_on_file_change")}
-      /> 
+    Update when switching between files<input
+      bind:this={auto_update_file_switch_checkbox}
+      type="checkbox"
+      id="auto-update-file-switch"
+      on:click={toggleUpdateOnFileSwitch}
+      checked={settings.get("auto_update_on_file_change")}
+    />
   </div>
   <br />
   <ExcludedFolders {app} {plugin} />

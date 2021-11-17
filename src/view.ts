@@ -80,7 +80,7 @@ export default class MOCView extends ItemView {
     else if (this.app.workspace.getActiveFile() == null) {
       errors.push("No file is open")
     }
-    else if (this.plugin.isExludedFile(this.app.workspace.getActiveFile())) {
+    else if (this.settings.isExludedFile(this.app.workspace.getActiveFile())) {
       errors.push("This file has been excluded from the Map of Content.")
     }
     else {
@@ -138,7 +138,7 @@ export default class MOCView extends ItemView {
       Log("not monitoring note because disabled")
       return
     }
-    if (active_file == null || this.plugin.isExludedFile(active_file)) {
+    if (active_file == null || this.settings.isExludedFile(active_file)) {
       Log("not monitoring because no file / excluded file")
       return
     }

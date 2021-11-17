@@ -4,7 +4,7 @@ import { Notice } from 'obsidian'
 import { FileItem, DB, Path } from './types'
 import { FileNameFromPath } from "./utils"
 import type MOCPlugin from "./main"
-import { Log, isExludedFile } from "./utils";
+import { Log  } from "./utils";
 import type { SettingsManager } from "./settings";
 
 export class DBManager {
@@ -130,7 +130,7 @@ export class DBManager {
         // create new db entries 
         let entries_created = 0 
         vault_files.forEach((file) => {
-            if (!isExludedFile(file)) {
+            if (!this.settings.isExludedFile(file)) {
                 // logging
                 entries_created += 1
                 if (entries_created % 1000 == 0) {

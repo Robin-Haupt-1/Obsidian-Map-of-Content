@@ -1,9 +1,9 @@
 import type { DBManager } from "./db"
-import type { App } from "obsidian";
+import type { App, TFile } from "obsidian";
 
- 
+
 export const Log = (message: string) => {
-    let print_log = true  
+    let print_log = true
     if (print_log) console.log("[Map of Content] " + message)
 
 
@@ -53,7 +53,7 @@ export const NavigateToFile = async (
     const leaf = IsCtrlPressed(event)
         ? app.workspace.splitActiveLeaf()
         : app.workspace.getUnpinnedLeaf();
-    app.workspace.openLinkText(path, "/") 
+    app.workspace.openLinkText(path, "/")
 };
 
 /** Get the paths of all folders in the vault, empty or not */
