@@ -130,6 +130,7 @@ export default class MOCView extends ItemView {
   }
 
   async monitorNote() {
+    let rerender = false;
     let active_file = this.app.workspace.getActiveFile()
     if (active_file == null) {
       return
@@ -144,12 +145,12 @@ export default class MOCView extends ItemView {
     }
     if (this.monitoring_note && this.app.metadataCache.getCache(this.monitoring_note) == undefined) {
       Log("note name must have changed")
+      rerender=true
     }
     let path = active_file.path
 
     Log("Monitornote called on: " + path)
     Log("Old monitoring note: " + this.monitoring_note)
-    let rerender = false;
     if (this.monitoring_note && this.app.metadataCache.getCache(this.monitoring_note)) {
       if (!(path === this.monitoring_note)) {
 
