@@ -7,17 +7,27 @@ import type { DBManager } from './db'
 import Settings from './svelte/Settings.svelte';
 
 export interface MOCSettings {
-	CN_path: string, exluded_folders: string[], exluded_filename_components: string[], settings_version: string, plugin_version: string, do_show_update_notice: boolean, auto_update_on_file_change: boolean
+	CN_path: string,
+	exluded_folders: string[],
+	exluded_filename_components: string[],
+	settings_version: string,
+	plugin_version: string,
+	do_show_update_notice: boolean,
+	auto_update_on_file_change: boolean,
+	do_remember_expanded: boolean,
+	file_descendants_expanded: {}
 }
 
 export const DEFAULT_SETTINGS: MOCSettings = {
 	CN_path: "Central Note.md",
 	exluded_folders: [],
 	exluded_filename_components: [],
-	settings_version: "0.1.12",
-	plugin_version: "0.1.12",
+	settings_version: "0.1.14",
+	plugin_version: "0.1.14",
 	do_show_update_notice: false,
-	auto_update_on_file_change: true
+	auto_update_on_file_change: true,
+	do_remember_expanded: false,
+	file_descendants_expanded: {}
 }
 
 export class SettingsManager {
@@ -46,6 +56,7 @@ export class SettingsManager {
 	}
 
 	UpgradeSettingsVersion(object: any) {
+		// TODO remove deleted/renamed files from the is_expanded object
 		try {
 			// if fresh install, go with defaults
 			if (object == undefined) {
@@ -70,7 +81,7 @@ export class SettingsManager {
 			if (!object_keys.contains("settings_version")) {
 				old_version = "pre-0.1.10"
 			}
-			
+
 			else {
 				old_version = object["settings_version"]
 			}
@@ -99,8 +110,15 @@ export class SettingsManager {
 				Log("upgrading settings to 0.1.12")
 				object["plugin_version"] = "0.1.12"
 				object["settings_version"] = "0.1.12"
-
 			}
+
+			if (old_version === "0.1.12") {
+				Log("upgrading settings to 0.1.14")
+				object["plugin_version"] = "0.1.14"
+				object["settings_version"] = "0.1.14"
+				object["do_show_update_notice"]=true
+			}
+
 			return this.UpgradeSettingsVersion(object)
 		} catch {
 			// it things don't work out, delete all old settings data (better than breaking the plugin)
@@ -116,6 +134,31 @@ export class SettingsManager {
 		let filename = file.basename + "." + file.extension
 		let has_excluded_filename = this.get("exluded_filename_components").some((phrase: string) => filename.contains(phrase))
 		return has_excluded_filename
+	}
+
+	isExpanded(path: string) {
+		if (!this.get("do_remember_expanded")) return true
+		let current_settings = this.get("file_descendants_expanded")
+		if (Object.keys(current_settings).contains(path)) {
+			return current_settings[path]
+		}
+		let new_settings = Object.assign(current_settings, { path: true })
+		this.set({ "file_descendants_expanded": new_settings })
+		return true
+
+	}
+
+	setExpanded(path: string, expanded: boolean) {
+		if (!this.get("do_remember_expanded")) return
+
+		let new_val = {}
+		new_val[path] = expanded
+
+
+		let new_settings = Object.assign({}, this.get("file_descendants_expanded"), new_val)
+		this.set({ "file_descendants_expanded": new_settings })
+		return true
+
 	}
 
 

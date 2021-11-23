@@ -35,6 +35,7 @@
     cn_path_input_value = "";
   };
   let auto_update_file_switch_checkbox;
+  let do_remember_expanded_checkbox;
   const toggleUpdateOnFileSwitch = () => {
     settings.set({
       auto_update_on_file_change: !settings.get("auto_update_on_file_change"),
@@ -46,6 +47,7 @@
     }
   };
 </script>
+
 
 <div id="settings-container">
   <div class="path">
@@ -81,13 +83,47 @@
       bind:this={auto_update_file_switch_checkbox}
       type="checkbox"
       id="auto-update-file-switch"
-      on:click={toggleUpdateOnFileSwitch}
+      on:click={() => {
+        let enabled = !settings.get("auto_update_on_file_change");
+        settings.set({
+          auto_update_on_file_change: enabled,
+        });
+        auto_update_file_switch_checkbox.checked = enabled;
+      }}
       checked={settings.get("auto_update_on_file_change")}
+    />
+  </div>
+  <br />
+  <div>
+    <h2>Descendants</h2>
+    Remember whether a file's descandants are shown or hidden<input
+      bind:this={do_remember_expanded_checkbox}
+      type="checkbox"
+      on:click={() => {
+        let enabled = !settings.get("do_remember_expanded");
+        settings.set({
+          do_remember_expanded: enabled,
+        });
+        do_remember_expanded_checkbox.checked = enabled;
+      }}
+      checked={settings.get("do_remember_expanded")}
     />
   </div>
   <br />
   <ExcludedFolders {app} {plugin} />
   <ExcludedFilenames {app} {plugin} />
+<p>
+For support & suggestion feature ideas, visit the plugin's <a
+href="https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content"
+>
+GitHub page</a
+>
+or
+<a href="https://forum.obsidian.md/t/map-of-content-plugin-release/25209/4">
+this post</a
+> in the official Obsidian forum.
+<br><br>
+You can support the development by donating on <a href="https://www.patreon.com/RobinHaupt">Patreon</a>, <a href="https://ko-fi.com/robinhaupt">Ko-Fi</a> or <a href="https://www.paypal.com/paypalme/robinhaupt">PayPal</a>. Thank you!</p>
 </div>
 
 <style>

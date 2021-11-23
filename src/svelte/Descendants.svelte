@@ -23,13 +23,16 @@
     children = db.descendants.get(note_path).slice();
   }
 
-  function redraw(new_max_indent: number) {
-    expanded = true ? indentation < new_max_indent : false;
+  function resetExpanded(new_max_indent: number) {
+    if (!view.plugin.settings.isExpanded(note_path)) {
+      expanded = false;
+    } else {
+      expanded = true ? indentation < new_max_indent : false;
+    }
   }
-  redraw(expandMan.initial_max_indent);
+  resetExpanded(expandMan.initial_max_indent);
 
-  function toggleExpand() {}
-  expandMan.registerRedrawDescendantCallback(redraw);
+  expandMan.registerRedrawDescendantCallback(resetExpanded);
 </script>
 
 <!-- expand svg-->
@@ -54,6 +57,8 @@
             class="expand-arrow"
             on:click={() => {
               expanded = !expanded;
+              console.log("known path: ", note_path);
+              view.plugin.settings.setExpanded(note_path, expanded);
               if (expanded) {
                 expandMan.onManualExpand();
                 expandMan.logIndent(indentation + 1);
