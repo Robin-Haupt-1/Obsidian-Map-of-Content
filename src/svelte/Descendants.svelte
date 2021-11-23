@@ -122,12 +122,12 @@
 
   li {
     padding-left: 1em;
-    border: 5px dotted black;
+    border: 5px solid darkgray;
     border-width: 0 0 1px 1px;
   }
   li.dark-mode {
     padding-left: 1em;
-    border: 5px dotted lightgray;
+    border: 5px solid gray;
     border-width: 0 0 1px 1px;
   }
   li.container {
@@ -141,13 +141,13 @@
   }
 
   li ul {
-    border-top: 1px dotted black;
+    border-top: 1px solid darkgray;
     margin-left: -1em;
     padding-left: 2em;
   }
 
   li.dark-mode ul {
-    border-top: 1px dotted lightgray;
+    border-top: 1px solid gray;
   }
 
   ul li:last-child ul {
