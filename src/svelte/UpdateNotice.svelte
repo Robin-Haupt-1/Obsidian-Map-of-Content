@@ -10,42 +10,52 @@
     export let plugin: MOCPlugin;
     let settings = plugin.settings;
 
-    let main_div;
+    
     let dark_mode = document.body.classList.contains("theme-dark")
         ? "dark-mode"
         : "light-mode";
-    /** Scroll the whole view to the top*/
-    function acceptNotice() {
-        settings.set({ do_show_update_notice: false });
-        view.rerender();
-    }
+
+        
 </script>
 
 <div id="all-container">
-    <div id="main_moc_div" class={dark_mode} bind:this={main_div}>
+    <div id="main_moc_div" class={dark_mode}
+    >
         <h3 style="text-align:center">This plugin has been updated</h3>
 
         The latest changes are:
         <ul>
             <li>
+                You can pin a file to navigate it's links while
+                keeping it's Map of Content open. Just click on the little pin
+                in the top left corner.
+            </li>
+            <br />
+            <li>
                 The plugin can remember whether to show or hide a file's
                 descendants in the tree view. This must be enabled in the
                 settings.
-            </li> 
+            </li>
         </ul>
-        See <a
+        See<a
             href="https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content/releases"
             >here</a
-        > for a complete history of all changes.<br><br>
-        You can support the development by donating on <a
-            href="https://www.patreon.com/RobinHaupt">Patreon</a
-        >, <a href="https://ko-fi.com/robinhaupt">Ko-Fi</a> or
-        <a href="https://www.paypal.com/paypalme/robinhaupt">PayPal</a>. <br />
-        Thank you!
+        >
+        for a complete history of all changes.<br /><br />
+        You can support the development of this plugin by donating on
+        <a href="https://www.patreon.com/RobinHaupt">Patreon</a>,
+        <a href="https://ko-fi.com/robinhaupt">Ko-Fi</a>
+        or
+        <a href="https://www.paypal.com/paypalme/robinhaupt">PayPal</a>. Thank
+        you!
 
         <br /><br />
-        <button on:click={acceptNotice} style="display:block;margin:auto;"
-            >Close</button
+        <button
+            on:click={() => {
+                settings.set({ do_show_update_notice: false });
+                view.rerender();
+            }}
+            style="display:block;margin:auto;">Close</button
         >
     </div>
 </div>

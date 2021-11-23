@@ -15,10 +15,10 @@ export default class MOCView extends ItemView {
   db: DBManager
   _app: View
   plugin: MOCPlugin
-  settings:SettingsManager
+  settings: SettingsManager
   open_file_path: string
   max_indent: number = 5
-
+  is_pinned = false
   monitoring_note: string
   monitoring_note_links: string[]
 
@@ -27,7 +27,7 @@ export default class MOCView extends ItemView {
     super(leaf)
     this.plugin = plugin
     this.db = this.plugin.db
-    this.settings=plugin.settings
+    this.settings = plugin.settings
     this.app = this.plugin.app
 
     // register with the main class
@@ -44,7 +44,7 @@ export default class MOCView extends ItemView {
 
   init() {
     // update the path view every time a file is opened
-    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => { this.monitorNote(); this.rerender() }))
+    this.registerEvent(this.app.workspace.on("file-open", (file: TFile) => { if (!this.is_pinned) { this.monitorNote(); this.rerender() } }))
     this.monitorNote()
     this.rerender()
   }
@@ -108,7 +108,7 @@ export default class MOCView extends ItemView {
 
     this._app = new View({
       target: (this as any).contentEl,
-      props: {  view: this, paths: paths,  errors: errors },
+      props: { view: this, paths: paths, errors: errors },
 
     })
   }
@@ -145,7 +145,7 @@ export default class MOCView extends ItemView {
     }
     if (this.monitoring_note && this.app.metadataCache.getCache(this.monitoring_note) == undefined) {
       Log("note name must have changed")
-      rerender=true
+      rerender = true
     }
     let path = active_file.path
 

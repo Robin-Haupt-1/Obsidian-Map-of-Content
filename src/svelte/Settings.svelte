@@ -48,11 +48,10 @@
   };
 </script>
 
-
 <div id="settings-container">
   <div class="path">
     <h2>Path of your Central Note</h2>
-    Current path:<span id="tli_path">{current_tli}</span><br />
+    Current path:&nbsp;<span id="tli_path">{current_tli}</span><br />
     <label for="myBrowser"> New path:</label>
     <input
       type="text"
@@ -79,7 +78,9 @@
   <br />
   <div>
     <h2>Auto-updating the Map of Content</h2>
-    Update when switching between files<input
+    <label for="auto-update-file-switch"
+      >Update when switching between files
+    </label><input
       bind:this={auto_update_file_switch_checkbox}
       type="checkbox"
       id="auto-update-file-switch"
@@ -96,9 +97,12 @@
   <br />
   <div>
     <h2>Descendants</h2>
-    Remember whether a file's descandants are shown or hidden<input
+    <label for="do_remember_expanded_checkbox"
+      >Remember whether a file's descandants are shown or hidden
+    </label><input
       bind:this={do_remember_expanded_checkbox}
       type="checkbox"
+      id="do_remember_expanded_checkbox"
       on:click={() => {
         let enabled = !settings.get("do_remember_expanded");
         settings.set({
@@ -112,18 +116,24 @@
   <br />
   <ExcludedFolders {app} {plugin} />
   <ExcludedFilenames {app} {plugin} />
-<p>
-For support & suggestion feature ideas, visit the plugin's <a
-href="https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content"
->
-GitHub page</a
->
-or
-<a href="https://forum.obsidian.md/t/map-of-content-plugin-release/25209/4">
-this post</a
-> in the official Obsidian forum.
-<br><br>
-You can support the development by donating on <a href="https://www.patreon.com/RobinHaupt">Patreon</a>, <a href="https://ko-fi.com/robinhaupt">Ko-Fi</a> or <a href="https://www.paypal.com/paypalme/robinhaupt">PayPal</a>. Thank you!</p>
+  <p>
+    For support & suggestion feature ideas, visit the plugin's <a
+      href="https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content"
+    >
+      GitHub page</a
+    >
+    or
+    <a href="https://forum.obsidian.md/t/map-of-content-plugin-release/25209">
+      this post</a
+    >
+    in the official Obsidian forum.
+    <br /><br />
+    You can support the development by donating on
+    <a href="https://www.patreon.com/RobinHaupt">Patreon</a>,
+    <a href="https://ko-fi.com/robinhaupt">Ko-Fi</a>
+    or <a href="https://www.paypal.com/paypalme/robinhaupt">PayPal</a>. Thank
+    you!
+  </p>
 </div>
 
 <style>
