@@ -26,6 +26,7 @@ export class SettingsManager {
 	constructor(plugin: any) {
 		this.plugin = plugin;
 	}
+
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, this.UpgradeSettingsVersion(await this.plugin.loadData()));
 		this.saveSettings()
@@ -69,6 +70,7 @@ export class SettingsManager {
 			if (!object_keys.contains("settings_version")) {
 				old_version = "pre-0.1.10"
 			}
+			
 			else {
 				old_version = object["settings_version"]
 			}

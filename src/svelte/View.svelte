@@ -25,6 +25,7 @@
     let settings = plugin.settings;
     let main_div;
     let scroll_up_div_already_visible = false;
+
 </script>
 
 <div
@@ -272,13 +273,13 @@
     }
 
     div#scroll_up {
-        cursor: pointer;
-        font-size: 25px;
+        cursor: pointer; 
         color: darkgrey;
     }
 
     div#scroll_up svg {
-        transform: rotate(-90deg);
+        transform: rotate(-90deg); 
+        height:20px;
     }
 
     div.light-mode div#scroll_up svg {
