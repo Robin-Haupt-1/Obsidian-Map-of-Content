@@ -16,7 +16,7 @@
     ? "dark-mode"
     : "light-mode";
 
-  let expanded = true ? indentation < expandMan.initial_max_indent : false;
+  let expanded;
 
   let children = [];
   if (db.descendants.has(note_path)) {
@@ -26,14 +26,9 @@
   function redraw(new_max_indent: number) {
     expanded = true ? indentation < new_max_indent : false;
   }
+  redraw(expandMan.initial_max_indent);
 
-  function toggleExpand() {
-    expanded = !expanded;
-    if (expanded) {
-      expandMan.onManualExpand();
-      expandMan.logIndent(indentation + 1);
-    }
-  }
+  function toggleExpand() {}
   expandMan.registerRedrawDescendantCallback(redraw);
 </script>
 
@@ -58,7 +53,11 @@
           <span
             class="expand-arrow"
             on:click={() => {
-              toggleExpand();
+              expanded = !expanded;
+              if (expanded) {
+                expandMan.onManualExpand();
+                expandMan.logIndent(indentation + 1);
+              }
             }}
             ><div class="expand_button">
               {#if expanded}
