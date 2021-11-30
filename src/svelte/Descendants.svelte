@@ -24,10 +24,9 @@
   }
 
   function resetExpanded(new_max_indent: number) {
-    if(indentation==0){
-      expanded=true
-    }
-    else if (!view.plugin.settings.isExpanded(note_path)) {
+    if (indentation == 0) {
+      expanded = true;
+    } else if (!view.plugin.settings.isExpanded(note_path)) {
       expanded = false;
     } else {
       expanded = true ? indentation < new_max_indent : false;
