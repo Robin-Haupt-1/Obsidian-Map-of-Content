@@ -115,6 +115,7 @@ export class SettingsManager {
         Log("upgrading settings to 0.1.12");
         object["plugin_version"] = "0.1.12";
         object["settings_version"] = "0.1.12";
+        object["do_show_update_notice"] = true;
       }
 
       if (old_version === "0.1.12") {
