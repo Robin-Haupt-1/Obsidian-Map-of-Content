@@ -1,7 +1,7 @@
 {
   "name": "map-of-content",
-  "version": "...",
-  "description": "...",
+  "version": "1.0.0",
+  "description": "Map of Content plugin",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
