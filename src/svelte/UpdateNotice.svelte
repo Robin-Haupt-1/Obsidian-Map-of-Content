@@ -33,7 +33,8 @@
     </ul>
     See<a
       href="https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content/releases"
-      >here</a
+    >
+      here</a
     >
     for a complete history of all changes.<br /><br />
     You can support the development of this plugin by donating on
