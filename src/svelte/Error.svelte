@@ -2,8 +2,6 @@
   export let message: String;
 </script>
 
-
-
 <style>
   .errors {
     padding: 10px;

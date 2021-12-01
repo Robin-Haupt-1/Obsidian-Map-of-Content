@@ -15,4 +15,3 @@ When you make changes to your notes, the Map of Content will be updated automati
 Here's another example of what the view can look like if you have a lot of notes:
 
 ![Second example Map of Content](https://raw.githubusercontent.com/Robin-Haupt-1/Obsidian-Map-of-Content/main/doc/example%203.png "Second Example Map of Content")
-
