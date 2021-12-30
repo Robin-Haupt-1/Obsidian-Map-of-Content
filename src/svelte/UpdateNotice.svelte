@@ -22,7 +22,7 @@
     The latest changes are:
     <ul>
       <li>
-        You can pin a file to navigate it's links while keeping it's Map of
+        You can pin a file to navigate its links while keeping its Map of
         Content open. Just click on the little pin in the top left corner.
       </li>
       <br />
