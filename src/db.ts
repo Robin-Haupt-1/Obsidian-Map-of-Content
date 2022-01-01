@@ -187,39 +187,35 @@ export class DBManager {
       let all_links = [];
       if (linkcache) {
         linkcache.forEach((val: LinkCache) => {
-          // check if the link is valid
-          let link_dest = this.app.metadataCache.getFirstLinkpathDest(
-            val.link,
-            "/"
-          );
-          //TODO is it neccessary to avoid including links multiple times? maybe they can't even be duplicate in the linkcache
-          if (
-            link_dest &&
-            !this_links_to.includes(link_dest.path) &&
-            this.db_keys.contains(link_dest.path)
-          ) {
-            this_links_to.push(link_dest.path);
-          }
+          all_links.push(val.link);
         });
       }
 
       let transclusions = this.app.metadataCache.getCache(note.path).embeds;
       if (transclusions) {
         transclusions.forEach((val: EmbedCache) => {
-          // check if the link is valid
-          let link_dest = this.app.metadataCache.getFirstLinkpathDest(
-            val.link,
-            "/"
-          );
-          if (
-            link_dest &&
-            !this_links_to.includes(link_dest.path) &&
-            this.db_keys.contains(link_dest.path)
-          ) {
-            this_links_to.push(link_dest.path);
-          }
+          all_links.push(val.link);
         });
       }
+      all_links.forEach((link: string) => {
+        // remove references to blocks or sections
+        link = link.split("#")[0];
+        link = link.split("^")[0];
+        all_links.push(link);
+
+        // check if the link is valid
+        let link_dest = this.app.metadataCache.getFirstLinkpathDest(link, "/");
+
+        //TODO is it neccessary to avoid including links multiple times? maybe they can't even be duplicate in the linkcache
+        if (
+          link_dest &&
+          !this_links_to.includes(link_dest.path) &&
+          this.db_keys.contains(link_dest.path)
+        ) {
+          this_links_to.push(link_dest.path);
+        }
+      });
+
       if (!this_links_to.length) return; // no links
 
       // save links_to information to db
