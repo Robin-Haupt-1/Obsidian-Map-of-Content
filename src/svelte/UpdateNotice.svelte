@@ -5,7 +5,6 @@
   import { Log } from "../utils";
   import { onMount } from "svelte";
 
-  export let app: App;
   export let view: any;
   export let plugin: MOCPlugin;
   let settings = plugin.settings;
@@ -22,26 +21,26 @@
     The latest changes are:
     <ul>
       <li>
-        You can pin a file to navigate its links while keeping its Map of
-        Content open. Just click on the little pin in the top left corner.
+        Added a settings option to display the path from the Central Note
+        starting at the Central Note instead of the currently open one.
       </li>
       <br />
       <li>
-        The plugin can remember whether to show or hide a file's descendants in
-        the tree view. This must be enabled in the settings.
+        Fixed a bug where links using # or ^ to reference headings or blocks
+        weren't followed
       </li>
     </ul>
-    See<a
+    See&nbsp;<a
       href="https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content/releases"
     >
       here</a
     >
     for a complete history of all changes.<br /><br />
-    You can support the development of this plugin by donating on
+    Thank you for using this plugin! You can donate to support it's development on
     <a href="https://www.patreon.com/RobinHaupt">Patreon</a>,
     <a href="https://ko-fi.com/robinhaupt">Ko-Fi</a>
     or
-    <a href="https://www.paypal.com/paypalme/robinhaupt">PayPal</a>. Thank you!
+    <a href="https://www.paypal.com/paypalme/robinhaupt">PayPal</a>.
 
     <br /><br />
     <button

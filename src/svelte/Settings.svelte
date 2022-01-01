@@ -1,6 +1,5 @@
 <script lang="ts">
   import { App, Notice, TFile } from "obsidian";
-  import type { DBManager } from "../db";
   import type MOCPlugin from "../main";
   import { Log, GetAllFolders } from "../utils";
   import ExcludedFolders from "./settings/ExcludedFolders.svelte";
@@ -8,6 +7,7 @@
 
   export let app: App;
   export let plugin: MOCPlugin;
+
   let cn_input;
   let settings = plugin.settings;
 
@@ -33,18 +33,6 @@
     // clear selection dropdown list
     cn_input.value = "";
     cn_path_input_value = "";
-  };
-  let auto_update_file_switch_checkbox;
-  let do_remember_expanded_checkbox;
-  const toggleUpdateOnFileSwitch = () => {
-    settings.set({
-      auto_update_on_file_change: !settings.get("auto_update_on_file_change"),
-    });
-    if (settings.get("auto_update_on_file_change")) {
-      auto_update_file_switch_checkbox.checked = true;
-    } else {
-      auto_update_file_switch_checkbox.checked = false;
-    }
   };
 </script>
 
@@ -81,7 +69,6 @@
     <label for="auto-update-file-switch"
       >Update when switching between files
     </label><input
-      bind:this={auto_update_file_switch_checkbox}
       type="checkbox"
       id="auto-update-file-switch"
       on:click={() => {
@@ -89,18 +76,31 @@
         settings.set({
           auto_update_on_file_change: enabled,
         });
-        auto_update_file_switch_checkbox.checked = enabled;
       }}
       checked={settings.get("auto_update_on_file_change")}
     />
   </div>
   <br />
   <div>
-    <h2>Descendants</h2>
-    <label for="do_remember_expanded_checkbox"
-      >Remember whether a file's descandants are shown or hidden
+    <h2>Path and descendants</h2>
+
+    <label for="MOC_path_starts_at_CN_checkbox"
+      >Display the path from the Central Note starting at the Central Note
     </label><input
-      bind:this={do_remember_expanded_checkbox}
+      type="checkbox"
+      id="MOC_path_starts_at_CN_checkbox"
+      on:click={() => {
+        let enabled = !settings.get("MOC_path_starts_at_CN");
+        settings.set({
+          MOC_path_starts_at_CN: enabled,
+        });
+      }}
+      checked={settings.get("MOC_path_starts_at_CN")}
+    />
+    <br />
+    <label for="do_remember_expanded_checkbox"
+      >Remember whether a file's descendants are shown or hidden
+    </label><input
       type="checkbox"
       id="do_remember_expanded_checkbox"
       on:click={() => {
@@ -108,7 +108,6 @@
         settings.set({
           do_remember_expanded: enabled,
         });
-        do_remember_expanded_checkbox.checked = enabled;
       }}
       checked={settings.get("do_remember_expanded")}
     />
@@ -117,7 +116,7 @@
   <ExcludedFolders {app} {plugin} />
   <ExcludedFilenames {app} {plugin} />
   <p>
-    For support & suggestion feature ideas, visit the plugin's <a
+    For support and suggesting feature ideas, visit the plugin's <a
       href="https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content"
     >
       GitHub page</a

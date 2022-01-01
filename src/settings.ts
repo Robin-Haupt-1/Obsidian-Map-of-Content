@@ -15,6 +15,7 @@ export interface MOCSettings {
   do_show_update_notice: boolean;
   auto_update_on_file_change: boolean;
   do_remember_expanded: boolean;
+  MOC_path_starts_at_CN: boolean;
   file_descendants_expanded: {};
 }
 
@@ -22,11 +23,12 @@ export const DEFAULT_SETTINGS: MOCSettings = {
   CN_path: "Central Note.md",
   exluded_folders: [],
   exluded_filename_components: [],
-  settings_version: "0.1.14",
-  plugin_version: "0.1.14",
+  settings_version: "0.1.15",
+  plugin_version: "0.1.15",
   do_show_update_notice: false,
   auto_update_on_file_change: true,
   do_remember_expanded: false,
+  MOC_path_starts_at_CN: false,
   file_descendants_expanded: {},
 };
 
@@ -111,17 +113,15 @@ export class SettingsManager {
         object["settings_version"] = "0.1.10";
       } // clone the object
 
-      if (old_version === "0.1.10") {
-        Log("upgrading settings to 0.1.12");
-        object["plugin_version"] = "0.1.12";
-        object["settings_version"] = "0.1.12";
-        object["do_show_update_notice"] = true;
-      }
+      let generic_update_versions = ["0.1.10", "0.1.12", "0.1.14"];
 
-      if (old_version === "0.1.12") {
-        Log("upgrading settings to 0.1.14");
-        object["plugin_version"] = "0.1.14";
-        object["settings_version"] = "0.1.14";
+      if (generic_update_versions.contains(old_version)) {
+        Log(
+          "performing generic update of settings to " +
+            DEFAULT_SETTINGS["settings_version"]
+        );
+        object["plugin_version"] = DEFAULT_SETTINGS["settings_version"];
+        object["settings_version"] = DEFAULT_SETTINGS["settings_version"];
         object["do_show_update_notice"] = true;
       }
 
