@@ -144,6 +144,7 @@
     margin: 0;
     position: relative;
     top: 0em;
+    padding: 1px 0 1px 0;
   }
 
   li ul {
