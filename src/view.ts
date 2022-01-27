@@ -72,9 +72,9 @@ export default class MOCView extends ItemView {
       errors.push("Updating...");
     } else if (!this.db.database_complete) {
       errors.push(
-        `Your Map of Content couldn't be created.<br><br> Make sure your Central Note path '${this.settings.get(
+        `Your Map of Content couldn't be created.<br><br> Make sure your Central Note path <code>'${this.settings.get(
           "CN_path"
-        )}' is correct. You can change this path in the settings tab.`
+        )}'</code> is correct. You can change this path in the settings tab.`
       );
     } else if (this.app.workspace.getActiveFile() == null) {
       errors.push("No file is open");

@@ -50,6 +50,14 @@ export default class MOCPlugin extends Plugin {
     });
 
     this.addCommand({
+      id: "show-map-of-content-pane",
+      name: "Show Map of Content pane",
+      callback: () => {
+        this.initLeaf();
+      },
+    });
+
+    this.addCommand({
       id: "open-note-as-central-note",
       name: "Set current note as Central Note",
       callback: () => {
