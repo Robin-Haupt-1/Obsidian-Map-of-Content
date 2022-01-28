@@ -41,8 +41,6 @@
       on:click={() => {
         view.is_pinned = !view.is_pinned;
         is_pinned = !is_pinned;
-        if (view.is_pinned) {
-        }
       }}
     >
       <svg
