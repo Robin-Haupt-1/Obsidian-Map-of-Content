@@ -125,6 +125,18 @@ export class SettingsManager {
         object["do_show_update_notice"] = true;
       }
 
+      let silent_generic_update_versions = ["0.1.15"];
+
+      if (silent_generic_update_versions.contains(old_version)) {
+        Log(
+          "performing silent generic update of settings to " +
+            DEFAULT_SETTINGS["settings_version"]
+        );
+        object["plugin_version"] = DEFAULT_SETTINGS["settings_version"];
+        object["settings_version"] = DEFAULT_SETTINGS["settings_version"];
+        object["do_show_update_notice"] = false;
+      }
+
       return this.UpgradeSettingsVersion(object);
     } catch {
       // it things don't work out, delete all old settings data (better than breaking the plugin)
