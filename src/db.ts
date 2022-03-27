@@ -204,7 +204,10 @@ export class DBManager {
         all_links.push(link);
 
         // check if the link is valid
-        let link_dest = this.app.metadataCache.getFirstLinkpathDest(link, "/");
+        let link_dest = this.app.metadataCache.getFirstLinkpathDest(
+          link,
+          note.path
+        );
 
         //TODO is it neccessary to avoid including links multiple times? maybe they can't even be duplicate in the linkcache
         if (
