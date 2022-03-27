@@ -46,10 +46,7 @@ export const NavigateToFile = async (
   let file = app.metadataCache.getFirstLinkpathDest(path, "/");
 
   if (!file) return;
-  const leaf = IsCtrlPressed(event)
-    ? app.workspace.splitActiveLeaf()
-    : app.workspace.getUnpinnedLeaf();
-  app.workspace.openLinkText(path, "/");
+  app.workspace.openLinkText(path, "/", IsCtrlPressed(event));
 };
 
 /** Get the paths of all folders in the vault, empty or not */
