@@ -24,7 +24,7 @@ export const DEFAULT_SETTINGS: MOCSettings = {
   exluded_folders: [],
   exluded_filename_components: [],
   settings_version: "0.1.16",
-  plugin_version: "0.1.16",
+  plugin_version: "0.1.17",
   do_show_update_notice: false,
   auto_update_on_file_change: true,
   do_remember_expanded: false,
@@ -62,13 +62,14 @@ export class SettingsManager {
   }
 
   UpgradeSettingsVersion(object: any) {
-    // TODO remove deleted/renamed files from the is_expanded object
+    // TODO remove deleted/renamed files from the is_expanded object. But this is only possible once the vault is done being indexed by Obsidian
     try {
       // if fresh install, go with defaults
       if (object == undefined) {
         Log("fresh install, returning empty settings object");
         return {};
       }
+      object["plugin_version"] = DEFAULT_SETTINGS["plugin_version"];
 
       // abort if settings are already in current version format
       if (object["settings_version"] === DEFAULT_SETTINGS["settings_version"]) {
@@ -120,23 +121,21 @@ export class SettingsManager {
           "performing generic update of settings to " +
             DEFAULT_SETTINGS["settings_version"]
         );
-        object["plugin_version"] = DEFAULT_SETTINGS["settings_version"];
         object["settings_version"] = DEFAULT_SETTINGS["settings_version"];
         object["do_show_update_notice"] = true;
       }
 
-      let silent_generic_update_versions = ["0.1.15"];
+      let silent_generic_update_versions = ["0.1.15", "0.1.16"];
 
       if (silent_generic_update_versions.contains(old_version)) {
         Log(
           "performing silent generic update of settings to " +
             DEFAULT_SETTINGS["settings_version"]
         );
-        object["plugin_version"] = DEFAULT_SETTINGS["settings_version"];
+
         object["settings_version"] = DEFAULT_SETTINGS["settings_version"];
         object["do_show_update_notice"] = false;
       }
-
       return this.UpgradeSettingsVersion(object);
     } catch {
       // it things don't work out, delete all old settings data (better than breaking the plugin)
