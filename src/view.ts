@@ -63,6 +63,13 @@ export default class MOCView extends ItemView {
   /** reload paths and recreate the svelte instance */
   rerender(): void {
     Log("Rerender called on view");
+    if (this.editor_mode) {
+      // if update MOC button is clicked in editor mode, the moc view will get focus leading to 'no file is open' message
+      // this fixes that issue:
+      focus_editor_view(this.app);
+    }
+
+    console.log(this.app.workspace.getLeaf().view.getViewType());
 
     // destroy old pathview/errorview instance
     // set symbol to undefined to avoid "This component has already been destroyed" message
