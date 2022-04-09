@@ -1,5 +1,6 @@
 import type { DBManager } from "./db";
-import type { App, TFile } from "obsidian";
+import type { App, TFile, WorkspaceLeaf } from "obsidian";
+import { MOC_VIEW_TYPE } from "./constants";
 
 export const Log = (message: string) => {
   let print_log = true;
@@ -38,6 +39,28 @@ export const GetDisplayName = (path: string, db: DBManager): string => {
   return display_name;
 };
 
+export const find_editor_view = (app): WorkspaceLeaf | null => {
+  let good_views = undefined;
+  let good_view_types = ["markdown", "image", "video", "audio", "pdf"];
+  good_view_types.forEach((type) => {
+    if (!good_views) {
+      Log("looking for good views in type " + type);
+      let found_views = app.workspace.getLeavesOfType(type);
+      if (found_views.length > 0) {
+        good_views = found_views;
+        Log("len of good views found: " + good_views.length);
+      }
+    }
+  });
+  if (good_views) {
+    return good_views[0];
+  }
+
+  return null;
+};
+
+
+}
 export const NavigateToFile = async (
   app: App,
   path: string,
