@@ -2,7 +2,7 @@ import "svelte";
 
 import { ItemView, LinkCache, Notice, TFile, WorkspaceLeaf } from "obsidian";
 
-import { Log } from "./utils";
+import { focus_editor_view, Log } from "./utils";
 import { MOC_VIEW_TYPE } from "./constants";
 import type MOCPlugin from "./main";
 import type { Path } from "./types";
@@ -15,15 +15,18 @@ export default class MOCView extends ItemView {
   _app: View;
   plugin: MOCPlugin;
   settings: SettingsManager;
+  leaf: WorkspaceLeaf;
   open_file_path: string;
   max_indent: number = 5;
   is_pinned = false;
   monitoring_note: string;
   monitoring_note_links: string[];
+  editor_mode: boolean = false; // whether the view is situated in an editor-type leaf and that leaf has focus
 
   constructor(leaf: WorkspaceLeaf, plugin: MOCPlugin) {
     super(leaf);
     this.plugin = plugin;
+    this.leaf = leaf;
     this.db = this.plugin.db;
     this.settings = plugin.settings;
     this.app = this.plugin.app;
@@ -43,7 +46,9 @@ export default class MOCView extends ItemView {
     // update the path view every time a file is opened
     this.registerEvent(
       this.app.workspace.on("file-open", (file: TFile) => {
-        if (!this.is_pinned) {
+        this.editor_mode =
+          this.app.workspace.getLeaf().view.getViewType() == MOC_VIEW_TYPE;
+        if (!this.is_pinned && !this.editor_mode) {
           this.monitorNote();
           this.rerender();
         }
