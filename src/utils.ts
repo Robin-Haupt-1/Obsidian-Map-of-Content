@@ -59,8 +59,21 @@ export const find_editor_view = (app): WorkspaceLeaf | null => {
   return null;
 };
 
+export const focus_editor_view = (app): boolean => {
+  if (app.workspace.getLeaf().view.getViewType() == MOC_VIEW_TYPE) {
+    let good_view = find_editor_view(app);
 
-}
+    if (good_view) {
+      app.workspace.setActiveLeaf(good_view);
+      console.log("setting active leaf");
+
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
 export const NavigateToFile = async (
   app: App,
   path: string,
