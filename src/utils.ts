@@ -79,10 +79,26 @@ export const NavigateToFile = async (
   path: string,
   event: MouseEvent
 ) => {
+  let split_leaf = false;
   let file = app.metadataCache.getFirstLinkpathDest(path, "/");
 
   if (!file) return;
-  app.workspace.openLinkText(path, "/", IsCtrlPressed(event));
+
+  if (app.workspace.getLeaf().view.getViewType() == MOC_VIEW_TYPE) {
+    let good_view = find_editor_view(app);
+
+    if (!good_view) {
+      split_leaf = true;
+    } else {
+      app.workspace.setActiveLeaf(good_view);
+      console.log("setting active leaf");
+    }
+  }
+  app.workspace.openLinkText(
+    path,
+    "/",
+    split_leaf ? true : IsCtrlPressed(event)
+  );
 };
 
 /** Get the paths of all folders in the vault, empty or not */
