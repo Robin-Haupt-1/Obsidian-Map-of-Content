@@ -69,7 +69,7 @@ export default class MOCView extends ItemView {
       focus_editor_view(this.app);
     }
 
-    console.log(this.app.workspace.getLeaf().view.getViewType());
+    Log("Leaf viewtype: " + this.app.workspace.getLeaf().view.getViewType());
 
     // destroy old pathview/errorview instance
     // set symbol to undefined to avoid "This component has already been destroyed" message
