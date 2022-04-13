@@ -24,7 +24,7 @@ export const DEFAULT_SETTINGS: MOCSettings = {
   exluded_folders: [],
   exluded_filename_components: [],
   settings_version: "0.1.16",
-  plugin_version: "0.1.17",
+  plugin_version: "0.1.18",
   do_show_update_notice: false,
   auto_update_on_file_change: true,
   do_remember_expanded: false,
@@ -125,7 +125,7 @@ export class SettingsManager {
         object["do_show_update_notice"] = true;
       }
 
-      let silent_generic_update_versions = ["0.1.15", "0.1.16"];
+      let silent_generic_update_versions = ["0.1.15", "0.1.16", "0.1.17"];
 
       if (silent_generic_update_versions.contains(old_version)) {
         Log(
