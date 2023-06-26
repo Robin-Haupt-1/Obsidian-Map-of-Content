@@ -47,7 +47,7 @@ export default class MOCView extends ItemView {
     this.registerEvent(
       this.app.workspace.on("file-open", (file: TFile) => {
         this.editor_mode =
-          this.app.workspace.getLeaf().view.getViewType() == MOC_VIEW_TYPE;
+          this.app.workspace.activeLeaf.view.getViewType() == MOC_VIEW_TYPE;
         if (!this.is_pinned && !this.editor_mode) {
           this.monitorNote();
           this.rerender();
@@ -69,7 +69,7 @@ export default class MOCView extends ItemView {
       focus_editor_view(this.app);
     }
 
-    Log("Leaf viewtype: " + this.app.workspace.getLeaf().view.getViewType());
+    Log("Leaf viewtype: " + this.app.workspace.activeLeaf.view.getViewType());
 
     // destroy old pathview/errorview instance
     // set symbol to undefined to avoid "This component has already been destroyed" message
