@@ -5,3 +5,5 @@
 - update plugin_version in DEFAULT_SETTINGS in settings.ts
 - update settings_version in DEFAULT_SETTINGS in settings.ts if necessary
 - add new version to silent_generic_update_versions or generic_update_versions in settings.ts
+- create new release at https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content/releases/new
+- add main.js and manifest.json

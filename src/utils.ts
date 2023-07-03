@@ -3,7 +3,7 @@ import type { App, TFile, WorkspaceLeaf } from "obsidian";
 import { MOC_VIEW_TYPE } from "./constants";
 
 export const Log = (message: string) => {
-  let print_log = true;
+  let print_log = false;
   if (print_log) console.log("[Map of Content] " + message);
 };
 
