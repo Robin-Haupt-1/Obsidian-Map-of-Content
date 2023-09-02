@@ -4,7 +4,13 @@ import {
   LINKED_TO,
   LINKED_FROM,
 } from "./constants";
-import type { App, Vault, LinkCache, EmbedCache } from "obsidian";
+import type {
+  App,
+  Vault,
+  LinkCache,
+  EmbedCache,
+  FrontmatterLinkCache,
+} from "obsidian";
 import { Notice } from "obsidian";
 import { FileItem, DB, Path } from "./types";
 import { FileNameFromPath } from "./utils";
@@ -202,7 +208,7 @@ export class DBManager {
         note.path
       ).frontmatterLinks;
       if (frontmatter_linkcache) {
-        frontmatter_linkcache.forEach((val: LinkCache) => {
+        frontmatter_linkcache.forEach((val: FrontmatterLinkCache) => {
           all_links.push(val.link);
         });
       }
