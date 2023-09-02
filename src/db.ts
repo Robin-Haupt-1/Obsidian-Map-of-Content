@@ -197,6 +197,16 @@ export class DBManager {
           all_links.push(val.link);
         });
       }
+
+      let frontmatter_linkcache = this.app.metadataCache.getCache(
+        note.path
+      ).frontmatterLinks;
+      if (frontmatter_linkcache) {
+        frontmatter_linkcache.forEach((val: LinkCache) => {
+          all_links.push(val.link);
+        });
+      }
+
       all_links.forEach((link: string) => {
         // remove references to blocks or sections
         link = link.split("#")[0];
