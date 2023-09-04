@@ -32,6 +32,7 @@
       expanded = true ? indentation < new_max_indent : false;
     }
   }
+
   resetExpanded(expandMan.initial_max_indent);
 
   expandMan.registerRedrawDescendantCallback(resetExpanded);
@@ -43,9 +44,10 @@
     id="expand-arrow-svg"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
-    ><path d="M22 12l-20 12 5-12-5-12z" />
-  </symbol></svg
->
+  >
+    <path d="M22 12l-20 12 5-12-5-12z" />
+  </symbol>
+</svg>
 <!--start descendants view-->
 {#if indentation === 0 && children.length === 0}
   No descendants
@@ -54,7 +56,8 @@
     <p>
       {#if indentation === 0}
         {GetDisplayName(note_path, db)}
-      {:else}{#if children.length > 0}
+      {:else}
+        {#if children.length > 0}
           <span
             class="expand-arrow"
             on:click={() => {
@@ -130,11 +133,13 @@
     border: 5px solid darkgray;
     border-width: 0 0 1px 1px;
   }
+
   li.dark-mode {
     padding-left: 1em;
     border: 5px solid gray;
     border-width: 0 0 1px 1px;
   }
+
   li.container {
     border-bottom: 0px;
   }
@@ -182,6 +187,7 @@
   li.light-mode div.expand_button svg.svg {
     fill: darkgrey;
   }
+
   li.light-mode div.expand_button svg.svg:hover {
     fill: gray;
   }
@@ -189,6 +195,7 @@
   li.dark-mode div.expand_button svg.svg {
     fill: gray;
   }
+
   li.dark-mode div.expand_button svg.svg:hover {
     fill: lightgray;
   }

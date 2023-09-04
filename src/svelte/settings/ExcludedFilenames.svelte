@@ -48,6 +48,7 @@
       exluded_filename_components: exluded_filename_components,
     });
   }
+
   function addValue() {
     if (!exclude_phrase_input_value) {
       return;
@@ -194,11 +195,13 @@ That also includes the file extension.<br /><br />
     height: 300px;
     width: 300px;
   }
+
   div#currently-excluded {
     width: 600px;
     max-height: 300px;
     overflow: hidden;
   }
+
   div#currently-excluded-list {
     overflow: auto;
     max-height: 260px;

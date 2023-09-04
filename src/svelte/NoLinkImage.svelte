@@ -115,6 +115,7 @@
     max-height: 200px;
     align-content: center;
   }
+
   svg {
     display: block;
     width: 100%;

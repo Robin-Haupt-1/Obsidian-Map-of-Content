@@ -52,7 +52,8 @@
 
     <datalist id="notes">
       {#each all_files as filepath}
-        <option value={filepath} />{/each}
+        <option value={filepath} />
+      {/each}
     </datalist>
 
     <button
@@ -60,8 +61,9 @@
       type="button"
       on:click={() => {
         updateCNPath();
-      }}>Save</button
-    >
+      }}
+      >Save
+    </button>
   </div>
   <br />
   <div>
@@ -141,15 +143,18 @@
     height: 100%;
     width: 100%;
   }
+
   #CN_select {
     min-width: 200px;
     width: 50%;
     font-size: 1em;
   }
+
   #update_TLI_path_button {
     margin-left: auto;
     margin-right: auto;
   }
+
   h2 {
     text-align: left;
   }

@@ -120,6 +120,7 @@ export default class MOCPlugin extends Plugin {
     Log("View registered");
     this.view = view;
   }
+
   unregisterViewInstance(view: MOCView) {
     this.view = undefined;
   }

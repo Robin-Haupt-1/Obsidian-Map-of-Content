@@ -53,16 +53,18 @@
         <path
           d="M18 6c0 2.972-2.164 5.433-5 5.91v8.09h-2v-8.089c-2.836-.477-5-2.938-5-5.911 0-3.314 2.687-6 6-6s6 2.687 6 6zm-2 0c0-2.206-1.794-4-4-4s-4 1.794-4 4 1.794 4 4 4 4-1.794 4-4zm-5.618 2.098c2.339 1.84 5.563-.722 3.858-3.539.313 2.237-1.956 4.03-3.858 3.539zm4.618 8.195v2.052l.438.107c1.706.493 2.496 1.027 2.507 1.547-.011.52-.801 1.054-2.507 1.547-2.097.606-4.786.604-6.874.001-1.695-.489-2.515-1.021-2.515-1.547s.82-1.058 2.516-1.548l.436-.106v-2.052c-2.932.593-5.001 2.028-5.001 3.706 0 2.209 3.581 4 8 4s8-1.791 8-4c0-1.678-2.069-3.113-5-3.707z"
         />
-      </svg><svg
+      </svg>
+      <svg
         id="pinned"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        ><path
-          d="M 12,2 C 8.687,2 6,4.687 6,8 c 0,2.972 2.164,5.433 5,5.91 V 20 h 2 v -6.089 c 2.836,-0.477 5,-2.938 5,-5.91 C 18,4.687 15.313,2 12,2 Z M 11.293,6.508 C 10.744,7.158 9.87,7.308 9.34,6.841 8.81,6.374 8.824,5.469 9.374,4.819 9.922,4.169 10.796,4.02 11.326,4.486 c 0.53,0.467 0.515,1.372 -0.033,2.022 z M 20,20 c 0,2.209 -3.581,4 -8,4 -4.419,0 -8,-1.791 -8,-4 0,-1.678 2.069,-3.113 5,-3.707 v 2.052 L 8.564,18.451 C 6.869,18.942 6.048,19.474 6.048,20 c 0,0.526 0.82,1.058 2.516,1.548 2.088,0.603 4.777,0.605 6.874,-10e-4 C 17.144,21.054 17.934,20.52 17.945,20 17.934,19.48 17.144,18.946 15.438,18.453 L 15,18.346 v -2.052 c 2.931,0.593 5,2.028 5,3.706 z"
-        /></svg
       >
+        <path
+          d="M 12,2 C 8.687,2 6,4.687 6,8 c 0,2.972 2.164,5.433 5,5.91 V 20 h 2 v -6.089 c 2.836,-0.477 5,-2.938 5,-5.91 C 18,4.687 15.313,2 12,2 Z M 11.293,6.508 C 10.744,7.158 9.87,7.308 9.34,6.841 8.81,6.374 8.824,5.469 9.374,4.819 9.922,4.169 10.796,4.02 11.326,4.486 c 0.53,0.467 0.515,1.372 -0.033,2.022 z M 20,20 c 0,2.209 -3.581,4 -8,4 -4.419,0 -8,-1.791 -8,-4 0,-1.678 2.069,-3.113 5,-3.707 v 2.052 L 8.564,18.451 C 6.869,18.942 6.048,19.474 6.048,20 c 0,0.526 0.82,1.058 2.516,1.548 2.088,0.603 4.777,0.605 6.874,-10e-4 C 17.144,21.054 17.934,20.52 17.945,20 17.934,19.48 17.144,18.946 15.438,18.453 L 15,18.346 v -2.052 c 2.931,0.593 5,2.028 5,3.706 z"
+        />
+      </svg>
     </div>
     <div id="top-bar-flex">
       <div
@@ -122,11 +124,11 @@
         main_div.scrollTop = 0;
       }}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-        ><path
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path
           d="M15 5.829l6.171 6.171-6.171 6.171v-3.171h-13v-6h13v-3.171zm-2-4.829v6h-13v10h13v6l11-11-11-11z"
-        /></svg
-      >
+        />
+      </svg>
     </div>
   </div>
   <div
@@ -180,7 +182,8 @@
                   <path
                     d="M 2.117,7 9.644,0.765 9,0 0,7.521 9,15 9.645,14.236 2.116,8 H 24 V 7 Z"
                   />
-                </svg>{:else if pathitem[1] === LINKED_TO}
+                </svg>
+              {:else if pathitem[1] === LINKED_TO}
                 <svg
                   class="path-arrow"
                   xmlns="http://www.w3.org/2000/svg"
@@ -189,7 +192,8 @@
                   <path
                     d=" M 21.883,8 14.356,14.235 15,15 24,7.479 15,0 14.355,0.764 21.884,7 H 0 v 1 z"
                   />
-                </svg>{:else if pathitem[1] === LINKED_BOTH}
+                </svg>
+              {:else if pathitem[1] === LINKED_BOTH}
                 <svg
                   class="path-arrow"
                   xmlns="http://www.w3.org/2000/svg"
@@ -198,7 +202,9 @@
                   <path
                     d="M 9 0 L 0 7.5214844 L 9 15 L 9.6445312 14.236328 L 2.1152344 8 L 21.882812 8 L 14.355469 14.234375 L 15 15 L 24 7.4785156 L 15 0 L 14.355469 0.76367188 L 21.884766 7 L 2.1171875 7 L 9.6445312 0.765625 L 9 0 z "
                   />
-                </svg>{/if}{#if i === path.length - 1}<span title={pathitem[0]}>
+                </svg>
+              {/if}
+              {#if i === path.length - 1}<span title={pathitem[0]}>
                   {GetDisplayName(pathitem[0], db)}</span
                 >{:else}<a
                   class="link"
@@ -217,7 +223,9 @@
                   on:click={(event) => NavigateToFile(app, pathitem[0], event)}
                 >
                   {GetDisplayName(pathitem[0], db)}</a
-                >{/if}{#if pathitem[1] === LINKED_FROM}<svg
+                >{/if}
+              {#if pathitem[1] === LINKED_FROM}
+                <svg
                   class="path-arrow"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 15.05"
@@ -225,7 +233,9 @@
                   <path
                     d=" M 21.883,8 14.356,14.235 15,15 24,7.479 15,0 14.355,0.764 21.884,7 H 0 v 1 z"
                   />
-                </svg>{:else if pathitem[1] === LINKED_TO}<svg
+                </svg>
+              {:else if pathitem[1] === LINKED_TO}
+                <svg
                   class="path-arrow"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 15.05"
@@ -233,7 +243,9 @@
                   <path
                     d="M 2.117,7 9.644,0.765 9,0 0,7.521 9,15 9.645,14.236 2.116,8 H 24 V 7 Z"
                   />
-                </svg>{:else if pathitem[1] === LINKED_BOTH}<svg
+                </svg>
+              {:else if pathitem[1] === LINKED_BOTH}
+                <svg
                   class="path-arrow"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 15.05"
@@ -241,7 +253,8 @@
                   <path
                     d="M 9 0 L 0 7.5214844 L 9 15 L 9.6445312 14.236328 L 2.1152344 8 L 21.882812 8 L 14.355469 14.234375 L 15 15 L 24 7.4785156 L 15 0 L 14.355469 0.76367188 L 21.884766 7 L 2.1171875 7 L 9.6445312 0.765625 L 9 0 z "
                   />
-                </svg>{/if}
+                </svg>
+              {/if}
             {/each}
           {/if}
         </div>
@@ -283,6 +296,7 @@
   div#top-bar div#pin-file svg#pinned {
     display: none;
   }
+
   div#top-bar div#pin-file.is-pinned svg#pinned {
     display: block;
   }
@@ -296,27 +310,33 @@
     display: flex;
     justify-content: center;
   }
+
   div#top-bar div.action {
     height: 20px;
     width: 20px;
     margin: 5px;
   }
+
   div#top-bar div.action svg {
     height: 20px;
     width: 20px;
     fill: darkgrey;
   }
+
   div#top-bar div.action:hover svg {
     fill: grey;
   }
+
   div.dark-mode div#top-bar div.action svg {
     height: 20px;
     width: 20px;
     fill: grey;
   }
+
   div.dark-mode div#top-bar div.action:hover svg {
     fill: darkgrey;
   }
+
   div#main_moc_div {
     padding: initial;
     width: initial;
@@ -348,6 +368,7 @@
   div.light-mode div#scroll_up svg {
     fill: darkgray;
   }
+
   div.light-mode div#scroll_up:hover svg {
     fill: gray;
   }
@@ -355,12 +376,15 @@
   div.dark-mode div#scroll_up svg {
     fill: gray;
   }
+
   div.dark-mode div#scroll_up:hover svg {
     fill: darkgray;
   }
+
   a.link {
     cursor: pointer;
   }
+
   ul {
     padding-left: 0;
   }
@@ -372,9 +396,11 @@
     width: 24px;
     height: 0.7em;
   }
+
   div.dark-mode svg.path-arrow {
     fill: lightgray;
   }
+
   .errors {
     padding: 10px;
     width: initial;

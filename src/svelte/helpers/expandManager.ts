@@ -38,6 +38,7 @@ export class expandManager {
       func(new_max_indent);
     }
   }
+
   registerRedrawDescendantCallback(redraw: Function) {
     this.redrawCallbacks.push(redraw);
   }
@@ -48,6 +49,7 @@ export class expandManager {
       this.initial_max_indent = indent;
     }
   }
+
   onManualExpand() {
     this.manually_expanded = true;
   }

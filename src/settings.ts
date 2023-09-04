@@ -35,6 +35,7 @@ export const DEFAULT_SETTINGS: MOCSettings = {
 export class SettingsManager {
   settings: MOCSettings;
   plugin: MOCPlugin;
+
   constructor(plugin: any) {
     this.plugin = plugin;
   }

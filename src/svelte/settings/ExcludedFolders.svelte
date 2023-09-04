@@ -123,7 +123,8 @@
       {#each all_folders as folder_path}
         <option value={folder_path} />
       {/each}
-    </datalist><br />
+    </datalist>
+    <br />
     <br />
     <input
       type="button"
@@ -195,11 +196,13 @@
     height: 300px;
     width: 300px;
   }
+
   div#currently-excluded {
     width: 600px;
     max-height: 300px;
     overflow: hidden;
   }
+
   div#currently-excluded-list {
     overflow: auto;
     max-height: 260px;
