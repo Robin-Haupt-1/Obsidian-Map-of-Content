@@ -140,10 +140,10 @@ export default class MOCView extends ItemView {
       return;
     }
     if (!this.settings.get("auto_update_on_file_change")) {
-      Log("not monitoring note because disabled");
+      Log("not monitoring note because feature disabled");
       return;
     }
-    if (active_file == null || this.settings.isExludedFile(active_file)) {
+    if (this.settings.isExludedFile(active_file)) {
       Log("not monitoring because no file / excluded file");
       return;
     }

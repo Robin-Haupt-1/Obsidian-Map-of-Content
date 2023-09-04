@@ -183,11 +183,9 @@ export class DBManager {
     Log("analyzing links");
     this.all_notes().forEach((note: FileItem) => {
       if (note.extension != "md") {
-        // skip if it's not an md file. Other file types can't link to anything
         return;
       }
 
-      //  save all the links this note links to
       let this_links_to: string[] = [];
       let linkcache = this.app.metadataCache.getCache(note.path).links;
       let all_links = [];
@@ -207,6 +205,7 @@ export class DBManager {
       let frontmatter_linkcache = this.app.metadataCache.getCache(
         note.path
       ).frontmatterLinks;
+
       if (frontmatter_linkcache) {
         frontmatter_linkcache.forEach((val: FrontmatterLinkCache) => {
           all_links.push(val.link);
@@ -235,12 +234,10 @@ export class DBManager {
         }
       });
 
-      if (!this_links_to.length) return; // no links
+      if (!this_links_to.length) return;
 
-      // save links_to information to db
       this.db[note.path].links_to = this_links_to;
 
-      // add a "linked_from" reference to the db entry of all notes that are linked to from this note
       this_links_to.forEach((link: string) => {
         if (!this.db[link].linked_from.includes(note.path)) {
           this.db[link].linked_from.push(note.path);
@@ -392,7 +389,8 @@ export class DBManager {
       });
     });
   }
-  getLinksFromNote(path: string, contained_in_db: boolean = false): string[] {
+
+  getLinksFromNote(path: string): string[] {
     let linkcache = this.app.metadataCache.getCache(path).links;
     let all_links: string[] = [];
     if (linkcache) {
@@ -406,7 +404,7 @@ export class DBManager {
         if (
           link_dest &&
           !all_links.includes(link_dest.path) &&
-          (!contained_in_db || this.db_keys.contains(link_dest.path))
+          this.db_keys.contains(link_dest.path)
         ) {
           all_links.push(link_dest.path);
         }
