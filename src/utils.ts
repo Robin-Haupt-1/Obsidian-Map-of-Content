@@ -51,45 +51,14 @@ export const findContentEditorView = (app): WorkspaceLeaf | undefined => {
 
   return contentEditorViews?.[0];
 };
-
-export const focusContentEditorView = (app): boolean => {
-  if (app.workspace.activeLeaf.view.getViewType() === MOC_VIEW_TYPE) {
-    const goodView = findContentEditorView(app);
-
-    if (goodView) {
-      app.workspace.setActiveLeaf(goodView);
-      devLog("setting active leaf");
-
-      return true;
-    } else {
-      return false;
-    }
-  }
-};
-
 export const NavigateToFile = async (
   app: App,
   path: string,
   event: MouseEvent
 ) => {
-  let mustCreateNewLeaf = true;
-
   if (!app.metadataCache.getFirstLinkpathDest(path, "/")) return;
 
-  if (app.workspace.activeLeaf.view.getViewType() === MOC_VIEW_TYPE) {
-    const contentEditorView = findContentEditorView(app);
-
-    if (contentEditorView) {
-      mustCreateNewLeaf = false;
-      app.workspace.setActiveLeaf(contentEditorView);
-      devLog("setting active leaf");
-    }
-  }
-  app.workspace.openLinkText(
-    path,
-    "/",
-    mustCreateNewLeaf ? true : isCtrlPressed(event)
-  );
+  app.workspace.openLinkText(path, "/", isCtrlPressed(event));
 };
 
 /** Get the paths of all folders in the vault, empty or not */

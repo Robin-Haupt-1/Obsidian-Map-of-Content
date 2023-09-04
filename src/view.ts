@@ -2,7 +2,7 @@ import "svelte";
 
 import { ItemView, LinkCache, Notice, TFile, WorkspaceLeaf } from "obsidian";
 
-import { focusContentEditorView, devLog } from "./utils";
+import { devLog } from "./utils";
 import { MOC_VIEW_TYPE } from "./constants";
 import type MOCPlugin from "./main";
 import type { Path } from "./types";
@@ -21,7 +21,6 @@ export default class MOCView extends ItemView {
   isPinned = false;
   noteBeingMonitored: string;
   linksOfNoteBeingMonitored: string[];
-  inInEditorLeaf: boolean = false;
 
   constructor(leaf: WorkspaceLeaf, plugin: MOCPlugin) {
     super(leaf);
@@ -42,9 +41,7 @@ export default class MOCView extends ItemView {
   init() {
     this.registerEvent(
       this.app.workspace.on("file-open", (file: TFile) => {
-        this.inInEditorLeaf =
-          this.app.workspace.activeLeaf.view.getViewType() === MOC_VIEW_TYPE;
-        if (!this.isPinned && !this.inInEditorLeaf) {
+        if (!this.isPinned) {
           this.monitorNote();
           this.rerender();
         }
@@ -59,11 +56,6 @@ export default class MOCView extends ItemView {
   /** reload paths and recreate the svelte instance */
   rerender(): void {
     devLog("Rerender called on view");
-    if (this.inInEditorLeaf) {
-      // if update MOC button is clicked in editor mode, the moc view will get focus leading to 'no file is open' message
-      // this fixes that issue:
-      focusContentEditorView(this.app);
-    }
 
     devLog(
       "Leaf viewtype: " + this.app.workspace.activeLeaf?.view?.getViewType()
