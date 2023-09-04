@@ -36,7 +36,6 @@ export default class MOCView extends ItemView {
     this.plugin.app.workspace.onLayoutReady(() => this.init());
 
     // rerender on css change to adapt to dark/light mode changes
-    // TODO pass command to svelte, not recreate it
     this.plugin.app.workspace.on("css-change", () => {
       this.rerender();
     });
@@ -163,7 +162,10 @@ export default class MOCView extends ItemView {
       this.app.metadataCache.getCache(this.monitoring_note)
     ) {
       if (!(path === this.monitoring_note)) {
-        let now_links = this.db.getLinksFromNote(this.monitoring_note);
+        let now_links = this.db.getValidatedLinksFromNote(
+          this.monitoring_note,
+          "/"
+        );
         if (
           !(
             JSON.stringify(now_links) ==
@@ -176,7 +178,7 @@ export default class MOCView extends ItemView {
       }
     }
     this.monitoring_note = path;
-    this.monitoring_note_links = this.db.getLinksFromNote(path);
+    this.monitoring_note_links = this.db.getValidatedLinksFromNote(path, "/");
     if (rerender) {
       this.db.update(true);
     }

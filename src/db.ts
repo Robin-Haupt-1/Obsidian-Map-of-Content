@@ -1,21 +1,20 @@
 import {
   LINKED_BOTH,
   LINKED_CN as LINKED_CN,
-  LINKED_TO,
   LINKED_FROM,
+  LINKED_TO,
 } from "./constants";
 import type {
   App,
-  Vault,
-  LinkCache,
   EmbedCache,
   FrontmatterLinkCache,
+  LinkCache,
+  Vault,
 } from "obsidian";
 import { Notice } from "obsidian";
-import { FileItem, DB, Path } from "./types";
-import { FileNameFromPath } from "./utils";
+import { DB, FileItem, Path } from "./types";
+import { FileNameFromPath, Log } from "./utils";
 import type MOCPlugin from "./main";
-import { Log } from "./utils";
 import type { SettingsManager } from "./settings";
 
 export class DBManager {
@@ -176,69 +175,20 @@ export class DBManager {
       }
     });
 
-    // update the db_entries representation of the db
     this.db_entries = Object.entries(this.db);
 
-    // step 2: analyze links
     Log("analyzing links");
-    this.all_notes().forEach((note: FileItem) => {
-      if (note.extension != "md") {
-        return;
-      }
 
-      let this_links_to: string[] = [];
-      let linkcache = this.app.metadataCache.getCache(note.path).links;
-      let all_links = [];
-      if (linkcache) {
-        linkcache.forEach((val: LinkCache) => {
-          all_links.push(val.link);
-        });
-      }
+    const markdownNotes = this.all_notes().filter(
+      (note) => note.extension === "md"
+    );
 
-      let transclusions = this.app.metadataCache.getCache(note.path).embeds;
-      if (transclusions) {
-        transclusions.forEach((val: EmbedCache) => {
-          all_links.push(val.link);
-        });
-      }
+    markdownNotes.forEach((note: FileItem) => {
+      let linksFromNote = this.getValidatedLinksFromNote(note.path, note.path);
 
-      let frontmatter_linkcache = this.app.metadataCache.getCache(
-        note.path
-      ).frontmatterLinks;
+      this.db[note.path].links_to = linksFromNote;
 
-      if (frontmatter_linkcache) {
-        frontmatter_linkcache.forEach((val: FrontmatterLinkCache) => {
-          all_links.push(val.link);
-        });
-      }
-
-      all_links.forEach((link: string) => {
-        // remove references to blocks or sections
-        link = link.split("#")[0];
-        link = link.split("^")[0];
-        all_links.push(link);
-
-        // check if the link is valid
-        let link_dest = this.app.metadataCache.getFirstLinkpathDest(
-          link,
-          note.path
-        );
-
-        //TODO is it neccessary to avoid including links multiple times? maybe they can't even be duplicate in the linkcache
-        if (
-          link_dest &&
-          !this_links_to.includes(link_dest.path) &&
-          this.db_keys.contains(link_dest.path)
-        ) {
-          this_links_to.push(link_dest.path);
-        }
-      });
-
-      if (!this_links_to.length) return;
-
-      this.db[note.path].links_to = this_links_to;
-
-      this_links_to.forEach((link: string) => {
+      linksFromNote.forEach((link: string) => {
         if (!this.db[link].linked_from.includes(note.path)) {
           this.db[link].linked_from.push(note.path);
         }
@@ -390,26 +340,40 @@ export class DBManager {
     });
   }
 
-  getLinksFromNote(path: string): string[] {
-    let linkcache = this.app.metadataCache.getCache(path).links;
-    let all_links: string[] = [];
-    if (linkcache) {
-      linkcache.forEach((val: LinkCache) => {
-        // check if the link is valid
-        let link_dest = this.app.metadataCache.getFirstLinkpathDest(
-          val.link,
-          "/"
-        );
-        //TODO is it neccessary to avoid including links multiple times? maybe they can't even be duplicate in the linkcache
-        if (
-          link_dest &&
-          !all_links.includes(link_dest.path) &&
-          this.db_keys.contains(link_dest.path)
-        ) {
-          all_links.push(link_dest.path);
-        }
-      });
+  getValidatedLinkPath(link: string, notePath: string): string | null {
+    const linkWithoutAnchor = link.split("#")[0].split("^")[0];
+
+    const linkDestination = this.app.metadataCache.getFirstLinkpathDest(
+      linkWithoutAnchor,
+      notePath
+    );
+
+    if (!linkDestination || !this.db_keys.contains(linkDestination.path)) {
+      return null;
     }
-    return all_links;
+
+    return linkDestination.path;
+  }
+
+  getValidatedLinksFromNote(notePath: string, sourcePath: string): string[] {
+    const cachedMetadata = this.app.metadataCache.getCache(notePath);
+
+    const unvalidatedLinks = new Set<string>();
+
+    cachedMetadata.links?.forEach((val: LinkCache) => {
+      unvalidatedLinks.add(val.link);
+    });
+
+    cachedMetadata.embeds?.forEach((val: EmbedCache) => {
+      unvalidatedLinks.add(val.link);
+    });
+
+    cachedMetadata.frontmatterLinks?.forEach((val: FrontmatterLinkCache) => {
+      unvalidatedLinks.add(val.link);
+    });
+
+    return Array.from(unvalidatedLinks)
+      .map((link: string) => this.getValidatedLinkPath(link, sourcePath))
+      .filter((link) => link != null);
   }
 }
