@@ -11,13 +11,9 @@
   export let paths: [string, string][][];
   export let errors: string[];
 
-  let plugin = view.plugin;
-  let app = plugin.app;
-  let db = plugin.db;
-  let cnPath = plugin.settings.get("CN_path");
-  let expandManager = new ExpandManager();
+  const plugin = view.plugin;
+  const expandManager = new ExpandManager();
   let scrollUpDiv;
-  let settings = plugin.settings;
   let mainDiv;
   let isScrollUpDivVisible = false;
   let currentNoteIsPinned = false;
@@ -69,7 +65,7 @@
         class="action"
         title="Update the Map of Content"
         on:click={() => {
-          db.update();
+          plugin.db.update();
         }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -143,7 +139,7 @@
       }
     }}
   >
-    {#if settings.get("do_show_update_notice")}
+    {#if plugin.settings.get("do_show_update_notice")}
       <UpdateNotice {view} {plugin} />
     {:else if errors.length}
       <div class="errors">
@@ -152,15 +148,16 @@
     {:else if paths.length === 0}
       This file doesn't have any connections to <a
         class="link"
-        title={cnPath}
-        on:click={(event) => NavigateToFile(app, cnPath, event)}
+        title={plugin.settings.get("CN_path")}
+        on:click={(event) =>
+          NavigateToFile(plugin.app, plugin.settings.get("CN_path"), event)}
       >
-        {getDisplayName(cnPath, db)}</a
+        {getDisplayName(plugin.settings.get("CN_path"), plugin.db)}</a
       >.<br /><br /> Link it to a file that is part of your Map of Content. Then
       <a
         class="link"
         on:click={() => {
-          db.update();
+          plugin.db.update();
         }}>update</a
       >
       your Map of Content and watch it grow!<br />
@@ -168,7 +165,7 @@
     {:else}
       {#each paths as path}
         <div class="path">
-          {#if settings.get("MOC_path_starts_at_CN")}
+          {#if plugin.settings.get("MOC_path_starts_at_CN")}
             {#each path as pathitem, i}
               {#if pathitem[1] === LINKED_FROM}
                 <svg
@@ -202,24 +199,26 @@
                 </svg>
               {/if}
               {#if i === path.length - 1}<span title={pathitem[0]}>
-                  {getDisplayName(pathitem[0], db)}</span
+                  {getDisplayName(pathitem[0], plugin.db)}</span
                 >{:else}<a
                   class="link"
                   title={pathitem[0]}
-                  on:click={(event) => NavigateToFile(app, pathitem[0], event)}
-                  >{getDisplayName(pathitem[0], db)}</a
+                  on:click={(event) =>
+                    NavigateToFile(plugin.app, pathitem[0], event)}
+                  >{getDisplayName(pathitem[0], plugin.db)}</a
                 >{/if}
             {/each}
           {:else}
             {#each path.reverse() as pathitem, i}
               {#if i === 0}<span title={pathitem[0]}>
-                  {getDisplayName(pathitem[0], db)}</span
+                  {getDisplayName(pathitem[0], plugin.db)}</span
                 >{:else}<a
                   class="link"
                   title={pathitem[0]}
-                  on:click={(event) => NavigateToFile(app, pathitem[0], event)}
+                  on:click={(event) =>
+                    NavigateToFile(plugin.app, pathitem[0], event)}
                 >
-                  {getDisplayName(pathitem[0], db)}</a
+                  {getDisplayName(pathitem[0], plugin.db)}</a
                 >{/if}
               {#if pathitem[1] === LINKED_FROM}
                 <svg
@@ -261,8 +260,8 @@
       <br />
       <ul>
         <Descendants
-          {db}
-          {app}
+          db={plugin.db}
+          app={plugin.app}
           {view}
           notePath={view.openFilePath}
           indentation={0}

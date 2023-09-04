@@ -132,8 +132,8 @@ export default class MOCView extends ItemView {
   }
 
   async monitorNote() {
-    let rerender = false;
-    let activeFile = this.app.workspace.getActiveFile();
+    let doUpdateDb = false;
+    const activeFile = this.app.workspace.getActiveFile();
     if (activeFile === null) {
       return;
     }
@@ -150,7 +150,7 @@ export default class MOCView extends ItemView {
       this.app.metadataCache.getCache(this.noteBeingMonitored) === undefined
     ) {
       devLog("note name must have changed");
-      rerender = true;
+      doUpdateDb = true;
     }
 
     devLog("Monitornote called on: " + activeFile.path);
@@ -166,7 +166,7 @@ export default class MOCView extends ItemView {
           ) !== JSON.stringify(this.linksOfNoteBeingMonitored)
         ) {
           devLog("links changed!");
-          rerender = true;
+          doUpdateDb = true;
         }
       }
     }
@@ -175,8 +175,8 @@ export default class MOCView extends ItemView {
       activeFile.path,
       "/"
     );
-    if (rerender) {
-      this.db.update(true);
+    if (doUpdateDb) {
+      await this.db.update(true);
     }
   }
 

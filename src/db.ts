@@ -231,38 +231,33 @@ export class DBManager {
   followPaths(pathSoFar: Path) {
     this.timesGetPathRan += 1;
 
-    let note = this.db[pathSoFar.allMembers.last()];
-    let allPathMembers = pathSoFar.allMembers;
-    let items = pathSoFar.items;
+    const note = this.db[pathSoFar.allMembers.last()];
 
-    let newPathsToFollow: Path[] = [];
-    let noteLinksTo = note.linksTo.slice();
-    let noteIsLinkedFrom = note.linkedFrom.slice();
+    const newPathsToFollow: Path[] = [];
+    const noteIsLinkedFrom = note.linkedFrom.slice();
 
-    noteLinksTo.forEach((link: string) => {
+    note.linksTo.forEach((link: string) => {
       // check whether the linked note also links to the current note
       let linkDirectionToken = LINKED_TO;
       if (noteIsLinkedFrom.contains(link)) {
         // remove it from the passive links to be followed later
-        let index = noteIsLinkedFrom.indexOf(link, 0);
-        noteIsLinkedFrom.splice(index, 1);
+        noteIsLinkedFrom.splice(noteIsLinkedFrom.indexOf(link, 0), 1);
         linkDirectionToken = LINKED_BOTH;
       }
-      let newPath: Path = {
-        allMembers: allPathMembers.concat(link),
-        items: items.concat([[link, linkDirectionToken]]),
-      };
-      newPathsToFollow.push(newPath);
+      newPathsToFollow.push({
+        allMembers: pathSoFar.allMembers.concat(link),
+        items: pathSoFar.items.concat([[link, linkDirectionToken]]),
+      });
     });
 
-    newPathsToFollow = newPathsToFollow.concat(
-      noteIsLinkedFrom.map((link) => ({
-        allMembers: allPathMembers.concat(link),
-        items: items.concat([[link, LINKED_FROM]]),
+    newPathsToFollow.push(
+      ...noteIsLinkedFrom.map((link) => ({
+        allMembers: pathSoFar.allMembers.concat(link),
+        items: pathSoFar.items.concat([[link, LINKED_FROM]]),
       }))
     );
 
-    let pathHasNovelChildPath: boolean = false;
+    let pathHasNovelChildPath = false;
 
     newPathsToFollow.forEach((path: Path) => {
       // the path without the next note that is to be explored
@@ -288,6 +283,7 @@ export class DBManager {
     if (pathHasNovelChildPath) {
       return;
     }
+
     this.allPaths.push(pathSoFar);
   }
 

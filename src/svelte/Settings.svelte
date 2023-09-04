@@ -9,23 +9,21 @@
   export let plugin: MOCPlugin;
 
   let cnInput;
-  let settings = plugin.settings;
 
   // TODO check the db is complete before allow settings changes (maybe have this svelte only do that and load all other components from other svelte files)
   // TODO lazy load all the file names and folders?
 
   // get list of all files for dropdown menu
   let allFiles = app.vault.getFiles().map((file: TFile) => file.path);
-  devLog("Central note path: " + settings.get("CN_path"));
+  devLog("Central note path: " + plugin.settings.get("CN_path"));
   let cnPathInputValue;
-  let currentCnPath = settings.get("CN_path");
 
   const updateCNPath = () => {
     if (!cnPathInputValue) {
       return;
     }
     // change TLI path
-    settings.set({ CN_path: cnPathInputValue });
+    plugin.settings.set({ CN_path: cnPathInputValue });
     devLog("New central note path: " + cnPathInputValue);
     document.getElementById("cn-path-input").textContent = cnPathInputValue;
     new Notice("New Central Note path saved");
@@ -39,7 +37,9 @@
 <div id="settings-container">
   <div class="path">
     <h2>Path of your Central Note</h2>
-    Current path:&nbsp;<span id="cn-path-input">{currentCnPath}</span><br />
+    Current path:&nbsp;<span id="cn-path-input"
+      >{plugin.settings.get("CN_path")}</span
+    ><br />
     <label for="CN-select"> New path:</label>
     <input
       type="text"
@@ -74,12 +74,13 @@
       type="checkbox"
       id="auto-update-file-switch"
       on:click={() => {
-        let enabled = !settings.get("auto_update_on_file_change");
-        settings.set({
-          auto_update_on_file_change: enabled,
+        plugin.settings.set({
+          auto_update_on_file_change: !plugin.settings.get(
+            "auto_update_on_file_change"
+          ),
         });
       }}
-      checked={settings.get("auto_update_on_file_change")}
+      checked={plugin.settings.get("auto_update_on_file_change")}
     />
   </div>
   <br />
@@ -92,12 +93,11 @@
       type="checkbox"
       id="MOC_path_starts_at_CN_checkbox"
       on:click={() => {
-        let enabled = !settings.get("MOC_path_starts_at_CN");
-        settings.set({
-          MOC_path_starts_at_CN: enabled,
+        plugin.settings.set({
+          MOC_path_starts_at_CN: !plugin.settings.get("MOC_path_starts_at_CN"),
         });
       }}
-      checked={settings.get("MOC_path_starts_at_CN")}
+      checked={plugin.settings.get("MOC_path_starts_at_CN")}
     />
     <br />
     <label for="do_remember_expanded_checkbox"
@@ -106,12 +106,11 @@
       type="checkbox"
       id="do_remember_expanded_checkbox"
       on:click={() => {
-        let enabled = !settings.get("do_remember_expanded");
-        settings.set({
-          do_remember_expanded: enabled,
+        plugin.settings.set({
+          do_remember_expanded: !plugin.settings.get("do_remember_expanded"),
         });
       }}
-      checked={settings.get("do_remember_expanded")}
+      checked={plugin.settings.get("do_remember_expanded")}
     />
   </div>
   <br />

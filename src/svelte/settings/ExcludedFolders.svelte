@@ -7,30 +7,31 @@
 
   export let app: App;
   export let plugin: MOCPlugin;
-  let excludedlist;
-  let excludedFolders = plugin.settings.get("exluded_folders");
-  // TODO show all exluded files in TextEdit not list
+  let excludedList;
+  const excludedFolders = plugin.settings.get("exluded_folders");
+  // TODO show all excluded files in TextEdit not list
   // Select box based on https://www.c-sharpcorner.com/UploadFile/mahakgupta/add-and-remove-listbox-items-in-javascript/
-  let allFolders = GetAllFolders(app);
+  const allFolders = GetAllFolders(app);
 
   var listOptionsNo = 0;
   let excludedFiles = allExcludedFiles();
   onMount(() => {
     // create select entries for all already excluded folders
     excludedFolders.forEach((folder) => {
-      excludedlist.options[listOptionsNo] = new Option(folder, folder);
+      excludedList.options[listOptionsNo] = new Option(folder, folder);
       listOptionsNo++;
     });
   });
 
   function allExcludedFiles() {
-    let allFiles = app.vault.getFiles().map((file) => file.path);
-
-    return allFiles.filter((pathToFile) => {
-      return excludedFolders.some((path: string) =>
-        pathToFile.startsWith(path)
-      );
-    });
+    return app.vault
+      .getFiles()
+      .map((file) => file.path)
+      .filter((pathToFile) => {
+        return excludedFolders.some((path: string) =>
+          pathToFile.startsWith(path)
+        );
+      });
   }
 
   let excludePathInputValue;
@@ -59,7 +60,7 @@
       return;
     }
     // add option to select box
-    excludedlist.options[listOptionsNo++] = new Option(
+    excludedList.options[listOptionsNo++] = new Option(
       excludePathInputValue,
       excludePathInputValue
     );
@@ -75,19 +76,19 @@
 
   function deleteValue() {
     let s = 1;
-    let Index;
-    if (excludedlist.selectedIndex === -1) {
+    let index;
+    if (excludedList.selectedIndex === -1) {
       alert("Please select an item from the list");
       return true;
     }
 
     while (s > 0) {
-      Index = excludedlist.selectedIndex;
+      index = excludedList.selectedIndex;
 
-      if (Index >= 0) {
-        excludedFolders.remove(excludedlist.options[Index].value);
+      if (index >= 0) {
+        excludedFolders.remove(excludedList.options[index].value);
 
-        excludedlist.options[Index] = null;
+        excludedList.options[index] = null;
 
         --listOptionsNo;
       } else s = 0;
@@ -102,7 +103,7 @@
 <div id="exluded-folders-container">
   <div id="list-excluded">
     <select
-      bind:this={excludedlist}
+      bind:this={excludedList}
       id="excluded-select"
       name="lstValue"
       type="text"

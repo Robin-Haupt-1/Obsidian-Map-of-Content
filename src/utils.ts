@@ -3,7 +3,7 @@ import type { App, TFile, WorkspaceLeaf } from "obsidian";
 import { MOC_VIEW_TYPE } from "./constants";
 
 export const devLog = (message: string) => {
-  let printLog = true;
+  const printLog = true;
   if (printLog) console.log("[Map of Content] " + message);
 };
 
@@ -28,7 +28,7 @@ export const getFileNameFromPath = (path: string): string => {
 
 /**  return the full path if there are two or more notes with the same filename and extension, else only the filename  */
 export const getDisplayName = (path: string, db: DBManager): string => {
-  let fileName = getFileNameFromPath(path);
+  const fileName = getFileNameFromPath(path);
 
   if (db.fileHasDuplicatedName.get(fileName) === true) {
     return removeExtension(path);
@@ -38,13 +38,13 @@ export const getDisplayName = (path: string, db: DBManager): string => {
 };
 
 export const findContentEditorView = (app): WorkspaceLeaf | undefined => {
-  let contentEditorViews = [];
-  let contentEditorViewTypes = ["markdown", "image", "video", "audio", "pdf"];
-  contentEditorViewTypes.forEach((type) => {
+  const contentEditorViews = [];
+
+  ["markdown", "image", "video", "audio", "pdf"].forEach((type) => {
     devLog("looking for views of type " + type);
-    let foundViews = app.workspace.getLeavesOfType(type);
+    const foundViews = app.workspace.getLeavesOfType(type);
     if (foundViews.length > 0) {
-      contentEditorViews = contentEditorViews.concat(foundViews);
+      contentEditorViews.push(...foundViews);
       devLog("len of content editor views found: " + contentEditorViews.length);
     }
   });
@@ -54,7 +54,7 @@ export const findContentEditorView = (app): WorkspaceLeaf | undefined => {
 
 export const focusContentEditorView = (app): boolean => {
   if (app.workspace.activeLeaf.view.getViewType() === MOC_VIEW_TYPE) {
-    let goodView = findContentEditorView(app);
+    const goodView = findContentEditorView(app);
 
     if (goodView) {
       app.workspace.setActiveLeaf(goodView);
@@ -72,17 +72,15 @@ export const NavigateToFile = async (
   path: string,
   event: MouseEvent
 ) => {
-  let mustCreateNewLeaf = false;
-  let file = app.metadataCache.getFirstLinkpathDest(path, "/");
+  let mustCreateNewLeaf = true;
 
-  if (!file) return;
+  if (!app.metadataCache.getFirstLinkpathDest(path, "/")) return;
 
   if (app.workspace.activeLeaf.view.getViewType() === MOC_VIEW_TYPE) {
-    let contentEditorView = findContentEditorView(app);
-
-    mustCreateNewLeaf = !contentEditorView;
+    const contentEditorView = findContentEditorView(app);
 
     if (contentEditorView) {
+      mustCreateNewLeaf = false;
       app.workspace.setActiveLeaf(contentEditorView);
       devLog("setting active leaf");
     }
@@ -96,11 +94,10 @@ export const NavigateToFile = async (
 
 /** Get the paths of all folders in the vault, empty or not */
 export const GetAllFolders = (app: App): string[] => {
-  let vaultFiles = app.vault.getFiles();
-  let allFolderPaths = [];
-  vaultFiles.forEach((file) => {
+  const allFolderPaths = [];
+  app.vault.getFiles().forEach((file) => {
     // cut of filename
-    let folderPath = file.path.slice(
+    const folderPath = file.path.slice(
       0,
       file.path.length - (file.basename.length + file.extension.length + 1)
     );
@@ -112,9 +109,9 @@ export const GetAllFolders = (app: App): string[] => {
 
   // store all parent folder paths as unique paths if they aren't yet because they don't include any notes directly
   allFolderPaths.forEach((path) => {
-    let allSubPaths = path.split("/");
+    const allSubPaths = path.split("/");
     for (let i = 1; i < allSubPaths.length - 1; i++) {
-      let partialPath = allSubPaths.slice(0, i).join("/") + "/";
+      const partialPath = allSubPaths.slice(0, i).join("/") + "/";
       if (!allFolderPaths.contains(partialPath)) {
         allFolderPaths.push(partialPath);
       }

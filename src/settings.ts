@@ -36,6 +36,14 @@ export const DEFAULT_SETTINGS: MOCSettings = {
 export class SettingsManager {
   settings: MOCSettings;
   plugin: MOCPlugin;
+  genericUpdateVersions = ["0.1.10", "0.1.12", "0.1.14"];
+  silentGenericUpdateVersions = [
+    "0.1.15",
+    "0.1.16",
+    "0.1.17",
+    "0.1.18",
+    "1.0.0",
+  ];
 
   constructor(plugin: any) {
     this.plugin = plugin;
@@ -81,12 +89,11 @@ export class SettingsManager {
 
       object = JSON.parse(JSON.stringify(object));
 
-      let objectKeys = Object.keys(object);
-      devLog("old settings object: " + String(objectKeys));
+      devLog(`old settings object: ${Object.keys(object)}`);
       let oldVersion;
 
       // determine which version the legacy object is from
-      if (!objectKeys.contains("settings_version")) {
+      if (!Object.keys(object).contains("settings_version")) {
         oldVersion = "pre-0.1.10";
       } else {
         oldVersion = object["settings_version"];
@@ -98,13 +105,13 @@ export class SettingsManager {
         // extract the CN path from CN_path_per_vault and save it as CN_path
         devLog("Converting CN path from pre-0.1.10 to 0.1.10");
 
-        let ncSettingsVaultNames = object["CN_path_per_vault"].map(
+        const vaultsWithCnPath = object["CN_path_per_vault"].map(
           (val: [string, string]) => val[0]
-        ); // get just the name of all vaults there's a CN stored for
-        if (ncSettingsVaultNames.contains(this.plugin.app.vault.getName())) {
+        );
+        if (vaultsWithCnPath.contains(this.plugin.app.vault.getName())) {
           object["CN_path"] =
             object["CN_path_per_vault"][
-              ncSettingsVaultNames.indexOf(this.plugin.app.vault.getName())
+              vaultsWithCnPath.indexOf(this.plugin.app.vault.getName())
             ][1];
         } else {
           delete object["CN_path"];
@@ -115,9 +122,7 @@ export class SettingsManager {
         object["settings_version"] = "0.1.10";
       } // clone the object
 
-      let genericUpdateVersions = ["0.1.10", "0.1.12", "0.1.14"];
-
-      if (genericUpdateVersions.contains(oldVersion)) {
+      if (this.genericUpdateVersions.contains(oldVersion)) {
         devLog(
           "performing generic update of settings to " +
             DEFAULT_SETTINGS["settings_version"]
@@ -126,15 +131,7 @@ export class SettingsManager {
         object["do_show_update_notice"] = true;
       }
 
-      let silentGenericUpdateVersions = [
-        "0.1.15",
-        "0.1.16",
-        "0.1.17",
-        "0.1.18",
-        "1.0.0",
-      ];
-
-      if (silentGenericUpdateVersions.contains(oldVersion)) {
+      if (this.silentGenericUpdateVersions.contains(oldVersion)) {
         devLog(
           "performing silent generic update of settings to " +
             DEFAULT_SETTINGS["settings_version"]
@@ -152,42 +149,46 @@ export class SettingsManager {
   }
 
   isExcludedFile(file: TFile) {
-    let pathToFile = file.path;
-    let isInExcludedFolder = this.get("exluded_folders").some((path: string) =>
-      pathToFile.startsWith(path)
-    );
-    if (isInExcludedFolder) {
+    if (
+      this.get("exluded_folders").some((path: string) =>
+        file.path.startsWith(path)
+      )
+    ) {
       return true;
     }
-    let filename = file.basename + "." + file.extension;
-    return this.get("exluded_filename_components").some((phrase: string) =>
-      filename.contains(phrase)
+
+    return this.get("exluded_filename_components").some(
+      (phrase: string) => file.basename + "." + file.extension.contains(phrase)
     );
   }
 
   isExpanded(path: string) {
-    if (!this.get("do_remember_expanded")) return true;
-    let currentSettings = this.get("file_descendants_expanded");
-    if (Object.keys(currentSettings).contains(path)) {
-      return currentSettings[path];
+    if (!this.get("do_remember_expanded")) {
+      return true;
     }
-    let newSettings = Object.assign(currentSettings, { path: true });
-    this.set({ file_descendants_expanded: newSettings });
+    if (Object.keys(this.get("file_descendants_expanded")).contains(path)) {
+      return this.get("file_descendants_expanded")[path];
+    }
+    this.set({
+      file_descendants_expanded: {
+        ...this.get("file_descendants_expanded"),
+        [path]: true,
+      },
+    });
     return true;
   }
 
-  setExpanded(path: string, expanded: boolean) {
-    if (!this.get("do_remember_expanded")) return;
+  setExpanded(path: string, newIsExpanded: boolean) {
+    if (!this.get("do_remember_expanded")) {
+      return;
+    }
 
-    let newVal = {};
-    newVal[path] = expanded;
-
-    let newSettings = Object.assign(
-      {},
-      this.get("file_descendants_expanded"),
-      newVal
-    );
-    this.set({ file_descendants_expanded: newSettings });
+    this.set({
+      file_descendants_expanded: {
+        ...this.get("file_descendants_expanded"),
+        [path]: newIsExpanded,
+      },
+    });
     return true;
   }
 }

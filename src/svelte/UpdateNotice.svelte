@@ -3,15 +3,15 @@
 
   export let view: any;
   export let plugin: MOCPlugin;
-  let settings = plugin.settings;
+  const settings = plugin.settings;
 
-  let dark_mode = document.body.classList.contains("theme-dark")
+  const darkModeDependentClass = document.body.classList.contains("theme-dark")
     ? "dark-mode"
     : "light-mode";
 </script>
 
 <div id="all-container">
-  <div id="main-moc-div" class={dark_mode}>
+  <div id="main-moc-div" class={darkModeDependentClass}>
     <h3 style="text-align:center">This plugin has been updated</h3>
 
     The latest changes are:

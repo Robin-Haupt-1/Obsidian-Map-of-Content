@@ -10,29 +10,25 @@
   export let view: any;
   export let app: App;
   export let expandManager: ExpandManager;
+  let isExpanded;
 
-  expandManager.logIndent(indentation);
+  const children = db.descendants.get(notePath)?.slice() || [];
 
-  let darkModeDependentClass = document.body.classList.contains("theme-dark")
+  const darkModeDependentClass = document.body.classList.contains("theme-dark")
     ? "dark-mode"
     : "light-mode";
 
-  let expanded;
-
-  let children = [];
-  if (db.descendants.has(notePath)) {
-    children = db.descendants.get(notePath).slice();
-  }
-
   function resetExpanded(newMaxIndent: number) {
     if (indentation === 0) {
-      expanded = true;
+      isExpanded = true;
     } else if (!view.plugin.settings.isExpanded(notePath)) {
-      expanded = false;
+      isExpanded = false;
     } else {
-      expanded = indentation < newMaxIndent;
+      isExpanded = indentation < newMaxIndent;
     }
   }
+
+  expandManager.logIndent(indentation);
 
   resetExpanded(expandManager.initialMaxIndent);
 
@@ -62,15 +58,15 @@
           <span
             class="expand-arrow"
             on:click={() => {
-              expanded = !expanded;
-              view.plugin.settings.setExpanded(notePath, expanded);
-              if (expanded) {
+              isExpanded = !isExpanded;
+              view.plugin.settings.setExpanded(notePath, isExpanded);
+              if (isExpanded) {
                 expandManager.onManualExpand();
                 expandManager.logIndent(indentation + 1);
               }
             }}
             ><div class="expand-button">
-              {#if expanded}
+              {#if isExpanded}
                 <svg class="svg expanded">
                   <use href="#expand-arrow-svg" />
                 </svg>
@@ -92,7 +88,7 @@
       {/if}
     </p>
     <ul>
-      {#if children.length > 0 && expanded}
+      {#if children.length > 0 && isExpanded}
         {#each children as child}
           <svelte:self
             {db}

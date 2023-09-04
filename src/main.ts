@@ -50,7 +50,7 @@ export default class MOCPlugin extends Plugin {
       id: "open-note-as-central-note",
       name: "Set current note as Central Note",
       callback: () => {
-        let errors = [];
+        const errors = [];
         // make sure a file is opened
         if (this.app.workspace.getActiveFile() === null) {
           errors.push("No file has been opened");

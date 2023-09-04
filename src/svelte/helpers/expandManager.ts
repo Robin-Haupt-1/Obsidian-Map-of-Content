@@ -26,10 +26,8 @@ export class ExpandManager {
   }
 
   rerenderDescendants(newMaxIndent) {
-    devLog("redrawing, new max_indent " + String(newMaxIndent));
-    for (let func of this.redrawCallbacks) {
-      func(newMaxIndent);
-    }
+    devLog(`redrawing, new maxIndent ${newMaxIndent}`);
+    this.redrawCallbacks.forEach((func) => func(newMaxIndent));
   }
 
   registerRedrawDescendantCallback(redraw: Function) {

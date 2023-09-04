@@ -5,12 +5,12 @@
 
   export let app: App;
   export let plugin: MOCPlugin;
-  let excludedlist;
+  let excludedList;
 
-  let excludedFilenameComponents = plugin.settings.get(
+  const excludedFilenameComponents = plugin.settings.get(
     "exluded_filename_components"
   );
-  let allFiles = app.vault
+  const allFiles = app.vault
     .getFiles()
     .map((file) => file.basename + "." + file.extension);
 
@@ -19,11 +19,11 @@
 
   // add all existing excluded folders to select element
 
-  var listOptionsNo = 0;
+  let listOptionsNo = 0;
   onMount(() => {
     // create select entries for all already excluded filename components
     excludedFilenameComponents.forEach((folder) => {
-      excludedlist.options[listOptionsNo] = new Option(folder, folder);
+      excludedList.options[listOptionsNo] = new Option(folder, folder);
       listOptionsNo++;
     });
   });
@@ -60,7 +60,7 @@
     }
 
     // add option to select box
-    excludedlist.options[listOptionsNo++] = new Option(
+    excludedList.options[listOptionsNo++] = new Option(
       excludePhraseInputValue,
       excludePhraseInputValue
     );
@@ -76,19 +76,21 @@
 
   function deleteValue() {
     let s = 1;
-    let Index;
-    if (excludedlist.selectedIndex === -1) {
+    let selectedIndex;
+    if (excludedList.selectedIndex === -1) {
       alert("Please select an item from the list");
       return true;
     }
 
     while (s > 0) {
-      Index = excludedlist.selectedIndex;
+      selectedIndex = excludedList.selectedIndex;
 
-      if (Index >= 0) {
-        excludedFilenameComponents.remove(excludedlist.options[Index].value);
+      if (selectedIndex >= 0) {
+        excludedFilenameComponents.remove(
+          excludedList.options[selectedIndex].value
+        );
 
-        excludedlist.options[Index] = null;
+        excludedList.options[selectedIndex] = null;
 
         --listOptionsNo;
       } else s = 0;
@@ -105,7 +107,7 @@ That also includes the file extension.<br /><br />
 <div id="exlude-filenames">
   <div id="list-excluded">
     <select
-      bind:this={excludedlist}
+      bind:this={excludedList}
       id="excluded-select"
       name="lstValue"
       type="text"
