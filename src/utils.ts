@@ -29,14 +29,12 @@ export const getFileNameFromPath = (path: string): string => {
 /**  return the full path if there are two or more notes with the same filename and extension, else only the filename  */
 export const getDisplayName = (path: string, db: DBManager): string => {
   let fileName = getFileNameFromPath(path);
-  let display_name = null;
 
-  if (db.fileHasDuplicatedName.get(fileName)) {
-    display_name = removeExtension(path);
-  } else {
-    display_name = removeExtension(fileName);
+  if (db.fileHasDuplicatedName.get(fileName) === true) {
+    return removeExtension(path);
   }
-  return display_name;
+
+  return removeExtension(fileName);
 };
 
 export const findContentEditorView = (app): WorkspaceLeaf | undefined => {

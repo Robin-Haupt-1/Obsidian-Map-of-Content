@@ -1,63 +1,63 @@
 <script lang="ts">
   import { App, Notice, TFile } from "obsidian";
   import type MOCPlugin from "../main";
-  import { devLog, GetAllFolders } from "../utils";
+  import { devLog } from "../utils";
   import ExcludedFolders from "./settings/ExcludedFolders.svelte";
   import ExcludedFilenames from "./settings/ExcludedFilenames.svelte";
 
   export let app: App;
   export let plugin: MOCPlugin;
 
-  let cn_input;
+  let cnInput;
   let settings = plugin.settings;
 
   // TODO check the db is complete before allow settings changes (maybe have this svelte only do that and load all other components from other svelte files)
   // TODO lazy load all the file names and folders?
 
   // get list of all files for dropdown menu
-  let all_files = app.vault.getFiles().map((file: TFile) => file.path);
+  let allFiles = app.vault.getFiles().map((file: TFile) => file.path);
   devLog("Central note path: " + settings.get("CN_path"));
-  let cn_path_input_value;
-  let current_tli = settings.get("CN_path");
+  let cnPathInputValue;
+  let currentCnPath = settings.get("CN_path");
 
   const updateCNPath = () => {
-    if (!cn_path_input_value) {
+    if (!cnPathInputValue) {
       return;
     }
     // change TLI path
-    settings.set({ CN_path: cn_path_input_value });
-    devLog("New central note path: " + cn_path_input_value);
-    document.getElementById("tli_path").textContent = cn_path_input_value;
+    settings.set({ CN_path: cnPathInputValue });
+    devLog("New central note path: " + cnPathInputValue);
+    document.getElementById("cn-path-input").textContent = cnPathInputValue;
     new Notice("New Central Note path saved");
 
     // clear selection dropdown list
-    cn_input.value = "";
-    cn_path_input_value = "";
+    cnInput.value = "";
+    cnPathInputValue = "";
   };
 </script>
 
 <div id="settings-container">
   <div class="path">
     <h2>Path of your Central Note</h2>
-    Current path:&nbsp;<span id="tli_path">{current_tli}</span><br />
-    <label for="myBrowser"> New path:</label>
+    Current path:&nbsp;<span id="cn-path-input">{currentCnPath}</span><br />
+    <label for="CN-select"> New path:</label>
     <input
       type="text"
-      bind:this={cn_input}
-      bind:value={cn_path_input_value}
+      bind:this={cnInput}
+      bind:value={cnPathInputValue}
       list="notes"
-      id="CN_select"
+      id="CN-select"
       placeholder="Start typing to see suggestions..."
     />
 
     <datalist id="notes">
-      {#each all_files as filepath}
+      {#each allFiles as filepath}
         <option value={filepath} />
       {/each}
     </datalist>
 
     <button
-      id="update_TLI_path_button"
+      id="update-CN-path-button"
       type="button"
       on:click={() => {
         updateCNPath();
@@ -144,13 +144,13 @@
     width: 100%;
   }
 
-  #CN_select {
+  #CN-select {
     min-width: 200px;
     width: 50%;
     font-size: 1em;
   }
 
-  #update_TLI_path_button {
+  #update-CN-path-button {
     margin-left: auto;
     margin-right: auto;
   }

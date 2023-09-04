@@ -205,7 +205,6 @@ export class DBManager {
     while (links.length > 0) {
       let nextLoopsLinks = new Set<string>();
       links.forEach((link: string) => {
-        // extract all active and passive connections (linked to or from) for the next iteration of link-following
         let note = this.getNoteFromPath(link);
         [...note.linksTo, ...note.linkedFrom].forEach((link: string) => {
           if (!previouslyCheckedLinks.contains(link)) {

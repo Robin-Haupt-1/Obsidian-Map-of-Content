@@ -8,66 +8,66 @@
   export let app: App;
   export let plugin: MOCPlugin;
   let excludedlist;
-  let excluded_folders = plugin.settings.get("exluded_folders");
+  let excludedFolders = plugin.settings.get("exluded_folders");
   // TODO show all exluded files in TextEdit not list
   // Select box based on https://www.c-sharpcorner.com/UploadFile/mahakgupta/add-and-remove-listbox-items-in-javascript/
-  let all_folders = GetAllFolders(app);
+  let allFolders = GetAllFolders(app);
 
-  var list_options_no = 0;
-  let excluded_files = allExcludedFiles();
+  var listOptionsNo = 0;
+  let excludedFiles = allExcludedFiles();
   onMount(() => {
     // create select entries for all already excluded folders
-    excluded_folders.forEach((folder) => {
-      excludedlist.options[list_options_no] = new Option(folder, folder);
-      list_options_no++;
+    excludedFolders.forEach((folder) => {
+      excludedlist.options[listOptionsNo] = new Option(folder, folder);
+      listOptionsNo++;
     });
   });
 
   function allExcludedFiles() {
-    let all_files = app.vault.getFiles().map((file) => file.path);
+    let allFiles = app.vault.getFiles().map((file) => file.path);
 
-    return all_files.filter((path_to_file) => {
-      return excluded_folders.some((path: string) =>
-        path_to_file.startsWith(path)
+    return allFiles.filter((pathToFile) => {
+      return excludedFolders.some((path: string) =>
+        pathToFile.startsWith(path)
       );
     });
   }
 
-  let exlude_path_input_value;
-  let exlude_path_input;
-  let show_all_hidden = false;
+  let excludePathInputValue;
+  let excludePathInput;
+  let showAllHidden = false;
 
   /** update the list of exluded files and save the updated settings*/
   function save() {
-    excluded_files = allExcludedFiles();
-    plugin.settings.set({ exluded_folders: excluded_folders });
+    excludedFiles = allExcludedFiles();
+    plugin.settings.set({ exluded_folders: excludedFolders });
   }
 
   function addValue() {
-    if (!exlude_path_input_value) {
+    if (!excludePathInputValue) {
       return;
     }
     // Return if folder doesn't exist
-    if (!all_folders.contains(exlude_path_input_value)) {
+    if (!allFolders.contains(excludePathInputValue)) {
       alert("Please choose a folder from the list");
       return;
     }
     // Return if folder already on list
-    if (excluded_folders.contains(exlude_path_input_value)) {
-      exlude_path_input.value = "";
-      exlude_path_input_value = "";
+    if (excludedFolders.contains(excludePathInputValue)) {
+      excludePathInput.value = "";
+      excludePathInputValue = "";
       return;
     }
     // add option to select box
-    excludedlist.options[list_options_no++] = new Option(
-      exlude_path_input_value,
-      exlude_path_input_value
+    excludedlist.options[listOptionsNo++] = new Option(
+      excludePathInputValue,
+      excludePathInputValue
     );
-    excluded_folders.push(exlude_path_input_value);
+    excludedFolders.push(excludePathInputValue);
 
     // reset input field
-    exlude_path_input.value = "";
-    exlude_path_input_value = "";
+    excludePathInput.value = "";
+    excludePathInputValue = "";
 
     save();
     return true;
@@ -85,11 +85,11 @@
       Index = excludedlist.selectedIndex;
 
       if (Index >= 0) {
-        excluded_folders.remove(excludedlist.options[Index].value);
+        excludedFolders.remove(excludedlist.options[Index].value);
 
         excludedlist.options[Index] = null;
 
-        --list_options_no;
+        --listOptionsNo;
       } else s = 0;
     }
     save();
@@ -112,8 +112,8 @@
   <div id="add-remove-exluded">
     <label for="Exluded-folders"> Add a folder:</label>
     <input
-      bind:this={exlude_path_input}
-      bind:value={exlude_path_input_value}
+      bind:this={excludePathInput}
+      bind:value={excludePathInputValue}
       list="exlude-folder"
       id="Exluded-folders"
       type="text"
@@ -121,8 +121,8 @@
       style="width:300px;"
     />
     <datalist id="exlude-folder">
-      {#each all_folders as folder_path}
-        <option value={folder_path} />
+      {#each allFolders as folderPath}
+        <option value={folderPath} />
       {/each}
     </datalist>
     <br />
@@ -145,22 +145,22 @@
     /><br /><br />
   </div>
   <div id="currently-excluded">
-    Currently excluded files: {excluded_files.length}
+    Currently excluded files: {excludedFiles.length}
     <input
       type="button"
       name="toggle-show-hidden"
-      value={show_all_hidden ? "Hide" : "Show"}
+      value={showAllHidden ? "Hide" : "Show"}
       on:click={() => {
-        show_all_hidden = !show_all_hidden;
+        showAllHidden = !showAllHidden;
       }}
     />
     <div
-      style={show_all_hidden ? "display:block" : "display:none"}
+      style={showAllHidden ? "display:block" : "display:none"}
       id="currently-excluded-list"
     >
       <ul>
-        {#each excluded_files as file_path}
-          <li>{file_path}</li>
+        {#each excludedFiles as filePath}
+          <li>{filePath}</li>
         {/each}
       </ul>
     </div>

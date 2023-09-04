@@ -1,6 +1,6 @@
 import { devLog } from "../../utils";
 
-export class expandManager {
+export class ExpandManager {
   constructor() {
     devLog("expandManager created");
   }

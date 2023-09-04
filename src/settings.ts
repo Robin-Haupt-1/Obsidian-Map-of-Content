@@ -6,6 +6,7 @@ import { devLog } from "./utils";
 import type { DBManager } from "./db";
 import Settings from "./svelte/Settings.svelte";
 
+// TODO refactor this settings object to use camelCase and migrate old versions objects to new version
 export interface MOCSettings {
   CN_path: string;
   exluded_folders: string[];
@@ -82,7 +83,7 @@ export class SettingsManager {
 
       let objectKeys = Object.keys(object);
       devLog("old settings object: " + String(objectKeys));
-      let oldVersion = undefined;
+      let oldVersion;
 
       // determine which version the legacy object is from
       if (!objectKeys.contains("settings_version")) {

@@ -7,69 +7,68 @@
   export let plugin: MOCPlugin;
   let excludedlist;
 
-  let exluded_filename_components = plugin.settings.get(
+  let excludedFilenameComponents = plugin.settings.get(
     "exluded_filename_components"
   );
-  let all_files = app.vault
+  let allFiles = app.vault
     .getFiles()
     .map((file) => file.basename + "." + file.extension);
 
-  let excluded_files = allExcludedFiles();
+  let excludedFiles = allExcludedFiles();
   // TODO show all exluded files in TextEdit not list
 
   // add all existing excluded folders to select element
 
-  var list_options_no = 0;
+  var listOptionsNo = 0;
   onMount(() => {
     // create select entries for all already excluded filename components
-    exluded_filename_components.forEach((folder) => {
-      excludedlist.options[list_options_no] = new Option(folder, folder);
-      list_options_no++;
+    excludedFilenameComponents.forEach((folder) => {
+      excludedlist.options[listOptionsNo] = new Option(folder, folder);
+      listOptionsNo++;
     });
   });
 
   function allExcludedFiles() {
-    return all_files.filter((filename: string) => {
-      return exluded_filename_components.some((path: string) =>
+    return allFiles.filter((filename: string) => {
+      return excludedFilenameComponents.some((path: string) =>
         filename.contains(path)
       );
     });
   }
 
-  let exclude_phrase_input_value;
-  let exclude_phrase_input;
-  let show_all_hidden = false;
+  let excludePhraseInputValue;
+  let excludePhraseInput;
+  let showAllHidden = false;
 
   /** update the list of exluded files and save the updated settings*/
   function save() {
-    excluded_files = allExcludedFiles();
+    excludedFiles = allExcludedFiles();
     plugin.settings.set({
-      exluded_filename_components: exluded_filename_components,
+      exluded_filename_components: excludedFilenameComponents,
     });
   }
 
   function addValue() {
-    if (!exclude_phrase_input_value) {
+    if (!excludePhraseInputValue) {
       return;
     }
     // Return if folder already on list
-    if (exluded_filename_components.contains(exclude_phrase_input_value)) {
-      exclude_phrase_input.value = "";
-      exclude_phrase_input_value = "";
+    if (excludedFilenameComponents.contains(excludePhraseInputValue)) {
+      excludePhraseInput.value = "";
+      excludePhraseInputValue = "";
       return;
     }
 
     // add option to select box
-    let AddOpt = new Option(
-      exclude_phrase_input_value,
-      exclude_phrase_input_value
+    excludedlist.options[listOptionsNo++] = new Option(
+      excludePhraseInputValue,
+      excludePhraseInputValue
     );
-    excludedlist.options[list_options_no++] = AddOpt;
-    exluded_filename_components.push(exclude_phrase_input_value);
+    excludedFilenameComponents.push(excludePhraseInputValue);
     // reset input field
 
-    exclude_phrase_input.value = "";
-    exclude_phrase_input_value = "";
+    excludePhraseInput.value = "";
+    excludePhraseInputValue = "";
 
     save();
     return true;
@@ -87,11 +86,11 @@
       Index = excludedlist.selectedIndex;
 
       if (Index >= 0) {
-        exluded_filename_components.remove(excludedlist.options[Index].value);
+        excludedFilenameComponents.remove(excludedlist.options[Index].value);
 
         excludedlist.options[Index] = null;
 
-        --list_options_no;
+        --listOptionsNo;
       } else s = 0;
     }
     save();
@@ -116,8 +115,8 @@ That also includes the file extension.<br /><br />
   <div id="add-remove-exluded">
     <label for="Exluded-phrases"> Add a phrase:</label>
     <input
-      bind:this={exclude_phrase_input}
-      bind:value={exclude_phrase_input_value}
+      bind:this={excludePhraseInput}
+      bind:value={excludePhraseInputValue}
       id="Exluded-phrases"
       type="text"
       style="width:300px;"
@@ -142,21 +141,21 @@ That also includes the file extension.<br /><br />
     /><br /><br />
   </div>
   <div id="currently-excluded">
-    Currently excluded files: {excluded_files.length}
+    Currently excluded files: {excludedFiles.length}
     <input
       type="button"
       name="toggle-show-hidden"
-      value={show_all_hidden ? "Hide" : "Show"}
+      value={showAllHidden ? "Hide" : "Show"}
       on:click={() => {
-        show_all_hidden = !show_all_hidden;
+        showAllHidden = !showAllHidden;
       }}
     />
     <div
-      style={show_all_hidden ? "display:block" : "display:none"}
+      style={showAllHidden ? "display:block" : "display:none"}
       id="currently-excluded-list"
     >
       <ul>
-        {#each excluded_files as file_path}
+        {#each excludedFiles as file_path}
           <li>{file_path}</li>
         {/each}
       </ul>

@@ -11,7 +11,7 @@
 </script>
 
 <div id="all-container">
-  <div id="main_moc_div" class={dark_mode}>
+  <div id="main-moc-div" class={dark_mode}>
     <h3 style="text-align:center">This plugin has been updated</h3>
 
     The latest changes are:
@@ -56,7 +56,7 @@
     height: 100%;
   }
 
-  div#main_moc_div {
+  div#main-moc-div {
     padding: initial;
     width: initial;
     height: initial;
@@ -65,7 +65,7 @@
     flex: 1;
   }
 
-  div#main_moc_div.dark-mode {
+  div#main-moc-div.dark-mode {
     color: #dcddde;
   }
 </style>

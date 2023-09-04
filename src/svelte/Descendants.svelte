@@ -2,40 +2,41 @@
   import type { App } from "obsidian";
   import type { DBManager } from "../db";
   import { getDisplayName, NavigateToFile } from "../utils";
-  import type { expandManager } from "./helpers/expandManager";
+  import type { ExpandManager } from "./helpers/expandManager";
 
-  export let note_path: string;
+  export let notePath: string;
   export let db: DBManager;
   export let indentation: number;
   export let view: any;
   export let app: App;
-  export let expandMan: expandManager;
+  export let expandManager: ExpandManager;
 
-  expandMan.logIndent(indentation);
-  let dark_mode = document.body.classList.contains("theme-dark")
+  expandManager.logIndent(indentation);
+
+  let darkModeDependentClass = document.body.classList.contains("theme-dark")
     ? "dark-mode"
     : "light-mode";
 
   let expanded;
 
   let children = [];
-  if (db.descendants.has(note_path)) {
-    children = db.descendants.get(note_path).slice();
+  if (db.descendants.has(notePath)) {
+    children = db.descendants.get(notePath).slice();
   }
 
-  function resetExpanded(new_max_indent: number) {
+  function resetExpanded(newMaxIndent: number) {
     if (indentation === 0) {
       expanded = true;
-    } else if (!view.plugin.settings.isExpanded(note_path)) {
+    } else if (!view.plugin.settings.isExpanded(notePath)) {
       expanded = false;
     } else {
-      expanded = indentation < new_max_indent;
+      expanded = indentation < newMaxIndent;
     }
   }
 
-  resetExpanded(expandMan.initialMaxIndent);
+  resetExpanded(expandManager.initialMaxIndent);
 
-  expandMan.registerRedrawDescendantCallback(resetExpanded);
+  expandManager.registerRedrawDescendantCallback(resetExpanded);
 </script>
 
 <!-- expand svg-->
@@ -52,23 +53,23 @@
 {#if indentation === 0 && children.length === 0}
   No descendants
 {:else}
-  <li class="container {dark_mode}">
+  <li class="container {darkModeDependentClass}">
     <p>
       {#if indentation === 0}
-        {getDisplayName(note_path, db)}
+        {getDisplayName(notePath, db)}
       {:else}
         {#if children.length > 0}
           <span
             class="expand-arrow"
             on:click={() => {
               expanded = !expanded;
-              view.plugin.settings.setExpanded(note_path, expanded);
+              view.plugin.settings.setExpanded(notePath, expanded);
               if (expanded) {
-                expandMan.onManualExpand();
-                expandMan.logIndent(indentation + 1);
+                expandManager.onManualExpand();
+                expandManager.logIndent(indentation + 1);
               }
             }}
-            ><div class="expand_button">
+            ><div class="expand-button">
               {#if expanded}
                 <svg class="svg expanded">
                   <use href="#expand-arrow-svg" />
@@ -81,12 +82,12 @@
           >{/if}
         <a
           class="link"
-          title={note_path}
+          title={notePath}
           on:click={(event) => {
-            NavigateToFile(app, note_path, event);
+            NavigateToFile(app, notePath, event);
           }}
         >
-          {getDisplayName(note_path, db)}</a
+          {getDisplayName(notePath, db)}</a
         >
       {/if}
     </p>
@@ -96,10 +97,10 @@
           <svelte:self
             {db}
             {app}
-            note_path={child}
+            notePath={child}
             indentation={indentation + 1}
             {view}
-            {expandMan}
+            {expandManager}
           />
         {/each}
       {/if}
@@ -174,33 +175,33 @@
     color: gray;
   }
 
-  div.expand_button {
+  div.expand-button {
     display: inline;
   }
 
-  div.expand_button svg.svg {
+  div.expand-button svg.svg {
     width: 14px;
     height: 14px;
     margin-top: 5px;
   }
 
-  li.light-mode div.expand_button svg.svg {
+  li.light-mode div.expand-button svg.svg {
     fill: darkgrey;
   }
 
-  li.light-mode div.expand_button svg.svg:hover {
+  li.light-mode div.expand-button svg.svg:hover {
     fill: gray;
   }
 
-  li.dark-mode div.expand_button svg.svg {
+  li.dark-mode div.expand-button svg.svg {
     fill: gray;
   }
 
-  li.dark-mode div.expand_button svg.svg:hover {
+  li.dark-mode div.expand-button svg.svg:hover {
     fill: lightgray;
   }
 
-  div.expand_button svg.svg.expanded {
+  div.expand-button svg.svg.expanded {
     transform: rotate(90deg);
   }
 </style>

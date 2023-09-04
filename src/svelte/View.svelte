@@ -1,34 +1,26 @@
 <script lang="ts">
   import { LINKED_BOTH, LINKED_TO, LINKED_FROM } from "../constants";
   import type MOCView from "../view";
-  import {
-    getDisplayName,
-    isCtrlPressed,
-    NavigateToFile,
-    devLog,
-  } from "../utils";
+  import { getDisplayName, NavigateToFile } from "../utils";
   import NoLinkImage from "./NoLinkImage.svelte";
   import Descendants from "./Descendants.svelte";
   import UpdateNotice from "./UpdateNotice.svelte";
-  import { expandManager } from "./helpers/expandManager";
+  import { ExpandManager } from "./helpers/expandManager";
 
   export let view: MOCView;
   export let paths: [string, string][][];
   export let errors: string[];
 
-  //let open_file_folder2=view.open_file_path.split("/")
-  //open_file_folder2.pop()
-  //let open_file_folder=open_file_folder2.join('/')
   let plugin = view.plugin;
   let app = plugin.app;
   let db = plugin.db;
-  let cn_path = plugin.settings.get("CN_path");
-  let expandMan = new expandManager();
-  let scroll_up_div;
+  let cnPath = plugin.settings.get("CN_path");
+  let expandManager = new ExpandManager();
+  let scrollUpDiv;
   let settings = plugin.settings;
-  let main_div;
-  let scroll_up_div_already_visible = false;
-  let is_pinned = false;
+  let mainDiv;
+  let isScrollUpDivVisible = false;
+  let currentNoteIsPinned = false;
 </script>
 
 <div
@@ -41,11 +33,11 @@
     <div
       id="pin-file"
       class="action is-pinned"
-      class:is-pinned={is_pinned}
-      title={is_pinned ? "Unpin this file" : "Pin this file"}
+      class:is-pinned={currentNoteIsPinned}
+      title={currentNoteIsPinned ? "Unpin this file" : "Pin this file"}
       on:click={() => {
         view.isPinned = !view.isPinned;
-        is_pinned = !is_pinned;
+        currentNoteIsPinned = !currentNoteIsPinned;
         if (view.isPinned) {
         }
       }}
@@ -91,7 +83,7 @@
         class="action"
         title="Show fewer descendants"
         on:click={() => {
-          expandMan.contract();
+          expandManager.contract();
         }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -105,7 +97,7 @@
         class="action"
         title="Show more descendants"
         on:click={() => {
-          expandMan.expand();
+          expandManager.expand();
         }}
       >
         <svg
@@ -121,12 +113,12 @@
       </div>
     </div>
     <div
-      bind:this={scroll_up_div}
-      id="scroll_up"
+      bind:this={scrollUpDiv}
+      id="scroll-up-button"
       title="Scroll to top"
       class="action"
       on:click={() => {
-        main_div.scrollTop = 0;
+        mainDiv.scrollTop = 0;
       }}
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -137,17 +129,17 @@
     </div>
   </div>
   <div
-    id="main_moc_div"
-    bind:this={main_div}
+    id="main-moc-div"
+    bind:this={mainDiv}
     on:scroll={(e) => {
-      if (e.target.scrollTop > 30 && !scroll_up_div_already_visible) {
-        scroll_up_div.style.display = "block";
-        scroll_up_div_already_visible = true;
+      if (e.target.scrollTop > 30 && !isScrollUpDivVisible) {
+        scrollUpDiv.style.display = "block";
+        isScrollUpDivVisible = true;
       }
       //hide the arrow if user scrolls back to the top
-      else if (e.target.scrollTop <= 30 && scroll_up_div_already_visible) {
-        scroll_up_div.style.display = "none";
-        scroll_up_div_already_visible = false;
+      else if (e.target.scrollTop <= 30 && isScrollUpDivVisible) {
+        scrollUpDiv.style.display = "none";
+        isScrollUpDivVisible = false;
       }
     }}
   >
@@ -160,10 +152,10 @@
     {:else if paths.length === 0}
       This file doesn't have any connections to <a
         class="link"
-        title={cn_path}
-        on:click={(event) => NavigateToFile(app, cn_path, event)}
+        title={cnPath}
+        on:click={(event) => NavigateToFile(app, cnPath, event)}
       >
-        {getDisplayName(cn_path, db)}</a
+        {getDisplayName(cnPath, db)}</a
       >.<br /><br /> Link it to a file that is part of your Map of Content. Then
       <a
         class="link"
@@ -272,9 +264,9 @@
           {db}
           {app}
           {view}
-          note_path={view.openFilePath}
+          notePath={view.openFilePath}
           indentation={0}
-          {expandMan}
+          {expandManager}
         />
       </ul>
     {/if}
@@ -342,7 +334,7 @@
     fill: darkgrey;
   }
 
-  div#main_moc_div {
+  div#main-moc-div {
     padding: initial;
     width: initial;
     height: initial;
@@ -355,34 +347,34 @@
     color: #dcddde;
   }
 
-  div#scroll_up {
+  div#scroll-up-button {
     justify-self: flex-end;
     display: none;
   }
 
-  div#scroll_up {
+  div#scroll-up-button {
     cursor: pointer;
     color: darkgrey;
   }
 
-  div#scroll_up svg {
+  div#scroll-up-button svg {
     transform: rotate(-90deg);
     height: 20px;
   }
 
-  div.light-mode div#scroll_up svg {
+  div.light-mode div#scroll-up-button svg {
     fill: darkgray;
   }
 
-  div.light-mode div#scroll_up:hover svg {
+  div.light-mode div#scroll-up-button:hover svg {
     fill: gray;
   }
 
-  div.dark-mode div#scroll_up svg {
+  div.dark-mode div#scroll-up-button svg {
     fill: gray;
   }
 
-  div.dark-mode div#scroll_up:hover svg {
+  div.dark-mode div#scroll-up-button:hover svg {
     fill: darkgray;
   }
 
