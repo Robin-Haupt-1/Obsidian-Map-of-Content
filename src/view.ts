@@ -57,10 +57,6 @@ export default class MOCView extends ItemView {
   rerender(): void {
     devLog("Rerender called on view");
 
-    devLog(
-      "Leaf viewtype: " + this.app.workspace.activeLeaf?.view?.getViewType()
-    );
-
     this.destroyApp();
 
     let errors = [];
