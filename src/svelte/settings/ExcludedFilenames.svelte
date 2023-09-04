@@ -114,11 +114,11 @@ That also includes the file extension.<br /><br />
     />
   </div>
   <div id="add-remove-exluded">
-    <label for="myBrowser"> Add a phrase:</label>
+    <label for="Exluded-phrases"> Add a phrase:</label>
     <input
       bind:this={exclude_phrase_input}
       bind:value={exclude_phrase_input_value}
-      id="Exluded-filenames"
+      id="Exluded-phrases"
       type="text"
       style="width:300px;"
     />
