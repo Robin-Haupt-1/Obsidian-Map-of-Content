@@ -91,10 +91,8 @@ export class DBManager {
     }
   }
 
-  getNoteFromPath(path: string): FileItem {
-    if (path in this.db) {
-      return this.db[path];
-    }
+  getNoteFromPath(path: string): FileItem | undefined {
+    return this.db?.[path];
   }
 
   /** return all paths that include a certain note. Only return the path up to that note*/
@@ -186,6 +184,9 @@ export class DBManager {
       this.db[note.path].linksTo = linksFromNote;
 
       linksFromNote.forEach((link: string) => {
+        if (!this.db[link]) {
+          return;
+        }
         if (!this.db[link].linkedFrom.includes(note.path)) {
           this.db[link].linkedFrom.push(note.path);
         }
@@ -206,6 +207,9 @@ export class DBManager {
       let nextLoopsLinks = new Set<string>();
       links.forEach((link: string) => {
         let note = this.getNoteFromPath(link);
+        if (!note) {
+          return;
+        }
         [...note.linksTo, ...note.linkedFrom].forEach((link: string) => {
           if (!previouslyCheckedLinks.contains(link)) {
             nextLoopsLinks.add(link);
@@ -232,6 +236,10 @@ export class DBManager {
     this.timesGetPathRan += 1;
 
     const note = this.db[pathSoFar.allMembers.last()];
+
+    if (!note) {
+      return;
+    }
 
     const newPathsToFollow: Path[] = [];
     const noteIsLinkedFrom = note.linkedFrom.slice();

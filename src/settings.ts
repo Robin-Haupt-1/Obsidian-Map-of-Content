@@ -9,7 +9,7 @@ import Settings from "./svelte/Settings.svelte";
 // TODO refactor this settings object to use camelCase and migrate old versions objects to new version
 export interface MOCSettings {
   CN_path: string;
-  exluded_folders: string[];
+  exluded_folders: string[]; // TODO rename to excludedFolders
   exluded_filename_components: string[];
   settings_version: string;
   plugin_version: string;
@@ -157,8 +157,8 @@ export class SettingsManager {
       return true;
     }
 
-    return this.get("exluded_filename_components").some(
-      (phrase: string) => file.basename + "." + file.extension.contains(phrase)
+    return this.get("exluded_filename_components").some((phrase: string) =>
+      (file.basename + "." + file.extension).contains(phrase)
     );
   }
 
