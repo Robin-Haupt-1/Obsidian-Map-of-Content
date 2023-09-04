@@ -1,20 +1,9 @@
-import {
-  App,
-  getLinkpath,
-  LinkCache,
-  Modal,
-  Notice,
-  Plugin,
-  PluginSettingTab,
-  Setting,
-  TFile,
-  Vault,
-} from "obsidian";
+import { Notice, Plugin } from "obsidian";
 import { MOC_VIEW_TYPE } from "./constants";
 import { DBManager } from "./db";
 import MOCView from "./view";
 import { MOCSettingTab, SettingsManager } from "./settings";
-import { Log } from "./utils";
+import { devLog } from "./utils";
 
 export default class MOCPlugin extends Plugin {
   db: DBManager;
@@ -66,7 +55,7 @@ export default class MOCPlugin extends Plugin {
         if (this.app.workspace.getActiveFile() === null) {
           errors.push("No file has been opened");
         } else if (
-          this.settings.isExludedFile(this.app.workspace.getActiveFile())
+          this.settings.isExcludedFile(this.app.workspace.getActiveFile())
         ) {
           errors.push("This file has been excluded from the Map of Content.");
         }
@@ -82,7 +71,7 @@ export default class MOCPlugin extends Plugin {
 
   initLeaf(): void {
     if (this.app.workspace.getLeavesOfType(MOC_VIEW_TYPE).length) {
-      Log("View already attached");
+      devLog("View already attached");
     } else {
       this.app.workspace.getRightLeaf(true).setViewState({
         type: MOC_VIEW_TYPE,
@@ -92,14 +81,14 @@ export default class MOCPlugin extends Plugin {
   }
 
   rerender() {
-    Log("rerender on plugin called");
+    devLog("rerender on plugin called");
     if (this.view) {
       this.view.rerender();
     }
   }
 
   onunload(): void {
-    Log("Unloading plugin");
+    devLog("Unloading plugin");
 
     if (this.view) {
       this.view.onClose();
@@ -112,12 +101,12 @@ export default class MOCPlugin extends Plugin {
       this.app.vault.getAbstractFileByPath(this.settings.get("CN_path")) ===
       null
     );
-    Log(exists ? "CN exists" : "CN does not exist");
+    devLog(exists ? "CN exists" : "CN does not exist");
     return exists;
   }
 
   registerViewInstance(view: MOCView) {
-    Log("View registered");
+    devLog("View registered");
     this.view = view;
   }
 

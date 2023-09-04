@@ -1,7 +1,7 @@
 <script lang="ts">
   import { App, Notice, TFile } from "obsidian";
   import type MOCPlugin from "../main";
-  import { Log, GetAllFolders } from "../utils";
+  import { devLog, GetAllFolders } from "../utils";
   import ExcludedFolders from "./settings/ExcludedFolders.svelte";
   import ExcludedFilenames from "./settings/ExcludedFilenames.svelte";
 
@@ -16,7 +16,7 @@
 
   // get list of all files for dropdown menu
   let all_files = app.vault.getFiles().map((file: TFile) => file.path);
-  Log("Central note path: " + settings.get("CN_path"));
+  devLog("Central note path: " + settings.get("CN_path"));
   let cn_path_input_value;
   let current_tli = settings.get("CN_path");
 
@@ -26,7 +26,7 @@
     }
     // change TLI path
     settings.set({ CN_path: cn_path_input_value });
-    Log("New central note path: " + cn_path_input_value);
+    devLog("New central note path: " + cn_path_input_value);
     document.getElementById("tli_path").textContent = cn_path_input_value;
     new Notice("New Central Note path saved");
 

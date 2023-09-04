@@ -2,7 +2,7 @@ import type { TFile } from "obsidian";
 import { PluginSettingTab } from "obsidian";
 
 import type MOCPlugin from "./main";
-import { Log } from "./utils";
+import { devLog } from "./utils";
 import type { DBManager } from "./db";
 import Settings from "./svelte/Settings.svelte";
 
@@ -44,7 +44,7 @@ export class SettingsManager {
     this.settings = Object.assign(
       {},
       DEFAULT_SETTINGS,
-      this.UpgradeSettingsVersion(await this.plugin.loadData())
+      this.upgradeSettingsVersion(await this.plugin.loadData())
     );
     this.saveSettings();
   }
@@ -62,49 +62,48 @@ export class SettingsManager {
     return this.settings[setting];
   }
 
-  UpgradeSettingsVersion(object: any) {
+  upgradeSettingsVersion(object: any) {
     // TODO remove deleted/renamed files from the is_expanded object. But this is only possible once the vault is done being indexed by Obsidian
     try {
       // if fresh install, go with defaults
       if (object === undefined) {
-        Log("fresh install, returning empty settings object");
+        devLog("fresh install, returning empty settings object");
         return {};
       }
       object["plugin_version"] = DEFAULT_SETTINGS["plugin_version"];
 
       // abort if settings are already in current version format
       if (object["settings_version"] === DEFAULT_SETTINGS["settings_version"]) {
-        Log("Settings already in current version");
+        devLog("Settings already in current version");
         return object;
       }
 
-      // clone the object
       object = JSON.parse(JSON.stringify(object));
 
-      let object_keys = Object.keys(object);
-      Log("old settings object: " + String(object_keys));
-      let old_version = undefined;
+      let objectKeys = Object.keys(object);
+      devLog("old settings object: " + String(objectKeys));
+      let oldVersion = undefined;
 
       // determine which version the legacy object is from
-      if (!object_keys.contains("settings_version")) {
-        old_version = "pre-0.1.10";
+      if (!objectKeys.contains("settings_version")) {
+        oldVersion = "pre-0.1.10";
       } else {
-        old_version = object["settings_version"];
+        oldVersion = object["settings_version"];
       }
 
-      Log("old settings version: " + old_version);
+      devLog("old settings version: " + oldVersion);
 
-      if (old_version === "pre-0.1.10") {
+      if (oldVersion === "pre-0.1.10") {
         // extract the CN path from CN_path_per_vault and save it as CN_path
-        Log("Converting CN path from pre-0.1.10 to 0.1.10");
+        devLog("Converting CN path from pre-0.1.10 to 0.1.10");
 
-        let cn_settings_vault_names = object["CN_path_per_vault"].map(
+        let ncSettingsVaultNames = object["CN_path_per_vault"].map(
           (val: [string, string]) => val[0]
         ); // get just the name of all vaults there's a CN stored for
-        if (cn_settings_vault_names.contains(this.plugin.app.vault.getName())) {
+        if (ncSettingsVaultNames.contains(this.plugin.app.vault.getName())) {
           object["CN_path"] =
             object["CN_path_per_vault"][
-              cn_settings_vault_names.indexOf(this.plugin.app.vault.getName())
+              ncSettingsVaultNames.indexOf(this.plugin.app.vault.getName())
             ][1];
         } else {
           delete object["CN_path"];
@@ -115,10 +114,10 @@ export class SettingsManager {
         object["settings_version"] = "0.1.10";
       } // clone the object
 
-      let generic_update_versions = ["0.1.10", "0.1.12", "0.1.14"];
+      let genericUpdateVersions = ["0.1.10", "0.1.12", "0.1.14"];
 
-      if (generic_update_versions.contains(old_version)) {
-        Log(
+      if (genericUpdateVersions.contains(oldVersion)) {
+        devLog(
           "performing generic update of settings to " +
             DEFAULT_SETTINGS["settings_version"]
         );
@@ -126,7 +125,7 @@ export class SettingsManager {
         object["do_show_update_notice"] = true;
       }
 
-      let silent_generic_update_versions = [
+      let silentGenericUpdateVersions = [
         "0.1.15",
         "0.1.16",
         "0.1.17",
@@ -134,8 +133,8 @@ export class SettingsManager {
         "1.0.0",
       ];
 
-      if (silent_generic_update_versions.contains(old_version)) {
-        Log(
+      if (silentGenericUpdateVersions.contains(oldVersion)) {
+        devLog(
           "performing silent generic update of settings to " +
             DEFAULT_SETTINGS["settings_version"]
         );
@@ -143,20 +142,20 @@ export class SettingsManager {
         object["settings_version"] = DEFAULT_SETTINGS["settings_version"];
         object["do_show_update_notice"] = false;
       }
-      return this.UpgradeSettingsVersion(object);
+      return this.upgradeSettingsVersion(object);
     } catch {
       // if things don't work out, delete all old settings data (better than breaking the plugin)
-      Log("error while transforming settings object");
+      devLog("error while transforming settings object");
       return {};
     }
   }
 
-  isExludedFile(file: TFile) {
-    let path_to_file = file.path;
-    let in_excluded_folder = this.get("exluded_folders").some((path: string) =>
-      path_to_file.startsWith(path)
+  isExcludedFile(file: TFile) {
+    let pathToFile = file.path;
+    let isInExcludedFolder = this.get("exluded_folders").some((path: string) =>
+      pathToFile.startsWith(path)
     );
-    if (in_excluded_folder) {
+    if (isInExcludedFolder) {
       return true;
     }
     let filename = file.basename + "." + file.extension;
@@ -167,27 +166,27 @@ export class SettingsManager {
 
   isExpanded(path: string) {
     if (!this.get("do_remember_expanded")) return true;
-    let current_settings = this.get("file_descendants_expanded");
-    if (Object.keys(current_settings).contains(path)) {
-      return current_settings[path];
+    let currentSettings = this.get("file_descendants_expanded");
+    if (Object.keys(currentSettings).contains(path)) {
+      return currentSettings[path];
     }
-    let new_settings = Object.assign(current_settings, { path: true });
-    this.set({ file_descendants_expanded: new_settings });
+    let newSettings = Object.assign(currentSettings, { path: true });
+    this.set({ file_descendants_expanded: newSettings });
     return true;
   }
 
   setExpanded(path: string, expanded: boolean) {
     if (!this.get("do_remember_expanded")) return;
 
-    let new_val = {};
-    new_val[path] = expanded;
+    let newVal = {};
+    newVal[path] = expanded;
 
-    let new_settings = Object.assign(
+    let newSettings = Object.assign(
       {},
       this.get("file_descendants_expanded"),
-      new_val
+      newVal
     );
-    this.set({ file_descendants_expanded: new_settings });
+    this.set({ file_descendants_expanded: newSettings });
     return true;
   }
 }

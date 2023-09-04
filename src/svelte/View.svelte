@@ -1,7 +1,12 @@
 <script lang="ts">
   import { LINKED_BOTH, LINKED_TO, LINKED_FROM } from "../constants";
   import type MOCView from "../view";
-  import { GetDisplayName, IsCtrlPressed, NavigateToFile, Log } from "../utils";
+  import {
+    getDisplayName,
+    isCtrlPressed,
+    NavigateToFile,
+    devLog,
+  } from "../utils";
   import NoLinkImage from "./NoLinkImage.svelte";
   import Descendants from "./Descendants.svelte";
   import UpdateNotice from "./UpdateNotice.svelte";
@@ -39,9 +44,9 @@
       class:is-pinned={is_pinned}
       title={is_pinned ? "Unpin this file" : "Pin this file"}
       on:click={() => {
-        view.is_pinned = !view.is_pinned;
+        view.isPinned = !view.isPinned;
         is_pinned = !is_pinned;
-        if (view.is_pinned) {
+        if (view.isPinned) {
         }
       }}
     >
@@ -158,7 +163,7 @@
         title={cn_path}
         on:click={(event) => NavigateToFile(app, cn_path, event)}
       >
-        {GetDisplayName(cn_path, db)}</a
+        {getDisplayName(cn_path, db)}</a
       >.<br /><br /> Link it to a file that is part of your Map of Content. Then
       <a
         class="link"
@@ -205,24 +210,24 @@
                 </svg>
               {/if}
               {#if i === path.length - 1}<span title={pathitem[0]}>
-                  {GetDisplayName(pathitem[0], db)}</span
+                  {getDisplayName(pathitem[0], db)}</span
                 >{:else}<a
                   class="link"
                   title={pathitem[0]}
                   on:click={(event) => NavigateToFile(app, pathitem[0], event)}
-                  >{GetDisplayName(pathitem[0], db)}</a
+                  >{getDisplayName(pathitem[0], db)}</a
                 >{/if}
             {/each}
           {:else}
             {#each path.reverse() as pathitem, i}
               {#if i === 0}<span title={pathitem[0]}>
-                  {GetDisplayName(pathitem[0], db)}</span
+                  {getDisplayName(pathitem[0], db)}</span
                 >{:else}<a
                   class="link"
                   title={pathitem[0]}
                   on:click={(event) => NavigateToFile(app, pathitem[0], event)}
                 >
-                  {GetDisplayName(pathitem[0], db)}</a
+                  {getDisplayName(pathitem[0], db)}</a
                 >{/if}
               {#if pathitem[1] === LINKED_FROM}
                 <svg
@@ -267,7 +272,7 @@
           {db}
           {app}
           {view}
-          note_path={view.open_file_path}
+          note_path={view.openFilePath}
           indentation={0}
           {expandMan}
         />

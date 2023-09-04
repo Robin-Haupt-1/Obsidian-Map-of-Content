@@ -13,7 +13,7 @@ import type {
 } from "obsidian";
 import { Notice } from "obsidian";
 import { DB, FileItem, Path } from "./types";
-import { FileNameFromPath, Log } from "./utils";
+import { getFileNameFromPath, devLog } from "./utils";
 import type MOCPlugin from "./main";
 import type { SettingsManager } from "./settings";
 
@@ -53,7 +53,7 @@ export class DBManager {
         if (!silent) {
           new Notice("Updating the Map of Content...");
         }
-        Log("Updating the Map of Content...");
+        devLog("Updating the Map of Content...");
         await new Promise((r) => setTimeout(r, 0));
         this.updateDB();
         await new Promise((r) => setTimeout(r, 0));
@@ -76,12 +76,12 @@ export class DBManager {
         if (!silent) {
           new Notice("Update complete");
         }
-        Log(
+        devLog(
           `Update complete, took ${String(
             (Date.now() - startTime) / 1000
           )} seconds`
         );
-        Log(`get paths ran ${this.timesGetPathRan} times`);
+        devLog(`get paths ran ${this.timesGetPathRan} times`);
 
         this.isDatabaseComplete = true;
       }
@@ -128,16 +128,16 @@ export class DBManager {
   }
 
   updateDB() {
-    Log("Updating the library...");
+    devLog("Updating the library...");
     // TODO - this is a hacky way to clear the db, find a better way - why is this necessary?
     for (let note in this.db) {
       delete this.db[note];
     }
     let vaultFiles = this.app.vault.getFiles();
-    Log(`Total number of files in vault: ${vaultFiles.length}`);
+    devLog(`Total number of files in vault: ${vaultFiles.length}`);
     let entriesCreatedCount = 0;
     vaultFiles.forEach((file) => {
-      if (this.settings.isExludedFile(file)) {
+      if (this.settings.isExcludedFile(file)) {
         return;
       }
       entriesCreatedCount += 1;
@@ -150,22 +150,17 @@ export class DBManager {
       );
     });
 
-    Log(`Created ${entriesCreatedCount} new db entries`);
-    console.log(this.db);
+    devLog(`Created ${entriesCreatedCount} new db entries`);
 
     this.dbEntries = Object.entries(this.db);
     this.dbKeys = Object.keys(this.db);
 
     this.fileHasDuplicatedName = new Map<string, boolean>();
-    let checkedFiles = 0;
+    let duplicateCheckedFilesCount = 0;
     this.allNotes().forEach((note) => {
-      let fileName = FileNameFromPath(note.path);
+      let fileName = getFileNameFromPath(note.path);
 
-      // logging
-      checkedFiles += 1;
-      if (checkedFiles % 1000 === 0) {
-        Log("checked for duplicates: " + String(checkedFiles));
-      }
+      duplicateCheckedFilesCount += 1;
       // TODO use something like a counter here that just counts up the occurrences of each file name
       if (this.fileHasDuplicatedName.has(fileName)) {
         // If the file name is encountered twice or more, set it's duplicate status to true
@@ -175,9 +170,11 @@ export class DBManager {
       }
     });
 
+    devLog(`Checked ${duplicateCheckedFilesCount} files for duplicate names`);
+
     this.dbEntries = Object.entries(this.db);
 
-    Log("Analyzing links");
+    devLog("Analyzing links");
 
     const markdownNotes = this.allNotes().filter(
       (note) => note.extension === "md"
@@ -198,7 +195,7 @@ export class DBManager {
 
   /** starting from the CN, follow all paths and store the information on how long the shortest path to each note is*/
   updateDepthInformation() {
-    Log(
+    devLog(
       "Analyzing distance from Central Note. CN path: " +
         this.settings.get("CN_path")
     );
@@ -233,7 +230,6 @@ export class DBManager {
    * @param pathSoFar the path to be extended in this iteration
    */
   followPaths(pathSoFar: Path) {
-    console.log("followPaths called with path: ", pathSoFar);
     this.timesGetPathRan += 1;
 
     let note = this.db[pathSoFar.allMembers.last()];
@@ -298,34 +294,34 @@ export class DBManager {
 
   /** for every note, store all notes that come right after it in any path. this is for generating the Map Of Content later on */
   updateDescendants() {
-    // delete old Information
     this.descendants = new Map();
 
-    let descendants_ran = 0;
+    let updateDescendantsLoopRanCounter = 0;
     this.allPaths.forEach((p: Path) => {
-      p.allMembers.forEach((note_path: string, index: number) => {
+      p.allMembers.forEach((notePath: string, index: number) => {
         // make sure it's not the last member of the path
         if (!(index === p.allMembers.length - 1)) {
           // create entry in descendants if it doesn't exist
-          if (!this.descendants.has(note_path)) {
-            this.descendants.set(note_path, []);
+          if (!this.descendants.has(notePath)) {
+            this.descendants.set(notePath, []);
           }
           // logging
-          descendants_ran += 1;
-          if (descendants_ran % 1000 === 0) {
-            Log("descendants ran " + String(descendants_ran));
-          }
-          let next_path_member = p.allMembers[index + 1];
+          updateDescendantsLoopRanCounter += 1;
           // add note as descendant if it isn't already stored in array
-          if (!this.descendants.get(note_path).includes(next_path_member)) {
+          if (
+            !this.descendants.get(notePath).includes(p.allMembers[index + 1])
+          ) {
             this.descendants.set(
-              note_path,
-              this.descendants.get(note_path).concat(next_path_member)
+              notePath,
+              this.descendants.get(notePath).concat(p.allMembers[index + 1])
             );
           }
         }
       });
     });
+    devLog(
+      `update descendants loop ran ${updateDescendantsLoopRanCounter} times`
+    );
   }
 
   getValidatedLinkPath(link: string, notePath: string): string | null {
@@ -341,7 +337,7 @@ export class DBManager {
     }
 
     if (this.dbKeys && !this.dbKeys.contains(linkDestination.path)) {
-      // TODO why is this called before db_keys is set?
+      // TODO why is this called before dbKeys is set?
       return null;
     }
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { App } from "obsidian";
   import type { DBManager } from "../db";
-  import { GetDisplayName, NavigateToFile } from "../utils";
+  import { getDisplayName, NavigateToFile } from "../utils";
   import type { expandManager } from "./helpers/expandManager";
 
   export let note_path: string;
@@ -33,7 +33,7 @@
     }
   }
 
-  resetExpanded(expandMan.initial_max_indent);
+  resetExpanded(expandMan.initialMaxIndent);
 
   expandMan.registerRedrawDescendantCallback(resetExpanded);
 </script>
@@ -55,7 +55,7 @@
   <li class="container {dark_mode}">
     <p>
       {#if indentation === 0}
-        {GetDisplayName(note_path, db)}
+        {getDisplayName(note_path, db)}
       {:else}
         {#if children.length > 0}
           <span
@@ -86,7 +86,7 @@
             NavigateToFile(app, note_path, event);
           }}
         >
-          {GetDisplayName(note_path, db)}</a
+          {getDisplayName(note_path, db)}</a
         >
       {/if}
     </p>

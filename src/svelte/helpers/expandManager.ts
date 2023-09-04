@@ -1,34 +1,34 @@
-import { Log } from "../../utils";
+import { devLog } from "../../utils";
 
 export class expandManager {
   constructor() {
-    Log("expandManager created");
+    devLog("expandManager created");
   }
 
-  initial_max_indent = 3;
+  initialMaxIndent = 3;
   redrawCallbacks = [];
-  manually_expanded = false;
+  isManuallyExpanded = false;
 
   expand() {
-    if (this.manually_expanded) {
-      this.rerenderDescendants(this.initial_max_indent);
-      this.manually_expanded = false;
+    if (this.isManuallyExpanded) {
+      this.rerenderDescendants(this.initialMaxIndent);
+      this.isManuallyExpanded = false;
     } else {
-      this.rerenderDescendants(this.initial_max_indent + 1);
+      this.rerenderDescendants(this.initialMaxIndent + 1);
     }
   }
 
   contract() {
-    if (this.initial_max_indent > 1) {
-      this.rerenderDescendants(this.initial_max_indent - 1);
-      this.initial_max_indent -= 1;
+    if (this.initialMaxIndent > 1) {
+      this.rerenderDescendants(this.initialMaxIndent - 1);
+      this.initialMaxIndent -= 1;
     }
   }
 
-  rerenderDescendants(new_max_indent) {
-    Log("redrawing, new max_indent " + String(new_max_indent));
+  rerenderDescendants(newMaxIndent) {
+    devLog("redrawing, new max_indent " + String(newMaxIndent));
     for (let func of this.redrawCallbacks) {
-      func(new_max_indent);
+      func(newMaxIndent);
     }
   }
 
@@ -37,13 +37,13 @@ export class expandManager {
   }
 
   logIndent(indent: number) {
-    Log("indentation registered: " + String(indent));
-    if (indent > this.initial_max_indent) {
-      this.initial_max_indent = indent;
+    devLog("indentation registered: " + String(indent));
+    if (indent > this.initialMaxIndent) {
+      this.initialMaxIndent = indent;
     }
   }
 
   onManualExpand() {
-    this.manually_expanded = true;
+    this.isManuallyExpanded = true;
   }
 }
