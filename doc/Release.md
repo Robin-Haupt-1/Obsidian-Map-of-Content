@@ -1,3 +1,4 @@
+- first, use watchexec npm run build to keep rebuilding the plugin while developing
 - set print_log in utils.ts to false #TODO autodetect build environment
 - npm run build
 - increment version number in manifest.json
