@@ -1,11 +1,4 @@
-import type MOCPlugin from "../../main";
-import {
-  GetDisplayName,
-  IsCtrlPressed,
-  NavigateToFile,
-  Log,
-} from "../../utils";
-import { onMount } from "svelte";
+import { Log } from "../../utils";
 
 export class expandManager {
   constructor() {

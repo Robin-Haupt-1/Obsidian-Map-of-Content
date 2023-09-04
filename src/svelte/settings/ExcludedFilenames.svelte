@@ -1,6 +1,5 @@
 <script lang="ts">
-  import type { App, TFile } from "obsidian";
-  import type { DBManager } from "../../db";
+  import type { App } from "obsidian";
   import type MOCPlugin from "../../main";
   import { onMount } from "svelte";
 

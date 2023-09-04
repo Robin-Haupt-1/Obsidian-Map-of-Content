@@ -1,8 +1,8 @@
-import type { App, TFile } from "obsidian";
+import type { TFile } from "obsidian";
+import { PluginSettingTab } from "obsidian";
 
 import type MOCPlugin from "./main";
 import { Log } from "./utils";
-import { PluginSettingTab } from "obsidian";
 import type { DBManager } from "./db";
 import Settings from "./svelte/Settings.svelte";
 
@@ -145,7 +145,7 @@ export class SettingsManager {
       }
       return this.UpgradeSettingsVersion(object);
     } catch {
-      // it things don't work out, delete all old settings data (better than breaking the plugin)
+      // if things don't work out, delete all old settings data (better than breaking the plugin)
       Log("error while transforming settings object");
       return {};
     }
@@ -160,10 +160,9 @@ export class SettingsManager {
       return true;
     }
     let filename = file.basename + "." + file.extension;
-    let has_excluded_filename = this.get("exluded_filename_components").some(
-      (phrase: string) => filename.contains(phrase)
+    return this.get("exluded_filename_components").some((phrase: string) =>
+      filename.contains(phrase)
     );
-    return has_excluded_filename;
   }
 
   isExpanded(path: string) {

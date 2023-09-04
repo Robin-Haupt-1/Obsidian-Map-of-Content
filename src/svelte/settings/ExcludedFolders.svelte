@@ -1,10 +1,9 @@
 <script lang="ts">
-  import type { App, TFile } from "obsidian";
-  import type { DBManager } from "../../db";
+  import type { App } from "obsidian";
   import type MOCPlugin from "../../main";
   import { onMount } from "svelte";
 
-  import { Log, GetAllFolders } from "../../utils";
+  import { GetAllFolders } from "../../utils";
 
   export let app: App;
   export let plugin: MOCPlugin;
@@ -60,8 +59,10 @@
       return;
     }
     // add option to select box
-    let AddOpt = new Option(exlude_path_input_value, exlude_path_input_value);
-    excludedlist.options[list_options_no++] = AddOpt;
+    excludedlist.options[list_options_no++] = new Option(
+      exlude_path_input_value,
+      exlude_path_input_value
+    );
     excluded_folders.push(exlude_path_input_value);
 
     // reset input field
@@ -98,7 +99,7 @@
 
 <h2>Excluded folders</h2>
 
-<div id="exluded-folders">
+<div id="exluded-folders-container">
   <div id="list-excluded">
     <select
       bind:this={excludedlist}
@@ -109,7 +110,7 @@
     />
   </div>
   <div id="add-remove-exluded">
-    <label for="myBrowser"> Add a folder:</label>
+    <label for="Exluded-folders"> Add a folder:</label>
     <input
       bind:this={exlude_path_input}
       bind:value={exlude_path_input_value}
@@ -175,7 +176,7 @@
     text-align: left;
   }
 
-  div#exluded-folders {
+  div#exluded-folders-container {
     display: flex;
     flex-wrap: wrap;
     column-gap: 10px;

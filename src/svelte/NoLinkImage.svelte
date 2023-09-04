@@ -1,5 +1,6 @@
 <div id="broken-link-container">
   <!-- from https://www.svgrepo.com/svg/4538/link -->
+  <!-- TODO what is this enable-background thing? -->
   <svg
     version="1.1"
     id="Layer_1"
