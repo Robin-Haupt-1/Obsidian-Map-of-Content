@@ -1,9 +1,5 @@
 <script lang="ts">
-  import type { App } from "obsidian";
-  import type { DBManager } from "../db";
-  import type MOCPlugin from "../../main";
-  import { Log } from "../utils";
-  import { onMount } from "svelte";
+  import type MOCPlugin from "../main";
 
   export let view: any;
   export let plugin: MOCPlugin;
@@ -24,7 +20,6 @@
         Added a settings option to display the path from the Central Note
         starting at the Central Note instead of the currently open one.
       </li>
-      <br />
       <li>
         Fixed a bug where links using # or ^ to reference headings or blocks
         weren't followed
@@ -48,8 +43,9 @@
         settings.set({ do_show_update_notice: false });
         view.rerender();
       }}
-      style="display:block;margin:auto;">Close</button
-    >
+      style="display:block;margin:auto;"
+      >Close
+    </button>
   </div>
 </div>
 
