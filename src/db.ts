@@ -30,7 +30,7 @@ export class DBManager {
   fileHasDuplicatedName: Map<string, boolean>;
   isDatabaseComplete: boolean = false;
   isDatabaseUpdating: boolean = true;
-  timesGetPathRan: number; // TODO: remove this
+  timesGetPathRan: number;
 
   constructor(plugin: MOCPlugin) {
     this.app = plugin.app;
@@ -151,6 +151,7 @@ export class DBManager {
     });
 
     Log(`Created ${entriesCreatedCount} new db entries`);
+    console.log(this.db);
 
     this.dbEntries = Object.entries(this.db);
     this.dbKeys = Object.keys(this.db);
@@ -201,7 +202,7 @@ export class DBManager {
       "Analyzing distance from Central Note. CN path: " +
         this.settings.get("CN_path")
     );
-    let distanceFromCn = 0;
+    let distanceFromCn = 1;
     let previouslyCheckedLinks: string[] = []; // all the notes that have already been visited. dont visit them again to prevent endless loops
     let links = [this.settings.get("CN_path")];
     while (links.length > 0) {
@@ -232,6 +233,7 @@ export class DBManager {
    * @param pathSoFar the path to be extended in this iteration
    */
   followPaths(pathSoFar: Path) {
+    console.log("followPaths called with path: ", pathSoFar);
     this.timesGetPathRan += 1;
 
     let note = this.db[pathSoFar.allMembers.last()];
@@ -251,14 +253,14 @@ export class DBManager {
         noteIsLinkedFrom.splice(index, 1);
         linkDirectionToken = LINKED_BOTH;
       }
-      let new_path: Path = {
+      let newPath: Path = {
         allMembers: allPathMembers.concat(link),
         items: items.concat([[link, linkDirectionToken]]),
       };
-      newPathsToFollow.push(new_path);
+      newPathsToFollow.push(newPath);
     });
 
-    newPathsToFollow.concat(
+    newPathsToFollow = newPathsToFollow.concat(
       noteIsLinkedFrom.map((link) => ({
         allMembers: allPathMembers.concat(link),
         items: items.concat([[link, LINKED_FROM]]),
@@ -269,17 +271,17 @@ export class DBManager {
 
     newPathsToFollow.forEach((path: Path) => {
       // the path without the next note that is to be explored
-      let all_items_so_far = path.allMembers.slice(0, -1);
-      let last_item_path = path.allMembers.last();
-      let last_item = this.getNoteFromPath(last_item_path);
-
       // stop if this note is already part of the explored path
-      if (all_items_so_far.includes(last_item_path)) {
+
+      if (path.allMembers.slice(0, -1).includes(path.allMembers.last())) {
         return;
       }
 
-      // stop if the path meanders too much
-      if (path.allMembers.length - last_item.distanceFromCn > 1) {
+      // stop if the path isn't the shortest path to the note
+      if (
+        path.allMembers.length >
+        this.getNoteFromPath(path.allMembers.last()).distanceFromCn
+      ) {
         return;
       }
 
