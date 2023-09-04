@@ -29,7 +29,7 @@
     } else if (!view.plugin.settings.isExpanded(note_path)) {
       expanded = false;
     } else {
-      expanded = true ? indentation < new_max_indent : false;
+      expanded = indentation < new_max_indent;
     }
   }
 
