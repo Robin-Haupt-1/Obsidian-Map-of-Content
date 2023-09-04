@@ -59,7 +59,6 @@
             class="expand-arrow"
             on:click={() => {
               expanded = !expanded;
-              console.log("known path: ", note_path);
               view.plugin.settings.setExpanded(note_path, expanded);
               if (expanded) {
                 expandMan.onManualExpand();

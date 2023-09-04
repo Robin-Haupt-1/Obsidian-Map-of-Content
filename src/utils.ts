@@ -65,7 +65,7 @@ export const focus_editor_view = (app): boolean => {
 
     if (good_view) {
       app.workspace.setActiveLeaf(good_view);
-      console.log("setting active leaf");
+      Log("setting active leaf");
 
       return true;
     } else {
@@ -91,7 +91,7 @@ export const NavigateToFile = async (
       split_leaf = true;
     } else {
       app.workspace.setActiveLeaf(good_view);
-      console.log("setting active leaf");
+      Log("setting active leaf");
     }
   }
   app.workspace.openLinkText(
