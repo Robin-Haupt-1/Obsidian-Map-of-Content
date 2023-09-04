@@ -117,22 +117,11 @@
   <ExcludedFolders {app} {plugin} />
   <ExcludedFilenames {app} {plugin} />
   <p>
-    For support and suggesting feature ideas, visit the plugin's <a
+    For support, bug reports or suggesting feature ideas, visit the plugin's <a
       href="https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content"
     >
       GitHub page</a
-    >
-    or
-    <a href="https://forum.obsidian.md/t/map-of-content-plugin-release/25209">
-      this post</a
-    >
-    in the official Obsidian forum.
-    <br /><br />
-    You can support the development by donating on
-    <a href="https://www.patreon.com/RobinHaupt">Patreon</a>,
-    <a href="https://ko-fi.com/robinhaupt">Ko-Fi</a>
-    or <a href="https://www.paypal.com/paypalme/robinhaupt">PayPal</a>. Thank
-    you!
+    >.<br /><br />
   </p>
 </div>
 
