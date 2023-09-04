@@ -3,7 +3,7 @@ import type { App, TFile, WorkspaceLeaf } from "obsidian";
 import { MOC_VIEW_TYPE } from "./constants";
 
 export const Log = (message: string) => {
-  let print_log = false;
+  let print_log = true;
   if (print_log) console.log("[Map of Content] " + message);
 };
 
@@ -31,7 +31,7 @@ export const GetDisplayName = (path: string, db: DBManager): string => {
   let file_name = FileNameFromPath(path);
   let display_name = null;
 
-  if (db.duplicate_file_status.get(file_name)) {
+  if (db.file_has_duplicated_name.get(file_name)) {
     display_name = RemoveExtension(path);
   } else {
     display_name = RemoveExtension(file_name);
@@ -59,8 +59,8 @@ export const find_editor_view = (app): WorkspaceLeaf | null => {
   return null;
 };
 
-export const focus_editor_view = (app): boolean => {
-  if (app.workspace.activeLeaf.view.getViewType() == MOC_VIEW_TYPE) {
+export const focus_content_editor_view = (app): boolean => {
+  if (app.workspace.activeLeaf.view.getViewType() === MOC_VIEW_TYPE) {
     let good_view = find_editor_view(app);
 
     if (good_view) {
@@ -84,7 +84,7 @@ export const NavigateToFile = async (
 
   if (!file) return;
 
-  if (app.workspace.activeLeaf.view.getViewType() == MOC_VIEW_TYPE) {
+  if (app.workspace.activeLeaf.view.getViewType() === MOC_VIEW_TYPE) {
     let good_view = find_editor_view(app);
 
     if (!good_view) {

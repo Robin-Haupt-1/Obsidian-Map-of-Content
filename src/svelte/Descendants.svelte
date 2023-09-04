@@ -24,7 +24,7 @@
   }
 
   function resetExpanded(new_max_indent: number) {
-    if (indentation == 0) {
+    if (indentation === 0) {
       expanded = true;
     } else if (!view.plugin.settings.isExpanded(note_path)) {
       expanded = false;
@@ -47,12 +47,12 @@
   </symbol></svg
 >
 <!--start descendants view-->
-{#if indentation == 0 && children.length == 0}
+{#if indentation === 0 && children.length === 0}
   No descendants
 {:else}
   <li class="container {dark_mode}">
     <p>
-      {#if indentation == 0}
+      {#if indentation === 0}
         {GetDisplayName(note_path, db)}
       {:else}{#if children.length > 0}
           <span

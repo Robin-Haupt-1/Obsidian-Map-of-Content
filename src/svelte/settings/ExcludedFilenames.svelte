@@ -78,7 +78,7 @@
   function deleteValue() {
     let s = 1;
     let Index;
-    if (excludedlist.selectedIndex == -1) {
+    if (excludedlist.selectedIndex === -1) {
       alert("Please select an item from the list");
       return true;
     }

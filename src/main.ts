@@ -63,7 +63,7 @@ export default class MOCPlugin extends Plugin {
       callback: () => {
         let errors = [];
         // make sure a file is opened
-        if (this.app.workspace.getActiveFile() == null) {
+        if (this.app.workspace.getActiveFile() === null) {
           errors.push("No file has been opened");
         } else if (
           this.settings.isExludedFile(this.app.workspace.getActiveFile())
@@ -109,7 +109,8 @@ export default class MOCPlugin extends Plugin {
 
   CNexists(): boolean {
     let exists = !(
-      this.app.vault.getAbstractFileByPath(this.settings.get("CN_path")) == null
+      this.app.vault.getAbstractFileByPath(this.settings.get("CN_path")) ===
+      null
     );
     Log(exists ? "CN exists" : "CN does not exist");
     return exists;

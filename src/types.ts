@@ -3,7 +3,7 @@ export class FileItem {
   extension: string;
   links_to: string[];
   linked_from: string[];
-  distance_from_CN: number;
+  distance_from_CN: number | null;
 
   constructor(
     path: string,
@@ -19,9 +19,11 @@ export class FileItem {
     this.distance_from_CN = distance_from_CN;
   }
 }
+
 export interface DB {
   [index: string]: FileItem;
 }
+
 export interface Path {
   items: [string, any][];
   all_members: string[];

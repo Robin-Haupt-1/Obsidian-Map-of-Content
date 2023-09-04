@@ -65,7 +65,7 @@ export class SettingsManager {
     // TODO remove deleted/renamed files from the is_expanded object. But this is only possible once the vault is done being indexed by Obsidian
     try {
       // if fresh install, go with defaults
-      if (object == undefined) {
+      if (object === undefined) {
         Log("fresh install, returning empty settings object");
         return {};
       }
