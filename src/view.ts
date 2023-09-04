@@ -96,7 +96,7 @@ export default class MOCView extends ItemView {
     }
 
     this._app = new View({
-      target: (this as any).contentEl,
+      target: this.contentEl,
       props: { view: this, paths: paths, errors: errors },
     });
   }
