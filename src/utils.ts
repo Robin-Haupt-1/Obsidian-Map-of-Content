@@ -37,20 +37,6 @@ export const getDisplayName = (path: string, db: DBManager): string => {
   return removeExtension(fileName);
 };
 
-export const findContentEditorView = (app): WorkspaceLeaf | undefined => {
-  const contentEditorViews = [];
-
-  ["markdown", "image", "video", "audio", "pdf"].forEach((type) => {
-    devLog("looking for views of type " + type);
-    const foundViews = app.workspace.getLeavesOfType(type);
-    if (foundViews.length > 0) {
-      contentEditorViews.push(...foundViews);
-      devLog("len of content editor views found: " + contentEditorViews.length);
-    }
-  });
-
-  return contentEditorViews?.[0];
-};
 export const NavigateToFile = async (
   app: App,
   path: string,
