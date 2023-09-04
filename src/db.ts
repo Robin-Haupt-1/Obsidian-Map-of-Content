@@ -4,7 +4,13 @@ import {
   LINKED_TO,
   LINKED_FROM,
 } from "./constants";
-import type { App, Vault, LinkCache, EmbedCache } from "obsidian";
+import type {
+  App,
+  Vault,
+  LinkCache,
+  EmbedCache,
+  FrontmatterLinkCache,
+} from "obsidian";
 import { Notice } from "obsidian";
 import { FileItem, DB, Path } from "./types";
 import { FileNameFromPath } from "./utils";
@@ -197,6 +203,16 @@ export class DBManager {
           all_links.push(val.link);
         });
       }
+
+      let frontmatter_linkcache = this.app.metadataCache.getCache(
+        note.path
+      ).frontmatterLinks;
+      if (frontmatter_linkcache) {
+        frontmatter_linkcache.forEach((val: FrontmatterLinkCache) => {
+          all_links.push(val.link);
+        });
+      }
+
       all_links.forEach((link: string) => {
         // remove references to blocks or sections
         link = link.split("#")[0];
