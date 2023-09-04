@@ -71,9 +71,9 @@ export default class MOCView extends ItemView {
 
     let errors = [];
 
-    if (this.db.database_updating) {
+    if (this.db.isDatabaseUpdating) {
       errors.push("Updating...");
-    } else if (!this.db.database_complete) {
+    } else if (!this.db.isDatabaseComplete) {
       errors.push(
         `Your Map of Content couldn't be created.<br><br> Make sure your Central Note path <code>'${this.settings.get(
           "CN_path"

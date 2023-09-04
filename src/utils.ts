@@ -31,7 +31,7 @@ export const GetDisplayName = (path: string, db: DBManager): string => {
   let file_name = FileNameFromPath(path);
   let display_name = null;
 
-  if (db.file_has_duplicated_name.get(file_name)) {
+  if (db.fileHasDuplicatedName.get(file_name)) {
     display_name = RemoveExtension(path);
   } else {
     display_name = RemoveExtension(file_name);

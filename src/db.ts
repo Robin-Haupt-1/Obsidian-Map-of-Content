@@ -20,37 +20,36 @@ import type { SettingsManager } from "./settings";
 export class DBManager {
   db: DB;
   settings: SettingsManager;
-  db_entries: any[];
-  db_keys: string[];
+  dbEntries: any[];
+  dbKeys: string[];
   app: App;
   plugin: MOCPlugin;
   vault: Vault;
-  all_paths: Path[];
+  allPaths: Path[];
   descendants: Map<string, string[]>;
-  file_has_duplicated_name: Map<string, boolean>;
-  database_complete: boolean;
-  database_updating: boolean = true;
-
-  get_paths_ran: number;
+  fileHasDuplicatedName: Map<string, boolean>;
+  isDatabaseComplete: boolean = false;
+  isDatabaseUpdating: boolean = true;
+  timesGetPathRan: number; // TODO: remove this
 
   constructor(plugin: MOCPlugin) {
     this.app = plugin.app;
     this.plugin = plugin;
     this.settings = plugin.settings;
-    this.all_paths = [];
+    this.allPaths = [];
     this.db = {};
-    this.db_entries = Object.entries(this.db);
+    this.dbEntries = Object.entries(this.db);
   }
 
   init() {}
 
   async update(silent: boolean = false) {
-    this.database_complete = false;
-    this.database_updating = true;
+    this.isDatabaseComplete = false;
+    this.isDatabaseUpdating = true;
 
     try {
       if (this.plugin.CNexists()) {
-        let start_tmsp = Date.now();
+        let startTime = Date.now();
         if (!silent) {
           new Notice("Updating the Map of Content...");
         }
@@ -59,17 +58,17 @@ export class DBManager {
         this.updateDB();
         await new Promise((r) => setTimeout(r, 0));
 
-        this.get_paths_ran = 0;
+        this.timesGetPathRan = 0;
         this.updateDepthInformation();
 
-        this.all_paths.length = 0;
-        let path_so_far: Path = {
-          all_members: [this.settings.get("CN_path")],
+        this.allPaths.length = 0;
+        let pathSoFar: Path = {
+          allMembers: [this.settings.get("CN_path")],
           items: [[this.settings.get("CN_path"), LINKED_CN]],
         };
         await new Promise((r) => setTimeout(r, 0));
 
-        this.followPaths(path_so_far);
+        this.followPaths(pathSoFar);
         await new Promise((r) => setTimeout(r, 0));
 
         this.updateDescendants();
@@ -77,13 +76,17 @@ export class DBManager {
         if (!silent) {
           new Notice("Update complete");
         }
-        let end_tmsp = Date.now();
-        Log("Update complete, Took " + String((end_tmsp - start_tmsp) / 1000));
+        Log(
+          `Update complete, took ${String(
+            (Date.now() - startTime) / 1000
+          )} seconds`
+        );
+        Log(`get paths ran ${this.timesGetPathRan} times`);
 
-        this.database_complete = true;
+        this.isDatabaseComplete = true;
       }
     } finally {
-      this.database_updating = false;
+      this.isDatabaseUpdating = false;
       this.plugin.rerender();
     }
   }
@@ -96,32 +99,32 @@ export class DBManager {
 
   /** return all paths that include a certain note. Only return the path up to that note*/
   findPaths(path: string): Path[] {
-    let filtered_paths: Path[] = [];
-    let filtered_paths_json = JSON.stringify(filtered_paths);
-    this.all_paths.forEach((p: Path) => {
-      if (p.all_members.includes(path)) {
-        if (p.all_members.last() === path) {
-          filtered_paths.push(p);
+    let filteredPaths: Path[] = [];
+    let filteredPathsAsJson = JSON.stringify(filteredPaths);
+    this.allPaths.forEach((p: Path) => {
+      if (p.allMembers.includes(path)) {
+        if (p.allMembers.last() === path) {
+          filteredPaths.push(p);
         } else {
-          let index = p.all_members.indexOf(path) + 1;
-          let chopped_off_path = p.items.slice(0, index);
-          if (!filtered_paths_json.includes(JSON.stringify(chopped_off_path))) {
+          let index = p.allMembers.indexOf(path) + 1;
+          let choppedOffPath = p.items.slice(0, index);
+          if (!filteredPathsAsJson.includes(JSON.stringify(choppedOffPath))) {
             // return a path element containing only the parts of the path information up to the note in question
-            filtered_paths.push({
-              all_members: p.all_members.slice(0, index),
+            filteredPaths.push({
+              allMembers: p.allMembers.slice(0, index),
               items: p.items.slice(0, index),
             });
-            filtered_paths_json = JSON.stringify(filtered_paths);
+            filteredPathsAsJson = JSON.stringify(filteredPaths);
           }
         }
       }
     });
 
-    return filtered_paths;
+    return filteredPaths;
   }
 
-  all_notes(): FileItem[] {
-    return this.db_entries.map(([key, value]) => value);
+  allNotes(): FileItem[] {
+    return this.dbEntries.map(([key, value]) => value);
   }
 
   updateDB() {
@@ -130,14 +133,14 @@ export class DBManager {
     for (let note in this.db) {
       delete this.db[note];
     }
-    let vault_files = this.app.vault.getFiles();
-    Log(`Total number of files in vault: ${vault_files.length}`);
-    let entries_created = 0;
-    vault_files.forEach((file) => {
+    let vaultFiles = this.app.vault.getFiles();
+    Log(`Total number of files in vault: ${vaultFiles.length}`);
+    let entriesCreatedCount = 0;
+    vaultFiles.forEach((file) => {
       if (this.settings.isExludedFile(file)) {
         return;
       }
-      entries_created += 1;
+      entriesCreatedCount += 1;
       this.db[file.path] = new FileItem(
         file.path,
         file.extension,
@@ -147,46 +150,46 @@ export class DBManager {
       );
     });
 
-    Log(`Created ${entries_created} new db entries`);
+    Log(`Created ${entriesCreatedCount} new db entries`);
 
-    this.db_entries = Object.entries(this.db);
-    this.db_keys = Object.keys(this.db);
+    this.dbEntries = Object.entries(this.db);
+    this.dbKeys = Object.keys(this.db);
 
-    this.file_has_duplicated_name = new Map<string, boolean>();
-    let checked_files = 0;
-    this.all_notes().forEach((note) => {
-      let file_name = FileNameFromPath(note.path);
+    this.fileHasDuplicatedName = new Map<string, boolean>();
+    let checkedFiles = 0;
+    this.allNotes().forEach((note) => {
+      let fileName = FileNameFromPath(note.path);
 
       // logging
-      checked_files += 1;
-      if (checked_files % 1000 === 0) {
-        Log("checked for duplicates: " + String(checked_files));
+      checkedFiles += 1;
+      if (checkedFiles % 1000 === 0) {
+        Log("checked for duplicates: " + String(checkedFiles));
       }
       // TODO use something like a counter here that just counts up the occurrences of each file name
-      if (this.file_has_duplicated_name.has(file_name)) {
+      if (this.fileHasDuplicatedName.has(fileName)) {
         // If the file name is encountered twice or more, set it's duplicate status to true
-        this.file_has_duplicated_name.set(file_name, true);
+        this.fileHasDuplicatedName.set(fileName, true);
       } else {
-        this.file_has_duplicated_name.set(file_name, false);
+        this.fileHasDuplicatedName.set(fileName, false);
       }
     });
 
-    this.db_entries = Object.entries(this.db);
+    this.dbEntries = Object.entries(this.db);
 
     Log("Analyzing links");
 
-    const markdownNotes = this.all_notes().filter(
+    const markdownNotes = this.allNotes().filter(
       (note) => note.extension === "md"
     );
 
     markdownNotes.forEach((note: FileItem) => {
       let linksFromNote = this.getValidatedLinksFromNote(note.path, note.path);
 
-      this.db[note.path].links_to = linksFromNote;
+      this.db[note.path].linksTo = linksFromNote;
 
       linksFromNote.forEach((link: string) => {
-        if (!this.db[link].linked_from.includes(note.path)) {
-          this.db[link].linked_from.push(note.path);
+        if (!this.db[link].linkedFrom.includes(note.path)) {
+          this.db[link].linkedFrom.push(note.path);
         }
       });
     });
@@ -198,80 +201,76 @@ export class DBManager {
       "Analyzing distance from Central Note. CN path: " +
         this.settings.get("CN_path")
     );
-    let distance_from_cn = 0;
-    let previously_checked_links: string[] = []; // all the notes that have already been visited. dont visit them again to prevent endless loops
+    let distanceFromCn = 0;
+    let previouslyCheckedLinks: string[] = []; // all the notes that have already been visited. dont visit them again to prevent endless loops
     let links = [this.settings.get("CN_path")];
     while (links.length > 0) {
-      let next_links = new Set<string>();
+      let nextLoopsLinks = new Set<string>();
       links.forEach((link: string) => {
         // extract all active and passive connections (linked to or from) for the next iteration of link-following
         let note = this.getNoteFromPath(link);
-        [...note.links_to, ...note.linked_from].forEach((link: string) => {
-          if (!previously_checked_links.contains(link)) {
-            next_links.add(link);
+        [...note.linksTo, ...note.linkedFrom].forEach((link: string) => {
+          if (!previouslyCheckedLinks.contains(link)) {
+            nextLoopsLinks.add(link);
           }
         });
-        note.distance_from_CN =
-          note.distance_from_CN === null
-            ? distance_from_cn
-            : Math.min(note.distance_from_CN, distance_from_cn);
-        previously_checked_links.push(link);
+        if (
+          note.distanceFromCn == null ||
+          note.distanceFromCn > distanceFromCn
+        ) {
+          note.distanceFromCn = distanceFromCn;
+        }
+        previouslyCheckedLinks.push(link);
       });
-      links = Array.from(next_links);
-      distance_from_cn += 1;
+      links = Array.from(nextLoopsLinks);
+      distanceFromCn += 1;
     }
   }
 
   /**
    * Recursive function that follows all possible paths from the CN that aren't unreasonably long or circular and stores them
-   * @param path_so_far the path to be extended in this iteration
+   * @param pathSoFar the path to be extended in this iteration
    */
-  followPaths(path_so_far: Path) {
-    // logging
-    this.get_paths_ran += 1;
-    if (this.get_paths_ran % 10000 === 0) {
-      Log("get paths ran " + String(this.get_paths_ran));
-    }
+  followPaths(pathSoFar: Path) {
+    this.timesGetPathRan += 1;
 
-    let note = this.db[path_so_far.all_members.last()];
-    let all_members = path_so_far.all_members;
-    let items = path_so_far.items;
+    let note = this.db[pathSoFar.allMembers.last()];
+    let allPathMembers = pathSoFar.allMembers;
+    let items = pathSoFar.items;
 
-    let new_paths_to_follow: Path[] = [];
-    let note_links_to = note.links_to.slice();
-    let note_linked_from = note.linked_from.slice();
+    let newPathsToFollow: Path[] = [];
+    let noteLinksTo = note.linksTo.slice();
+    let noteIsLinkedFrom = note.linkedFrom.slice();
 
-    note_links_to.forEach((link: string) => {
+    noteLinksTo.forEach((link: string) => {
       // check whether the linked note also links to the current note
-      let linked_to_or_both_ways = LINKED_TO;
-      if (note_linked_from.contains(link)) {
+      let linkDirectionToken = LINKED_TO;
+      if (noteIsLinkedFrom.contains(link)) {
         // remove it from the passive links to be followed later
-        let index = note_linked_from.indexOf(link, 0);
-        note_linked_from.splice(index, 1);
-        linked_to_or_both_ways = LINKED_BOTH;
+        let index = noteIsLinkedFrom.indexOf(link, 0);
+        noteIsLinkedFrom.splice(index, 1);
+        linkDirectionToken = LINKED_BOTH;
       }
       let new_path: Path = {
-        all_members: all_members.concat(link),
-        items: items.concat([[link, linked_to_or_both_ways]]),
+        allMembers: allPathMembers.concat(link),
+        items: items.concat([[link, linkDirectionToken]]),
       };
-      new_paths_to_follow.push(new_path);
+      newPathsToFollow.push(new_path);
     });
 
-    note_linked_from.forEach((link: string) => {
-      let new_path: Path = {
-        all_members: all_members.concat(link),
+    newPathsToFollow.concat(
+      noteIsLinkedFrom.map((link) => ({
+        allMembers: allPathMembers.concat(link),
         items: items.concat([[link, LINKED_FROM]]),
-      };
-      new_paths_to_follow.push(new_path);
-    });
-    let called_itself: boolean = false; // whether the function called itself
+      }))
+    );
 
-    // function calls itself to explore every new path
+    let pathHasNovelChildPath: boolean = false;
 
-    new_paths_to_follow.forEach((path: Path) => {
+    newPathsToFollow.forEach((path: Path) => {
       // the path without the next note that is to be explored
-      let all_items_so_far = path.all_members.slice(0, -1);
-      let last_item_path = path.all_members.last();
+      let all_items_so_far = path.allMembers.slice(0, -1);
+      let last_item_path = path.allMembers.last();
       let last_item = this.getNoteFromPath(last_item_path);
 
       // stop if this note is already part of the explored path
@@ -280,18 +279,19 @@ export class DBManager {
       }
 
       // stop if the path meanders too much
-      if (path.all_members.length - last_item.distance_from_CN > 1) {
+      if (path.allMembers.length - last_item.distanceFromCn > 1) {
         return;
       }
 
       this.followPaths(path);
-      called_itself = true;
+      pathHasNovelChildPath = true;
     });
 
-    if (!called_itself) {
-      // only add the path if it does't lead anywhere else. No need to have paths that are parts of other paths
-      this.all_paths.push(path_so_far);
+    // only add the path if it doesn't lead anywhere else. No need to have paths that are included in other paths
+    if (pathHasNovelChildPath) {
+      return;
     }
+    this.allPaths.push(pathSoFar);
   }
 
   /** for every note, store all notes that come right after it in any path. this is for generating the Map Of Content later on */
@@ -300,10 +300,10 @@ export class DBManager {
     this.descendants = new Map();
 
     let descendants_ran = 0;
-    this.all_paths.forEach((p: Path) => {
-      p.all_members.forEach((note_path: string, index: number) => {
+    this.allPaths.forEach((p: Path) => {
+      p.allMembers.forEach((note_path: string, index: number) => {
         // make sure it's not the last member of the path
-        if (!(index === p.all_members.length - 1)) {
+        if (!(index === p.allMembers.length - 1)) {
           // create entry in descendants if it doesn't exist
           if (!this.descendants.has(note_path)) {
             this.descendants.set(note_path, []);
@@ -313,7 +313,7 @@ export class DBManager {
           if (descendants_ran % 1000 === 0) {
             Log("descendants ran " + String(descendants_ran));
           }
-          let next_path_member = p.all_members[index + 1];
+          let next_path_member = p.allMembers[index + 1];
           // add note as descendant if it isn't already stored in array
           if (!this.descendants.get(note_path).includes(next_path_member)) {
             this.descendants.set(
@@ -338,7 +338,7 @@ export class DBManager {
       return null;
     }
 
-    if (this.db_keys && !this.db_keys.contains(linkDestination.path)) {
+    if (this.dbKeys && !this.dbKeys.contains(linkDestination.path)) {
       // TODO why is this called before db_keys is set?
       return null;
     }

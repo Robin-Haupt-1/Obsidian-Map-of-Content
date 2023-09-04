@@ -1,22 +1,24 @@
 export class FileItem {
+  // TODO rename this or use the same naming where it's used
+  // TODO also, just use an interface ?!
   path: string;
   extension: string;
-  links_to: string[];
-  linked_from: string[];
-  distance_from_CN: number | null;
+  linksTo: string[];
+  linkedFrom: string[];
+  distanceFromCn: number | null;
 
   constructor(
     path: string,
     extension: string,
-    links_to: string[],
-    linked_from: string[],
-    distance_from_CN: number
+    linksTo: string[],
+    linkedFrom: string[],
+    distanceFromCn: number
   ) {
     this.path = path;
     this.extension = extension;
-    this.links_to = links_to;
-    this.linked_from = linked_from;
-    this.distance_from_CN = distance_from_CN;
+    this.linksTo = linksTo;
+    this.linkedFrom = linkedFrom;
+    this.distanceFromCn = distanceFromCn;
   }
 }
 
@@ -26,5 +28,5 @@ export interface DB {
 
 export interface Path {
   items: [string, any][];
-  all_members: string[];
+  allMembers: string[];
 }
