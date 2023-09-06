@@ -12,7 +12,7 @@ import type {
   Vault,
 } from "obsidian";
 import { Notice } from "obsidian";
-import { DB, FileItem, Path } from "./types";
+import type { DB, FileItem, Path } from "./types";
 import { getFileNameFromPath, devLog } from "./utils";
 import type MOCPlugin from "./main";
 import type { SettingsManager } from "./settings";
@@ -139,13 +139,13 @@ export class DBManager {
         return;
       }
       entriesCreatedCount += 1;
-      this.db[file.path] = new FileItem(
-        file.path,
-        file.extension,
-        [],
-        [],
-        null
-      );
+      this.db[file.path] = {
+        path: file.path,
+        extension: file.extension,
+        linksTo: [],
+        linkedFrom: [],
+        distanceFromCn: null,
+      };
     });
 
     devLog(`Created ${entriesCreatedCount} new db entries`);
@@ -230,12 +230,12 @@ export class DBManager {
 
   /**
    * Recursive function that follows all possible paths from the CN that aren't unreasonably long or circular and stores them
-   * @param pathSoFar the path to be extended in this iteration
+   * @param basePath the path to be extended in this iteration
    */
-  followPaths(pathSoFar: Path) {
+  followPaths(basePath: Path) {
     this.timesGetPathRan += 1;
 
-    const note = this.db[pathSoFar.allMembers.last()];
+    const note = this.db[basePath.allMembers.last()];
 
     if (!note) {
       return;
@@ -253,37 +253,37 @@ export class DBManager {
         linkDirectionToken = LINKED_BOTH;
       }
       newPathsToFollow.push({
-        allMembers: pathSoFar.allMembers.concat(link),
-        items: pathSoFar.items.concat([[link, linkDirectionToken]]),
+        allMembers: basePath.allMembers.concat(link),
+        items: basePath.items.concat([[link, linkDirectionToken]]),
       });
     });
 
     newPathsToFollow.push(
       ...noteIsLinkedFrom.map((link) => ({
-        allMembers: pathSoFar.allMembers.concat(link),
-        items: pathSoFar.items.concat([[link, LINKED_FROM]]),
+        allMembers: basePath.allMembers.concat(link),
+        items: basePath.items.concat([[link, LINKED_FROM]]),
       }))
     );
 
     let pathHasNovelChildPath = false;
 
-    newPathsToFollow.forEach((path: Path) => {
+    newPathsToFollow.forEach((newPath: Path) => {
       // the path without the next note that is to be explored
       // stop if this note is already part of the explored path
 
-      if (path.allMembers.slice(0, -1).includes(path.allMembers.last())) {
+      if (newPath.allMembers.slice(0, -1).includes(newPath.allMembers.last())) {
         return;
       }
 
       // stop if the path isn't the shortest path to the note
       if (
-        path.allMembers.length >
-        this.getNoteFromPath(path.allMembers.last()).distanceFromCn
+        newPath.allMembers.length >
+        this.getNoteFromPath(newPath.allMembers.last()).distanceFromCn
       ) {
         return;
       }
 
-      this.followPaths(path);
+      this.followPaths(newPath);
       pathHasNovelChildPath = true;
     });
 
@@ -292,7 +292,7 @@ export class DBManager {
       return;
     }
 
-    this.allPaths.push(pathSoFar);
+    this.allPaths.push(basePath);
   }
 
   /** for every note, store all notes that come right after it in any path. this is for generating the Map Of Content later on */
