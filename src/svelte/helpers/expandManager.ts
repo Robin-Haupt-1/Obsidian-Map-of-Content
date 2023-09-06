@@ -34,7 +34,7 @@ export class ExpandManager {
     this.redrawCallbacks.push(redraw);
   }
 
-  logIndent(indent: number) {
+  registerIndentation(indent: number) {
     devLog("indentation registered: " + String(indent));
     if (indent > this.initialMaxIndent) {
       this.initialMaxIndent = indent;

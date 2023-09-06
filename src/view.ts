@@ -161,9 +161,8 @@ export default class MOCView extends ItemView {
       }
     }
     this.noteBeingMonitored = activeFile.path;
-    this.linksOfNoteBeingMonitored = this.db.getValidatedLinksFromNote(
-      activeFile.path,
-      "/"
+    this.linksOfNoteBeingMonitored = Array.from(
+      this.db.getValidatedLinksFromNote(activeFile.path, "/")
     );
     if (doUpdateDb) {
       await this.db.update(true);

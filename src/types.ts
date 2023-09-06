@@ -1,8 +1,8 @@
 export interface FileItem {
   path: string;
   extension: string;
-  linksTo: string[];
-  linkedFrom: string[];
+  linksTo: Set<string>;
+  linkedFrom: Set<string>;
   distanceFromCn: number | null;
 }
 

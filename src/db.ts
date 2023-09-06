@@ -26,7 +26,7 @@ export class DBManager {
   plugin: MOCPlugin;
   vault: Vault;
   allPaths: Path[] = [];
-  descendants: Map<string, string[]>;
+  descendants: Map<string, Set<string>>;
   fileHasDuplicatedName: Map<string, boolean>;
   isDatabaseComplete: boolean = false;
   isDatabaseUpdating: boolean = true;
@@ -138,8 +138,8 @@ export class DBManager {
       this.db[file.path] = {
         path: file.path,
         extension: file.extension,
-        linksTo: [],
-        linkedFrom: [],
+        linksTo: new Set<string>(),
+        linkedFrom: new Set<string>(),
         distanceFromCn: null,
       };
     });
@@ -183,8 +183,8 @@ export class DBManager {
         if (!this.db[link]) {
           return;
         }
-        if (!this.db[link].linkedFrom.includes(note.path)) {
-          this.db[link].linkedFrom.push(note.path);
+        if (!this.db[link].linkedFrom.has(note.path)) {
+          this.db[link].linkedFrom.add(note.path);
         }
       });
     });
@@ -238,14 +238,15 @@ export class DBManager {
     }
 
     const newPathsToFollow: Path[] = [];
-    const noteIsLinkedFrom = note.linkedFrom.slice();
+    const notesLinkingToThisNoteToFollow = new Set(note.linkedFrom);
 
     note.linksTo.forEach((link: string) => {
-      // check whether the linked note also links to the current note
+      if (basePath.allMembers.includes(link)) {
+        return;
+      }
       let linkDirectionToken = LINKED_TO;
-      if (noteIsLinkedFrom.contains(link)) {
-        // remove it from the passive links to be followed later
-        noteIsLinkedFrom.splice(noteIsLinkedFrom.indexOf(link, 0), 1);
+      if (notesLinkingToThisNoteToFollow.has(link)) {
+        notesLinkingToThisNoteToFollow.delete(link);
         linkDirectionToken = LINKED_BOTH;
       }
       newPathsToFollow.push({
@@ -254,24 +255,20 @@ export class DBManager {
       });
     });
 
-    newPathsToFollow.push(
-      ...noteIsLinkedFrom.map((link) => ({
+    notesLinkingToThisNoteToFollow.forEach((link: string) => {
+      if (basePath.allMembers.includes(link)) {
+        return;
+      }
+      newPathsToFollow.push({
         allMembers: basePath.allMembers.concat(link),
         items: basePath.items.concat([[link, LINKED_FROM]]),
-      }))
-    );
+      });
+    });
 
     let pathHasNovelChildPath = false;
 
     newPathsToFollow.forEach((newPath: Path) => {
-      // the path without the next note that is to be explored
-      // stop if this note is already part of the explored path
-
-      if (newPath.allMembers.slice(0, -1).includes(newPath.allMembers.last())) {
-        return;
-      }
-
-      // stop if the path isn't the shortest path to the note
+      // prevent meandering paths that are longer than the shortest path to the note
       if (
         newPath.allMembers.length >
         this.getNoteFromPath(newPath.allMembers.last()).distanceFromCn
@@ -283,7 +280,6 @@ export class DBManager {
       pathHasNovelChildPath = true;
     });
 
-    // only add the path if it doesn't lead anywhere else. No need to have paths that are included in other paths
     if (pathHasNovelChildPath) {
       return;
     }
@@ -291,39 +287,32 @@ export class DBManager {
     this.allPaths.push(basePath);
   }
 
-  /** for every note, store all notes that come right after it in any path. this is for generating the Map Of Content later on */
+  /** for every note, store all notes that come right after it in any path. this is for displaying the tree view */
   updateDescendants() {
     this.descendants = new Map();
 
     let updateDescendantsLoopRanCounter = 0;
-    this.allPaths.forEach((p: Path) => {
-      p.allMembers.forEach((notePath: string, index: number) => {
-        // make sure it's not the last member of the path
-        if (!(index === p.allMembers.length - 1)) {
-          // create entry in descendants if it doesn't exist
+    this.allPaths.forEach((path: Path) => {
+      path.allMembers
+        .slice(0, -1)
+        .forEach((notePath: string, index: number) => {
           if (!this.descendants.has(notePath)) {
-            this.descendants.set(notePath, []);
-          }
-          // logging
-          updateDescendantsLoopRanCounter += 1;
-          // add note as descendant if it isn't already stored in array
-          if (
-            !this.descendants.get(notePath).includes(p.allMembers[index + 1])
-          ) {
             this.descendants.set(
               notePath,
-              this.descendants.get(notePath).concat(p.allMembers[index + 1])
+              new Set<string>([path.allMembers[index + 1]])
             );
+            return;
           }
-        }
-      });
+          this.descendants.get(notePath).add(path.allMembers[index + 1]);
+        });
+      updateDescendantsLoopRanCounter += 1;
     });
     devLog(
       `update descendants loop ran ${updateDescendantsLoopRanCounter} times`
     );
   }
 
-  getValidatedLinkPath(link: string, notePath: string): string | null {
+  getValidatedLinkPath(link: string, notePath: string): string | undefined {
     const linkWithoutAnchor = link.split("#")[0].split("^")[0];
 
     const linkDestination = this.app.metadataCache.getFirstLinkpathDest(
@@ -332,7 +321,7 @@ export class DBManager {
     );
 
     if (!linkDestination) {
-      return null;
+      return;
     }
 
     if (this.dbKeys && !this.dbKeys.contains(linkDestination.path)) {
@@ -343,25 +332,28 @@ export class DBManager {
     return linkDestination.path;
   }
 
-  getValidatedLinksFromNote(notePath: string, sourcePath: string): string[] {
+  getValidatedLinksFromNote(notePath: string, sourcePath: string): Set<string> {
     const cachedMetadata = this.app.metadataCache.getCache(notePath);
 
-    const unvalidatedLinks = new Set<string>();
+    const linkCaches = [
+      ...(cachedMetadata.links ?? []),
+      ...(cachedMetadata.embeds ?? []),
+      ...(cachedMetadata.frontmatterLinks ?? []),
+    ];
 
-    cachedMetadata.links?.forEach((val: LinkCache) => {
-      unvalidatedLinks.add(val.link);
-    });
+    const validatedLinks = new Set<string>();
 
-    cachedMetadata.embeds?.forEach((val: EmbedCache) => {
-      unvalidatedLinks.add(val.link);
-    });
+    for (const linkCache of linkCaches) {
+      const validatedLink = this.getValidatedLinkPath(
+        linkCache.link,
+        sourcePath
+      );
+      if (!validatedLink) {
+        continue;
+      }
+      validatedLinks.add(validatedLink);
+    }
 
-    cachedMetadata.frontmatterLinks?.forEach((val: FrontmatterLinkCache) => {
-      unvalidatedLinks.add(val.link);
-    });
-
-    return Array.from(unvalidatedLinks)
-      .map((link: string) => this.getValidatedLinkPath(link, sourcePath))
-      .filter((link) => link != null);
+    return validatedLinks;
   }
 }

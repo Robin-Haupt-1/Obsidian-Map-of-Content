@@ -12,7 +12,7 @@
   export let expandManager: ExpandManager;
   let isExpanded;
 
-  const children = db.descendants.get(notePath)?.slice() || [];
+  const children = Array.from(db.descendants.get(notePath) || []);
 
   const darkModeDependentClass = document.body.classList.contains("theme-dark")
     ? "dark-mode"
@@ -28,7 +28,7 @@
     }
   }
 
-  expandManager.logIndent(indentation);
+  expandManager.registerIndentation(indentation);
 
   resetExpanded(expandManager.initialMaxIndent);
 
@@ -62,7 +62,7 @@
               view.plugin.settings.setExpanded(notePath, isExpanded);
               if (isExpanded) {
                 expandManager.onManualExpand();
-                expandManager.logIndent(indentation + 1);
+                expandManager.registerIndentation(indentation + 1);
               }
             }}
             ><div class="expand-button">
