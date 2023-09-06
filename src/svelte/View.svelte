@@ -9,7 +9,7 @@
 
   export let view: MOCView;
   export let paths: [string, string][][];
-  export let errors: string[];
+  export let error: string | undefined;
 
   const plugin = view.plugin;
   const expandManager = new ExpandManager();
@@ -141,9 +141,9 @@
   >
     {#if plugin.settings.get("do_show_update_notice")}
       <UpdateNotice {view} {plugin} />
-    {:else if errors.length}
-      <div class="errors">
-        {@html errors[0]}
+    {:else if error}
+      <div class="error">
+        {@html error}
       </div>
     {:else if paths.length === 0}
       This file doesn't have any connections to <a
@@ -397,7 +397,7 @@
     fill: lightgray;
   }
 
-  .errors {
+  .error {
     padding: 10px;
     width: initial;
     height: initial;

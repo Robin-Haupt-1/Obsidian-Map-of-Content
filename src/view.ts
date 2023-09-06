@@ -53,52 +53,54 @@ export default class MOCView extends ItemView {
 
   async onOpen(): Promise<void> {}
 
-  /** reload paths and recreate the svelte instance */
   rerender(): void {
     devLog("Rerender called on view");
 
     this.destroyApp();
 
-    let errors = [];
+    const error = this.getRerenderError();
 
-    if (this.db.isDatabaseUpdating) {
-      errors.push("Updating...");
-    } else if (!this.db.isDatabaseComplete) {
-      errors.push(
-        `Your Map of Content couldn't be created.<br><br> Make sure your Central Note path <code>'${this.settings.get(
-          "CN_path"
-        )}'</code> is correct. You can change this path in the settings tab.`
-      );
-    } else if (this.app.workspace.getActiveFile() === null) {
-      errors.push("No file is open");
-    } else if (
-      this.settings.isExcludedFile(this.app.workspace.getActiveFile())
-    ) {
-      errors.push("This file has been excluded from the Map of Content.");
-    } else {
-      this.openFilePath = this.app.workspace.getActiveFile().path;
-      if (this.db.getNoteFromPath(this.openFilePath) === undefined) {
-        errors.push("Updating...");
-        this.db.update(true);
-      }
+    if (error) {
+      this._app = new View({
+        target: this.contentEl,
+        props: { view: this, paths: [], error: error },
+      });
+      return;
     }
-    let paths = [];
-    if (errors.length === 0) {
-      let allPaths = this.db.findPaths(this.openFilePath);
-      if (allPaths.length === 0) {
-        devLog("No paths to this note");
-      }
-
-      paths = allPaths.map((p: Path) => p.items.slice());
-    } else {
-      this.openFilePath = "None";
-      paths = [];
+    let allPaths = this.db.findPaths(this.openFilePath);
+    if (allPaths.length === 0) {
+      devLog("No paths to this note");
     }
 
     this._app = new View({
       target: this.contentEl,
-      props: { view: this, paths: paths, errors: errors },
+      props: {
+        view: this,
+        paths: allPaths.map((p: Path) => p.items.slice()),
+        error: error,
+      },
     });
+  }
+
+  getRerenderError(): string | undefined {
+    switch (true) {
+      case this.db.isDatabaseUpdating:
+        return "Updating...";
+      case !this.db.isDatabaseComplete:
+        return `Your Map of Content couldn't be created.<br><br> Make sure your Central Note path <code>'${this.settings.get(
+          "CN_path"
+        )}'</code> is correct. You can change this path in the settings tab.`;
+      case this.app.workspace.getActiveFile() === null:
+        return "No file is open";
+      case this.settings.isExcludedFile(this.app.workspace.getActiveFile()):
+        return "This file has been excluded from the Map of Content.";
+      default:
+        this.openFilePath = this.app.workspace.getActiveFile().path;
+        if (this.db.getNoteFromPath(this.openFilePath) === undefined) {
+          this.db.update(true);
+          return "Updating...";
+        }
+    }
   }
 
   destroyApp() {

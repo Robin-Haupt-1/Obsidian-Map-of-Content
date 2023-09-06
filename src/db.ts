@@ -18,14 +18,14 @@ import type MOCPlugin from "./main";
 import type { SettingsManager } from "./settings";
 
 export class DBManager {
-  db: DB;
+  db: DB = {};
   settings: SettingsManager;
   dbEntries: any[];
   dbKeys: string[];
   app: App;
   plugin: MOCPlugin;
   vault: Vault;
-  allPaths: Path[];
+  allPaths: Path[] = [];
   descendants: Map<string, string[]>;
   fileHasDuplicatedName: Map<string, boolean>;
   isDatabaseComplete: boolean = false;
@@ -36,12 +36,8 @@ export class DBManager {
     this.app = plugin.app;
     this.plugin = plugin;
     this.settings = plugin.settings;
-    this.allPaths = [];
-    this.db = {};
     this.dbEntries = Object.entries(this.db);
   }
-
-  init() {}
 
   async update(silent: boolean = false) {
     this.isDatabaseComplete = false;
