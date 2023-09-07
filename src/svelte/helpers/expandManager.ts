@@ -35,7 +35,7 @@ export class ExpandManager {
   }
 
   registerIndentation(indent: number) {
-    devLog("indentation registered: " + String(indent));
+    devLog(`indentation registered: ${indent}`);
     if (indent > this.initialMaxIndent) {
       this.initialMaxIndent = indent;
     }
