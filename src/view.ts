@@ -152,7 +152,9 @@ export default class MOCView extends ItemView {
       if (activeFile.path !== this.noteBeingMonitored) {
         if (
           JSON.stringify(
-            this.db.getValidatedLinksFromNote(this.noteBeingMonitored, "/")
+            Array.from(
+              this.db.getValidatedLinksFromNote(this.noteBeingMonitored, "/")
+            )
           ) !== JSON.stringify(this.linksOfNoteBeingMonitored)
         ) {
           devLog("links changed!");
