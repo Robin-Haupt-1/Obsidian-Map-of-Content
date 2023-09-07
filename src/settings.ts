@@ -25,7 +25,7 @@ export const DEFAULT_SETTINGS: MOCSettings = {
   exluded_folders: [],
   exluded_filename_components: [],
   settings_version: "0.1.16",
-  plugin_version: "1.1.0",
+  plugin_version: "1.2.0",
   do_show_update_notice: false,
   auto_update_on_file_change: true,
   do_remember_expanded: false,
@@ -43,6 +43,7 @@ export class SettingsManager {
     "0.1.17",
     "0.1.18",
     "1.0.0",
+    "1.1.0",
   ];
 
   constructor(plugin: any) {

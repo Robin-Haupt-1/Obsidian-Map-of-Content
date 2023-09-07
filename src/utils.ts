@@ -3,8 +3,8 @@ import type { App, TFile, WorkspaceLeaf } from "obsidian";
 import { MOC_VIEW_TYPE } from "./constants";
 
 export const devLog = (message: string) => {
-  const printLog = true;
-  if (printLog) console.log("[Map of Content] " + message);
+  const printDevLog = false;
+  if (printDevLog) console.log("[Map of Content] " + message);
 };
 
 export const removeExtension = (path: string, extension: string = ".md") => {
