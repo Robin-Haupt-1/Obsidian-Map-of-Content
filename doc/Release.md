@@ -1,11 +1,11 @@
 - first, use watchexec npm run build to keep rebuilding the plugin while developing
-- set printDevLog in utils.ts to false #TODO autodetect build environment
+- set printDevLog in utils.ts to false
 - increment version number in manifest.json
 - add new version with new minimum Obsidian version to versions.json (or replace last version if it's the same)
 - update plugin_version in DEFAULT_SETTINGS in settings.ts
 - if necessary, update settings_version in DEFAULT_SETTINGS in settings.ts
 - add old plugin version to silentGenericUpdateVersions or genericUpdateVersions in settings.ts
 - npm run build
-- create new release at https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content/releases/new (must have new version as tag)
+- create new release at https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content/releases/new (must have new version as tag, example: "1.2.0")
 - add main.js and manifest.json to release and publish it
 - push commit with changes

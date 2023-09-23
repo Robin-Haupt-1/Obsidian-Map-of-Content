@@ -18,7 +18,7 @@
     <ul>
       <li>
         Added a settings option to toggle whether the paths to the current note
-        are displayed or not
+        are displayed or not (show only it's descendants)
       </li>
     </ul>
     See&nbsp;<a
