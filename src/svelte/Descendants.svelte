@@ -119,7 +119,7 @@
   li {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 2px 0;
   }
 
   ul {
