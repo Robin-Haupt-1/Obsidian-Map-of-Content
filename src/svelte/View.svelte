@@ -163,99 +163,101 @@
       your Map of Content and watch it grow!<br />
       <NoLinkImage />
     {:else}
-      {#each paths as path}
-        <div class="path">
-          {#if plugin.settings.get("MOC_path_starts_at_CN")}
-            {#each path as pathitem, i}
-              {#if pathitem[1] === LINKED_FROM}
-                <svg
-                  class="path-arrow"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 15.05"
-                >
-                  <path
-                    d="M 2.117,7 9.644,0.765 9,0 0,7.521 9,15 9.645,14.236 2.116,8 H 24 V 7 Z"
-                  />
-                </svg>
-              {:else if pathitem[1] === LINKED_TO}
-                <svg
-                  class="path-arrow"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 15.05"
-                >
-                  <path
-                    d=" M 21.883,8 14.356,14.235 15,15 24,7.479 15,0 14.355,0.764 21.884,7 H 0 v 1 z"
-                  />
-                </svg>
-              {:else if pathitem[1] === LINKED_BOTH}
-                <svg
-                  class="path-arrow"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 15.05"
-                >
-                  <path
-                    d="M 9 0 L 0 7.5214844 L 9 15 L 9.6445312 14.236328 L 2.1152344 8 L 21.882812 8 L 14.355469 14.234375 L 15 15 L 24 7.4785156 L 15 0 L 14.355469 0.76367188 L 21.884766 7 L 2.1171875 7 L 9.6445312 0.765625 L 9 0 z "
-                  />
-                </svg>
-              {/if}
-              {#if i === path.length - 1}<span title={pathitem[0]}>
-                  {getDisplayName(pathitem[0], plugin.db)}</span
-                >{:else}<a
-                  class="link"
-                  title={pathitem[0]}
-                  on:click={(event) =>
-                    NavigateToFile(plugin.app, pathitem[0], event)}
-                  >{getDisplayName(pathitem[0], plugin.db)}</a
-                >{/if}
-            {/each}
-          {:else}
-            {#each path.reverse() as pathitem, i}
-              {#if i === 0}<span title={pathitem[0]}>
-                  {getDisplayName(pathitem[0], plugin.db)}</span
-                >{:else}<a
-                  class="link"
-                  title={pathitem[0]}
-                  on:click={(event) =>
-                    NavigateToFile(plugin.app, pathitem[0], event)}
-                >
-                  {getDisplayName(pathitem[0], plugin.db)}</a
-                >{/if}
-              {#if pathitem[1] === LINKED_FROM}
-                <svg
-                  class="path-arrow"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 15.05"
-                >
-                  <path
-                    d=" M 21.883,8 14.356,14.235 15,15 24,7.479 15,0 14.355,0.764 21.884,7 H 0 v 1 z"
-                  />
-                </svg>
-              {:else if pathitem[1] === LINKED_TO}
-                <svg
-                  class="path-arrow"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 15.05"
-                >
-                  <path
-                    d="M 2.117,7 9.644,0.765 9,0 0,7.521 9,15 9.645,14.236 2.116,8 H 24 V 7 Z"
-                  />
-                </svg>
-              {:else if pathitem[1] === LINKED_BOTH}
-                <svg
-                  class="path-arrow"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 15.05"
-                >
-                  <path
-                    d="M 9 0 L 0 7.5214844 L 9 15 L 9.6445312 14.236328 L 2.1152344 8 L 21.882812 8 L 14.355469 14.234375 L 15 15 L 24 7.4785156 L 15 0 L 14.355469 0.76367188 L 21.884766 7 L 2.1171875 7 L 9.6445312 0.765625 L 9 0 z "
-                  />
-                </svg>
-              {/if}
-            {/each}
-          {/if}
-        </div>
-        <br />
-      {/each}
+      {#if plugin.settings.get("do_show_paths_to_note")}
+        {#each paths as path}
+          <div class="path">
+            {#if plugin.settings.get("MOC_path_starts_at_CN")}
+              {#each path as pathitem, i}
+                {#if pathitem[1] === LINKED_FROM}
+                  <svg
+                    class="path-arrow"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 15.05"
+                  >
+                    <path
+                      d="M 2.117,7 9.644,0.765 9,0 0,7.521 9,15 9.645,14.236 2.116,8 H 24 V 7 Z"
+                    />
+                  </svg>
+                {:else if pathitem[1] === LINKED_TO}
+                  <svg
+                    class="path-arrow"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 15.05"
+                  >
+                    <path
+                      d=" M 21.883,8 14.356,14.235 15,15 24,7.479 15,0 14.355,0.764 21.884,7 H 0 v 1 z"
+                    />
+                  </svg>
+                {:else if pathitem[1] === LINKED_BOTH}
+                  <svg
+                    class="path-arrow"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 15.05"
+                  >
+                    <path
+                      d="M 9 0 L 0 7.5214844 L 9 15 L 9.6445312 14.236328 L 2.1152344 8 L 21.882812 8 L 14.355469 14.234375 L 15 15 L 24 7.4785156 L 15 0 L 14.355469 0.76367188 L 21.884766 7 L 2.1171875 7 L 9.6445312 0.765625 L 9 0 z "
+                    />
+                  </svg>
+                {/if}
+                {#if i === path.length - 1}<span title={pathitem[0]}>
+                    {getDisplayName(pathitem[0], plugin.db)}</span
+                  >{:else}<a
+                    class="link"
+                    title={pathitem[0]}
+                    on:click={(event) =>
+                      NavigateToFile(plugin.app, pathitem[0], event)}
+                    >{getDisplayName(pathitem[0], plugin.db)}</a
+                  >{/if}
+              {/each}
+            {:else}
+              {#each path.reverse() as pathitem, i}
+                {#if i === 0}<span title={pathitem[0]}>
+                    {getDisplayName(pathitem[0], plugin.db)}</span
+                  >{:else}<a
+                    class="link"
+                    title={pathitem[0]}
+                    on:click={(event) =>
+                      NavigateToFile(plugin.app, pathitem[0], event)}
+                  >
+                    {getDisplayName(pathitem[0], plugin.db)}</a
+                  >{/if}
+                {#if pathitem[1] === LINKED_FROM}
+                  <svg
+                    class="path-arrow"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 15.05"
+                  >
+                    <path
+                      d=" M 21.883,8 14.356,14.235 15,15 24,7.479 15,0 14.355,0.764 21.884,7 H 0 v 1 z"
+                    />
+                  </svg>
+                {:else if pathitem[1] === LINKED_TO}
+                  <svg
+                    class="path-arrow"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 15.05"
+                  >
+                    <path
+                      d="M 2.117,7 9.644,0.765 9,0 0,7.521 9,15 9.645,14.236 2.116,8 H 24 V 7 Z"
+                    />
+                  </svg>
+                {:else if pathitem[1] === LINKED_BOTH}
+                  <svg
+                    class="path-arrow"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 15.05"
+                  >
+                    <path
+                      d="M 9 0 L 0 7.5214844 L 9 15 L 9.6445312 14.236328 L 2.1152344 8 L 21.882812 8 L 14.355469 14.234375 L 15 15 L 24 7.4785156 L 15 0 L 14.355469 0.76367188 L 21.884766 7 L 2.1171875 7 L 9.6445312 0.765625 L 9 0 z "
+                    />
+                  </svg>
+                {/if}
+              {/each}
+            {/if}
+          </div>
+          <br />
+        {/each}
+      {/if}
 
       <br />
       <ul>

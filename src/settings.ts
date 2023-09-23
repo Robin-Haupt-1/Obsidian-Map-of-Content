@@ -18,25 +18,27 @@ export interface MOCSettings {
   do_remember_expanded: boolean;
   MOC_path_starts_at_CN: boolean;
   file_descendants_expanded: {};
+  do_show_paths_to_note: boolean;
 }
 
 export const DEFAULT_SETTINGS: MOCSettings = {
   CN_path: "Central Note.md",
   exluded_folders: [],
   exluded_filename_components: [],
-  settings_version: "0.1.16",
-  plugin_version: "1.2.0",
+  settings_version: "1.3.0",
+  plugin_version: "1.3.0",
   do_show_update_notice: false,
   auto_update_on_file_change: true,
   do_remember_expanded: false,
   MOC_path_starts_at_CN: false,
   file_descendants_expanded: {},
+  do_show_paths_to_note: true,
 };
 
 export class SettingsManager {
   settings: MOCSettings;
   plugin: MOCPlugin;
-  genericUpdateVersions = ["0.1.10", "0.1.12", "0.1.14"];
+  genericUpdateVersions = ["0.1.10", "0.1.12", "0.1.14", "1.2.0"];
   silentGenericUpdateVersions = [
     "0.1.15",
     "0.1.16",
@@ -85,7 +87,7 @@ export class SettingsManager {
       // abort if settings are already in current version format
       if (object["settings_version"] === DEFAULT_SETTINGS["settings_version"]) {
         devLog("Settings already in current version");
-        return object;
+        return { ...DEFAULT_SETTINGS, ...object };
       }
 
       object = JSON.parse(JSON.stringify(object));

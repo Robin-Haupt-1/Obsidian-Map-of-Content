@@ -87,6 +87,18 @@
   <div>
     <h2>Path and descendants</h2>
 
+    <label for="do_show_paths_to_note"
+      >Display the paths from the Central Note to the current note
+    </label><input
+      type="checkbox"
+      id="do_show_paths_to_note"
+      on:click={() => {
+        plugin.settings.set({
+          do_show_paths_to_note: !plugin.settings.get("do_show_paths_to_note"),
+        });
+      }}
+      checked={plugin.settings.get("do_show_paths_to_note") ? "checked" : ""}
+    />
     <label for="MOC_path_starts_at_CN_checkbox"
       >Display the path from the Central Note starting at the Central Note
     </label><input
@@ -97,8 +109,9 @@
           MOC_path_starts_at_CN: !plugin.settings.get("MOC_path_starts_at_CN"),
         });
       }}
-      checked={plugin.settings.get("MOC_path_starts_at_CN")}
+      checked={plugin.settings.get("MOC_path_starts_at_CN") ? "checked" : ""}
     />
+
     <br />
     <label for="do_remember_expanded_checkbox"
       >Remember whether a file's descendants are shown or hidden

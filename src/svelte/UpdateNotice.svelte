@@ -17,12 +17,8 @@
     The latest changes are:
     <ul>
       <li>
-        Added a settings option to display the path from the Central Note
-        starting at the Central Note instead of the currently open one.
-      </li>
-      <li>
-        Fixed a bug where links using # or ^ to reference headings or blocks
-        weren't followed
+        Added a settings option to toggle whether the paths to the current note
+        are displayed or not
       </li>
     </ul>
     See&nbsp;<a
@@ -31,12 +27,6 @@
       here</a
     >
     for a complete history of all changes.<br /><br />
-    Thank you for using this plugin! You can donate to support it's development on
-    <a href="https://www.patreon.com/RobinHaupt">Patreon</a>,
-    <a href="https://ko-fi.com/robinhaupt">Ko-Fi</a>
-    or
-    <a href="https://www.paypal.com/paypalme/robinhaupt">PayPal</a>.
-
     <br /><br />
     <button
       on:click={() => {
@@ -44,7 +34,7 @@
         view.rerender();
       }}
       style="display:block;margin:auto;"
-      >Close
+      >Okay
     </button>
   </div>
 </div>
