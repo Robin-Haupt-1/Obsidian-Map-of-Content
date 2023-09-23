@@ -12,7 +12,6 @@ export interface MOCSettings {
   exluded_folders: string[]; // TODO rename to excludedFolders
   exluded_filename_components: string[];
   settings_version: string;
-  plugin_version: string;
   do_show_update_notice: boolean;
   auto_update_on_file_change: boolean;
   do_remember_expanded: boolean;
@@ -25,8 +24,7 @@ export const DEFAULT_SETTINGS: MOCSettings = {
   CN_path: "Central Note.md",
   exluded_folders: [],
   exluded_filename_components: [],
-  settings_version: "1.3.0",
-  plugin_version: "1.3.0",
+  settings_version: "1.4.0", // this is also the plugin version (since 1.4.0)
   do_show_update_notice: false,
   auto_update_on_file_change: true,
   do_remember_expanded: false,
@@ -38,7 +36,7 @@ export const DEFAULT_SETTINGS: MOCSettings = {
 export class SettingsManager {
   settings: MOCSettings;
   plugin: MOCPlugin;
-  genericUpdateVersions = ["0.1.10", "0.1.12", "0.1.14", "1.2.0"];
+  genericUpdateVersions = ["0.1.10", "0.1.12", "0.1.14", "1.2.0", "1.3.0"];
   silentGenericUpdateVersions = [
     "0.1.15",
     "0.1.16",
@@ -82,15 +80,30 @@ export class SettingsManager {
         devLog("fresh install, returning empty settings object");
         return {};
       }
-      object["plugin_version"] = DEFAULT_SETTINGS["plugin_version"];
 
-      // abort if settings are already in current version format
       if (object["settings_version"] === DEFAULT_SETTINGS["settings_version"]) {
         devLog("Settings already in current version");
         return { ...DEFAULT_SETTINGS, ...object };
       }
 
-      object = JSON.parse(JSON.stringify(object));
+      if (this.genericUpdateVersions.contains(object["settings_version"])) {
+        console.log(
+          "performing update of settings to " +
+            DEFAULT_SETTINGS["settings_version"]
+        );
+        object["do_show_update_notice"] = true;
+      }
+
+      if (
+        this.silentGenericUpdateVersions.contains(object["settings_version"])
+      ) {
+        console.log(
+          "performing silent generic update of settings to " +
+            DEFAULT_SETTINGS["settings_version"]
+        );
+      }
+
+      object = JSON.parse(JSON.stringify(object)); // TODO clone the object with ...
 
       devLog(`old settings object: ${Object.keys(object)}`);
       let oldVersion;
@@ -123,26 +136,10 @@ export class SettingsManager {
         delete object["CN_path_per_vault"];
 
         object["settings_version"] = "0.1.10";
-      } // clone the object
-
-      if (this.genericUpdateVersions.contains(oldVersion)) {
-        devLog(
-          "performing generic update of settings to " +
-            DEFAULT_SETTINGS["settings_version"]
-        );
+      } else {
         object["settings_version"] = DEFAULT_SETTINGS["settings_version"];
-        object["do_show_update_notice"] = true;
       }
 
-      if (this.silentGenericUpdateVersions.contains(oldVersion)) {
-        devLog(
-          "performing silent generic update of settings to " +
-            DEFAULT_SETTINGS["settings_version"]
-        );
-
-        object["settings_version"] = DEFAULT_SETTINGS["settings_version"];
-        object["do_show_update_notice"] = false;
-      }
       return this.upgradeSettingsVersion(object);
     } catch {
       // if things don't work out, delete all old settings data (better than breaking the plugin)
