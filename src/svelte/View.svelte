@@ -276,6 +276,10 @@
 </div>
 
 <style>
+  a {
+    text-decoration: none;
+  }
+
   div#all-container {
     display: flex;
     flex-direction: column;

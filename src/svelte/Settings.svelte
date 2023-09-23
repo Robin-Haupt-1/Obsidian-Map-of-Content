@@ -99,6 +99,7 @@
       }}
       checked={plugin.settings.get("do_show_paths_to_note") ? "checked" : ""}
     />
+    <br />
     <label for="MOC_path_starts_at_CN_checkbox"
       >Display the path from the Central Note starting at the Central Note
     </label><input

@@ -20,6 +20,9 @@
         Added a settings option to toggle whether the paths to the current note
         are displayed or not (show only it's descendants)
       </li>
+      <li>
+        For better readability, links in the view are no longer underlined
+      </li>
     </ul>
     See&nbsp;<a
       href="https://github.com/Robin-Haupt-1/Obsidian-Map-of-Content/releases"

@@ -107,6 +107,7 @@
 <style>
   a.link {
     cursor: pointer;
+    text-decoration: none;
   }
 
   ul {
